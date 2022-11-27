@@ -6,28 +6,85 @@ const renderer = new THREE.WebGLRenderer( {
 renderer.setSize( window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
-function makeSphereMarker() {
-    const geometry = new THREE.SphereGeometry( 15, 32, 16 );
-    const material = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
-    const sphere = new THREE.Mesh( geometry, material );
-    return sphere;
+
+function makeLineBoxMesh( shape, transform ) {
+    const material = new THREE.LineBasicMaterial();
+
+
+    const points = [
+        new THREE.Vector3( 0, 0, 0),
+        new THREE.Vector3( 0, shape[1], 0),
+        new THREE.Vector3( shape[0], shape[1], 0),
+        new THREE.Vector3( shape[0], 0, 0),
+        new THREE.Vector3( 0, 0, 0),
+        new THREE.Vector3( 0, 0, shape[2]),
+        new THREE.Vector3( 0, shape[1], shape[2]),
+        new THREE.Vector3( 0, shape[1], 0),
+        new THREE.Vector3( 0, shape[1], shape[2]),
+        new THREE.Vector3( shape[0], shape[1], shape[2]),
+        new THREE.Vector3( shape[0], shape[1], 0),
+        new THREE.Vector3( shape[0], shape[1], shape[2]),
+        new THREE.Vector3( shape[0], 0, shape[2]),
+        new THREE.Vector3( shape[0], 0, 0),
+        new THREE.Vector3( shape[0], 0, shape[2]),
+        new THREE.Vector3( 0, 0, shape[2]),
+    ]
+    points.forEach((point) => {
+        point.x += transform[0];
+        point.y += transform[1];
+        point.z += transform[2];
+    })
+    const geometry = new THREE.BufferGeometry().setFromPoints( points );
+    const line = new THREE.Line( geometry, material );
+
+    
+    return line;
 }
 
-function makeNetworkLayerMesh( width, height, channels) {
-    const geometry = new THREE.BoxGeometry( width, height, channels );
-    const material = new THREE.MeshBasicMaterial(  );
-    const mesh = new THREE.Mesh( geometry, material );
-    return mesh;
+
+class NetworkMesh {
+    constructor( tensorMeshArrays ) {}
 }
+
 
 
 class MeshArray {
-    constructor( meshArray ) { 
-        this.meshArray = meshArray;
 
-        this.rotationX = 0;
-        this.rotationY = 0;
-        this.rotationZ = 0;
+    /*
+    
+        This stores an array of cube meshes, which can represent a tensor
+    
+    */
+
+    constructor( array, shape ) { 
+        /* 
+       
+        take a 3D tensor, and turn it into a 3D mesh of each value of the tensor
+
+        */
+
+        this.meshArray = [];
+
+        for (let i=0;i<shape[0];i++) {
+            for (let j=0;j<shape[1];j++) {
+                for(let k=0;k<shape[2];k++) {
+                    const pixelValue = array[k*shape[0]*shape[1] + i*shape[0] + j]; // I think that should work
+
+                    const pixelGeometry = new THREE.BoxGeometry( 1, 1, 1 );
+                    const material = new THREE.MeshBasicMaterial({
+                        transparent : true,
+                        opacity : pixelValue
+                    });
+                    const mesh = new THREE.Mesh( pixelGeometry, material );
+
+                    mesh.position.x = i;
+                    mesh.position.y = j;
+                    mesh.position.z = k;
+
+                    this.meshArray.push(mesh);
+                }
+            }
+        }
     }
 
     addToScene() {
@@ -36,50 +93,23 @@ class MeshArray {
         })
     }
 
-    setRotationX( rotationX ) {
-        this.rotationX = rotationX;
+    transformX( bias ) {
         this.meshArray.forEach((mesh) => {
-            mesh.rotation.x = rotationX;
-        })
+            mesh.position.x += bias;
+        });
+    }
+    transformY( bias ) {
+        this.meshArray.forEach((mesh) => {
+            mesh.position.y += bias;
+        });
+    }
+    transformZ( bias ) {
+        this.meshArray.forEach((mesh) => {
+            mesh.position.z += bias;
+        });
     }
 }
 
-
-
-function makeTensorMesh( array, shape ) {
-    /* 
-       
-        take a 3D tensor, and turn it into a 3D mesh of each value of the tensor
-
-    */
-
-    var meshArray = [];
-
-
-    for (let i=0;i<shape[0];i++) {
-        for (let j=0;j<shape[1];j++) {
-            for(let k=0;k<shape[2];k++) {
-                const pixelValue = array[k*shape[0]*shape[1] + i*shape[0] + j]; // I think that should work
-
-                const pixelGeometry = new THREE.BoxGeometry( 1, 1, 1 );
-                const material = new THREE.MeshBasicMaterial({
-                    transparent : true,
-                    opacity : pixelValue
-                });
-                const mesh = new THREE.Mesh( pixelGeometry, material );
-
-                mesh.position.x = i;
-                mesh.position.y = j;
-                mesh.position.z = k;
-
-                meshArray.push(mesh);
-            }
-        }
-    }
-
-    return new MeshArray( meshArray );
-
-}
 
 
 
@@ -89,25 +119,32 @@ function makeTensorMesh( array, shape ) {
 
 */
 
-/*
+
 
 import { MnistData } from "./data.js";
 async function loadData() {    
     const data = new MnistData();
     await data.load();
 
-    var inputImage = data.nextTestBatch(1).xs;
+
+    var inputImage = data.nextTestBatch(1).xs.reshape([28,28]).transpose();
     inputImage = Array.from(inputImage.dataSync());
 
-    let meshArray = makeTensorMesh( inputImage, [28,28,1] );
+    let meshArray = new MeshArray( inputImage, [28,28,1] );
     meshArray.addToScene();
+    
+    const lineMesh = makeLineBoxMesh( [28,28,1], [0,0,0] );
+    scene.add( lineMesh );
 
-    meshArray.setRotationX(1);
+    const filterMesh = makeLineBoxMesh( [5,5,1], [6,28-6-5,0]);
+    scene.add( filterMesh );
+
+    meshArray.transformZ( 0.5 );
 
 
 }
 document.addEventListener('DOMContentLoaded', loadData);
-*/
+
 
 
 
@@ -117,17 +154,20 @@ document.addEventListener('DOMContentLoaded', loadData);
 
 */
 
-const geometry = new THREE.BoxGeometry( 1, 1, 1 );
-const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-const cube = new THREE.Mesh( geometry, material );
-scene.add( cube );
 
-const controls = new 
 
-camera.position.z = 5;
+const gridHelper = new THREE.GridHelper(200,50);
+//scene.add( gridHelper );
+
+import { OrbitControls } from 'https://cdn.skypack.dev/three@0.129.0/examples/jsm/controls/OrbitControls.js';
+const controls = new OrbitControls( camera, renderer.domElement );
+
+camera.position.z = 30;
 function animate() {
     requestAnimationFrame( animate );
     renderer.render( scene, camera );
+
+    controls.update();
 }
 animate();
 
