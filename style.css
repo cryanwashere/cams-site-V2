@@ -16,10 +16,19 @@ canvas {
 main {
     color: white;
     z-index: 99;
-    font-family: 'DM Serif Display', serif;
+    /*font-family: 'DM Serif Display', serif;*/
     position: absolute;
-
 }
+#section1 {
+    font-size: 200%;
+    text-align: center;
+}
+
+div.hstack {
+    display:flex;
+    overflow: auto;
+}
+
 
 .hidden {
     opacity: 1;
