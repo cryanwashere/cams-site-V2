@@ -21,49 +21,113 @@ function makeNetworkLayerMesh( width, height, channels) {
 }
 
 
-function makeInputMesh( array ) {
+class MeshArray {
+    constructor( meshArray ) { 
+        this.meshArray = meshArray;
+
+        this.rotationX = 0;
+        this.rotationY = 0;
+        this.rotationZ = 0;
+    }
+
+    addToScene() {
+        this.meshArray.forEach((mesh) => {
+            scene.add( mesh );
+        })
+    }
+
+    setRotationX( rotationX ) {
+        this.rotationX = rotationX;
+        this.meshArray.forEach((mesh) => {
+            mesh.rotation.x = rotationX;
+        })
+    }
+}
+
+
+
+function makeTensorMesh( array, shape ) {
     /* 
-    
-        Take in a 2D array of pixel values, normalized between [0,1],
-        and make a 3D mesh of the array
-    
+       
+        take a 3D tensor, and turn it into a 3D mesh of each value of the tensor
+
     */
 
     var meshArray = [];
 
-    for (let i=0;i<28;i++) {
-        for (let j=0;j<28;j++) {
-            const pixelGeometry = new THREE.BoxGeometry( 1, 1, 1 );
 
-            const colorValue = Math.floor(Math.random() * 255);
+    for (let i=0;i<shape[0];i++) {
+        for (let j=0;j<shape[1];j++) {
+            for(let k=0;k<shape[2];k++) {
+                const pixelValue = array[k*shape[0]*shape[1] + i*shape[0] + j]; // I think that should work
 
-            const material = new THREE.MeshBasicMaterial( {color : "rgb("+colorValue+", "+colorValue+", "+colorValue+")"} );
-            const mesh = new THREE.Mesh( pixelGeometry, material );
+                const pixelGeometry = new THREE.BoxGeometry( 1, 1, 1 );
+                const material = new THREE.MeshBasicMaterial({
+                    transparent : true,
+                    opacity : pixelValue
+                });
+                const mesh = new THREE.Mesh( pixelGeometry, material );
 
-            mesh.position.x = i;
-            mesh.position.y = j;
+                mesh.position.x = i;
+                mesh.position.y = j;
+                mesh.position.z = k;
 
-            scene.add( mesh );
-            meshArray.push( mesh );
+                meshArray.push(mesh);
+            }
         }
     }
 
-    return meshArray;
+    return new MeshArray( meshArray );
 
 }
 
-const inputArray = Array( 28*28 ).fill().map(() => Math.random());
-let meshArray = makeInputMesh( inputArray );
 
 
-camera.position.z = 40;
+/* 
+
+    load the data for the neural network
+
+*/
+
+/*
+
+import { MnistData } from "./data.js";
+async function loadData() {    
+    const data = new MnistData();
+    await data.load();
+
+    var inputImage = data.nextTestBatch(1).xs;
+    inputImage = Array.from(inputImage.dataSync());
+
+    let meshArray = makeTensorMesh( inputImage, [28,28,1] );
+    meshArray.addToScene();
+
+    meshArray.setRotationX(1);
 
 
+}
+document.addEventListener('DOMContentLoaded', loadData);
+*/
+
+
+
+/*
+
+    main animation loop
+
+*/
+
+const geometry = new THREE.BoxGeometry( 1, 1, 1 );
+const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+const cube = new THREE.Mesh( geometry, material );
+scene.add( cube );
+
+const controls = new 
+
+camera.position.z = 5;
 function animate() {
     requestAnimationFrame( animate );
     renderer.render( scene, camera );
-
-    
 }
 animate();
 
