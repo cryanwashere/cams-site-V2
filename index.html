@@ -7,25 +7,45 @@
     <title>Document</title>
 
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="fonts.css">
+    <!--<link rel="stylesheet" href="fonts.css">-->
 
 </head>
 <body>
 
-    <canvas id="bg"></canvas>
 
+    <!--
     <main>
-        <section id="section1">
-            <h1 style="display:inline-block;">Cameron Ryan</h1>
-            <h2 style="display:inline-block;">(in progress)</h2>
-
-            <div id="hstack">
-                <h3>Stuff I'm interested in</h3>
-                <h3>Links and Stuff</h3>
-            </div>
-            
+        <section>
+            <h1 style="display:inline-block;" class="hidden">Cameron Ryan</h1>
+            <h2 style="display:inline-block;" class="hidden">(in progress)</h2>
+        </section>
+        <section class="hidden">
+            <h1>Neural Networks</h1>
+            <p>
+                I have always loved the intersection between technology and life sciences,
+                and that is why I am drawn to artifical neural networks. Artificial neural
+                networks roughly simulate the way that biological neural networks (like your
+                brain) propogate information. In my mind, the fact that 
+                artificial neural networks can perform heuristic tasks that your brain does
+                (such as reading text) shows that they reveal some hidden, universal 
+                geometry of intelligence.
+            </p>
+        </section>
+        <section class="hidden">
+            <h1>Favorite Books</h1>
+            <p>Jurrassic Park - Michael Creighton</p>
+            <p>The Lost World - Michael Creighton</p>
+            <p>Life of Pi - Yann Martel</p>
+            <p>1984 - George Orwell</p>
+            <p>The Lord of the Flies - William Golding</p>
+        </section>
+        <section class="hidden">
+            <h1>Favorite quotes:</h1>
+            <p>"Think Different" - Steve Jobs</p>
+            <p>"Software is like sex - it's better when it's free" - Linus Torvalds</p>
         </section>
     </main>
+    -->
 
     <!-- Import Three.js for 3D rendering-->
     <script src="js/three.js"></script>
@@ -35,6 +55,56 @@
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-vis@1.0.2/dist/tfjs-vis.umd.min.js"></script>
     <script type="module" src="data.js"></script>
     <script type="module" src="main.js"></script>
+
+    <div class="header">
+        <div class="progress-container">
+            <div class="progress-bar" id="myBar"></div>
+        </div>  
+    </div>
+    
+
+    <div class="fullscreen">
+        <section>
+            <h1 style="display:inline-block;" class="hidden">Cameron Ryan</h1>
+            <h2 style="display:inline-block;" class="hidden">(in progress)</h2>
+        </section>
+    </div>
+    <section class="hidden">
+        <h1>Neural Networks</h1>
+        <p>
+            I have always loved the intersection between technology and life sciences,
+            and that is why I am drawn to artifical neural networks. Artificial neural
+            networks roughly simulate the way that biological neural networks (like your
+            brain) propogate information. In my mind, the fact that 
+            artificial neural networks can perform heuristic tasks that your brain does
+            (such as reading text) shows that they reveal some hidden, universal 
+            geometry of intelligence.
+        </p>
+    </section>
+    <div id="viewer-1">
+        <canvas id="bg1"></canvas>
+
+        <p>click and drag to manipulate</p>
+    </div>
+    
+    <section class="hidden">
+        <h1>Favorite Books</h1>
+        <p>Jurrassic Park - Michael Creighton</p>
+        <p>The Lost World - Michael Creighton</p>
+        <p>Life of Pi - Yann Martel</p>
+        <p>1984 - George Orwell</p>
+        <p>The Lord of the Flies - William Golding</p>
+    </section>
+    <section class="hidden">
+        <h1>Favorite quotes:</h1>
+        <p>"Think Different" - Steve Jobs</p>
+        <p>"Software is like sex, it's better when it's free" - Linus Torvalds</p>
+    </section>
+    <section class="hidden">
+        <h1>Links and Stuff</h1>
+        <a href="https://kaggle.com/cjryanwashere">Kaggle User profile</a>
+    </section>
+    <canvas id="bg2"></canvas> <!-- Just in case we decide to have an actual background -->
     
 </body>
 </html>

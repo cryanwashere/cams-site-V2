@@ -1,7 +1,29 @@
-canvas {
+/*canvas {
     position: fixed;
     top: 0;
     left: 0;
+}*/
+
+.progress-container {
+    width: 100%;
+    height: 4px;
+}
+
+
+
+.progress-bar {
+    height: 4px;
+    width: 0%;
+    background: white;
+}
+
+.header {
+    position: fixed;
+    top: 0;
+    z-index: 99;
+    width: 100%;
+    margin: 0;
+    padding: 0;
 }
 
 /*
@@ -11,34 +33,64 @@ canvas {
 */
 
 
-@import url('https://fonts.googlesapis.com/css2?family=DM+Serif+Display&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins&display=swap');
 
 main {
     color: white;
-    z-index: 99;
-    /*font-family: 'DM Serif Display', serif;*/
+    font-family: 'Poppins', sans-serif;
+    font-size: 125%;
     position: absolute;
 }
-#section1 {
-    font-size: 200%;
-    text-align: center;
+
+body {
+    background-color: black;
+    font-family: 'Poppins', sans-serif;
+    color: white;
+    padding: 0;
+    margin: 10%;
 }
 
-div.hstack {
-    display:flex;
-    overflow: auto;
+div.fullscreen {
+    height: 100vh;
+}
+
+h1 {
+    font-size: 200%;
+}
+
+section {
+    z-index: 99;
+    display: inline-block;
+    place-items: center;
+    align-items: center;
+    min-height: 20vh;
 }
 
 
 .hidden {
-    opacity: 1;
-    transform: translateX(100%);
-    transition: all 2s; 
+    opacity: 0;
+    filter: blur(5px);
+    transform: translateX(-100%);
+    transition: all 0.75s;
 }
-/*
+
 .show {
+    opacity: 1;
     filter: blur(0);
     transform: translateX(0);
-    opacity: 1;
+}
+
+canvas {
+    width: 100%;
+    display: block;
+}
+
+/*
+canvas.bg1 {
+    width: 100%;
+    height: 50%;
+    position: static;
+    top: 100px;
+    left: 100px; 
 }
 */
