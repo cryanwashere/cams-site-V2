@@ -115,13 +115,18 @@ class Model {
         this.model = getModel();
     }
 
+    async load () {
+        this.model = await tf.loadLayersModel("model/my-model.json");
+        console.log("loaded model");
+    }
+
     inference( xs ) {
         const newModel = tf.model({inputs: this.model.inputs, outputs: [this.model.layers[0].output, this.model.layers[2].output, this.model.layers[5].output]});
         const batch = xs.reshape([1,28,28,1]);
         return newModel.predict(batch);
     }
 
-    train ( data, epochs ) {
+    async train ( data, epochs ) {
         const BATCH_SIZE = 128;
         const TRAIN_DATA_SIZE = 5500;
         const TEST_DATA_SIZE = 1000;
@@ -142,7 +147,7 @@ class Model {
             ];
         });
 
-        this.model.fit( trainXs, trainYs, {
+        await this.model.fit( trainXs, trainYs, {
             batchSize : BATCH_SIZE,
             validationData : [testXs, testYs],
             epochs : epochs,
@@ -242,7 +247,7 @@ class MeshArray {
         this.shape = tensor.shape;
         const shape = tensor.shape;
 
-        //console.log(shape);
+
         tensor = tensor.transpose();   
         for (let i=0;i<this.shape[2];i++) {  // iterate through each channel of the tensor
 
@@ -252,9 +257,13 @@ class MeshArray {
             meshSlice = meshSlice.sub(min).div(max.sub(min)); // normalize between [0,1]
             meshSlice = meshSlice.squeeze();
             const meshArray = meshSlice.dataSync();
-            for (let m=0;m<shape[0];m++) {
-                for (let n=0;n<shape[1];n++) {
-                    const pixelValue = meshArray[(m*shape[0]) + n];
+            
+            
+            if (shape[0] == 10) {
+                console.log("hi");
+
+                for (let m=0;m<10;m++) {
+                    var pixelValue = meshArray[m];
 
                     if (pixelValue > 0.1) {
                         const pixelGeometry = new THREE.BoxGeometry( 1, 1, 1 );
@@ -263,11 +272,37 @@ class MeshArray {
                             opacity : pixelValue
                         });
                         const mesh = new THREE.Mesh( pixelGeometry, material );
-                        mesh.position.x = n;
-                        mesh.position.y = shape[1]-m; // matrix 'y' indexes move downwards
-                        mesh.position.z = i;
+                        mesh.position.x = m;
+                        mesh.position.y = 1; // matrix 'y' indexes move downwards
+                        mesh.position.z = 0;
 
                         this.meshArray.push(mesh);
+                    }
+                }
+
+            } else {
+
+                for (let m=0;m<shape[0];m++) {
+                    for (let n=0;n<shape[1];n++) {
+                        
+                        
+                        
+                        const index = (m*shape[0]) + n;
+                        var pixelValue = meshArray[index];
+
+                        if (pixelValue > 0.1) {
+                            const pixelGeometry = new THREE.BoxGeometry( 1, 1, 1 );
+                            const material = new THREE.MeshBasicMaterial({
+                                transparent : true,
+                                opacity : pixelValue
+                            });
+                            const mesh = new THREE.Mesh( pixelGeometry, material );
+                            mesh.position.x = n;
+                            mesh.position.y = shape[1]-m; // matrix 'y' indexes move downwards
+                            mesh.position.z = i;
+
+                            this.meshArray.push(mesh);
+                        }
                     }
                 }
             }
@@ -518,8 +553,6 @@ function makeNeuralNetworkMesh( model, inputImageTensor ) {
     networkMesh.addTensor( output[2].reshape([10,1,1]) );
     networkMesh.transformX( -networkMesh.getWidth() / 2 );
     networkMesh.transformZ( -networkMesh.getLength() / 2 );
-    networkMesh.addOutlineMesh();
-    networkMesh.addLayerConnections();
 }
 
 
@@ -530,26 +563,33 @@ async function loadData() {
     console.log("loaded data");
     
     const model = new Model();
+    await model.load();
+    
     const inputImageTensor = data.nextTestBatch(1).xs.reshape([28,28,1]);
+    
+
+
+    // it is not an actual tensorflow model class
+    //await model.train( data, 10 );
+    //await model.model.save('downloads://my-model');
+
+
     const networkMesh = new TensorStackMesh();
     networkMesh.addTensor( inputImageTensor );
     const output = model.inference( inputImageTensor );
     networkMesh.addTensor( output[0].reshape([24,24,8]) );
     networkMesh.addTensor( output[1].reshape([8,8,16]) );
+
     networkMesh.addTensor( output[2].reshape([10,1,1]) );
+    console.log( output[2].dataSync() );
     networkMesh.transformX( -networkMesh.getWidth() / 2 );
     networkMesh.transformZ( -networkMesh.getLength() / 2 );
+    
+
     networkMesh.addOutlineMesh( scene );
     networkMesh.addLayerConnections();
     networkMesh.addToScene( scene );
-    console.log("added "+networkMesh.report()+" cubes to the scene");
-    
 
-    let sceneList = [];
-    model.train( data, 10 );
-
-    //const networkViewer = new NeuralNetworkViewer( data );
-    //networkViewer.display();
 }
 document.addEventListener('DOMContentLoaded', loadData);
 
