@@ -1,3 +1,5 @@
+import { OrbitControls } from 'https://cdn.skypack.dev/three@0.129.0/examples/jsm/controls/OrbitControls.js';
+
 /*
 
     Scroll indicator:
@@ -538,22 +540,7 @@ class TensorStackMesh {
 }
 
 
-/* 
 
-    load the data for the neural network
-
-*/
-
-function makeNeuralNetworkMesh( model, inputImageTensor ) {
-    const networkMesh = new TensorStackMesh();
-    networkMesh.addTensor( inputImageTensor );
-    const output = model.inference( inputImageTensor );
-    networkMesh.addTensor( output[0].reshape([24,24,8]) );
-    networkMesh.addTensor( output[1].reshape([8,8,16]) );
-    networkMesh.addTensor( output[2].reshape([10,1,1]) );
-    networkMesh.transformX( -networkMesh.getWidth() / 2 );
-    networkMesh.transformZ( -networkMesh.getLength() / 2 );
-}
 
 
 import { MnistData } from "./data.js";
@@ -586,207 +573,387 @@ async function loadData() {
     networkMesh.transformZ( -networkMesh.getLength() / 2 );
     
 
-    networkMesh.addOutlineMesh( scene );
+    networkMesh.addOutlineMesh( v1.scene );
     networkMesh.addLayerConnections();
-    networkMesh.addToScene( scene );
+    networkMesh.addToScene( v1.scene );
 
 }
 document.addEventListener('DOMContentLoaded', loadData);
 
 
+class PDBData {
+    /*
+    
+        This class takes in a pdb file in the form of a string
+        it parses the file, and allows other objects to 
+        interface with the protein data
+    
+    */
+
+    constructor( PDBString ) {
+        this.parse( PDBString );
+    }
+    parse( string ) {
+        const lines = string.split('\n');
+
+        const atoms = [];
+        var chains = new Map();
+
+        lines.forEach((line) => {
+            
+
+            if (line.substring(0,6) === "ATOM  ") {   // find the atoms in the file
+                const atomRecord = {
+                    serial: parseInt(line.substring(6,11)),
+                    name: line.substring(12,16).trim(),
+                    resName: line.substring(17,20).trim(),
+                    chainID: line.substring(21,22).trim(),
+                    resSeq: parseInt(line.substring(22,26)),
+                    iCode: line.substring(26,27).trim(),
+                    x: parseFloat(line.substring(30,38)),
+                    y: parseFloat(line.substring(38,46)),
+                    z: parseFloat(line.substring(46,54)),
+                    occupancy: parseFloat(line.substring(54, 60)),
+                    tempFactor: parseFloat(line.substring(60, 66)),
+                    element: line.substring(76,78).trim(),
+                    charge: line.substring(78,80).trim()
+                };
+
+                // check if the chain has already been documented, and if
+                // it has not, then add it to the chain map
+                if (!chains.get(atomRecord.chainID)) {
+                    chains.set( atomRecord.chainID, {
+                        chainID : atomRecord.chainID
+                    });
+                } 
+                
+                atoms.push( atomRecord );
+            } 
+        });
+
+        // for each of the chains, add all of the atoms that 
+        // are in the chain
+        chains.forEach((chain) => {
+            chain.atoms = atoms.filter((atom) => 
+                atom.chainID === chain.chainID
+            );
+        });
+
+        // for each of the chains, group all of the atoms into
+        // residues
+        chains.forEach((chain) => {
+            const residues = new Map();
+            chain.atoms.forEach((atom) => {
+                if (!residues.get(atom.resSeq)) {
+                    residues.set( atom.resSeq, {
+                        resSeq : atom.resSeq
+                    } );
+                }
+            });
+            residues.forEach((residue) => {
+                residue.atoms = atoms.filter((atom) =>
+                    atom.resSeq === residue.resSeq && atom.chainID === chain.chainID
+                );
+            })
+            chain.residues = residues;
+        });
+
+        console.log("Loaded PDB file:");
+        console.log("chains: "+chains.size);
+        console.log("atoms:  "+atoms.length);
+
+       
+        
+        chains = Array.from(chains.values());
+        chains.forEach((chain) => {
+            chain.residues = Array.from(chain.residues.values());
+        });
+        console.log(chains);
+
+        this.chains = chains;
+        this.atoms  = atoms;
+
+        this.findCenter();
+
+    }
+    findCenter() {
+
+        this.center = {
+            x : 0,
+            y : 0,
+            z : 0
+        };
+        
+        
+        this.numAtoms = this.atoms.length;
+
+        this.atoms.forEach((atom) => {
+            this.center.x += atom.x;
+            this.center.y += atom.y;
+            this.center.z += atom.z;
+        });
+
+        this.center.x /= this.numAtoms;
+        this.center.y /= this.numAtoms;
+        this.center.z /= this.numAtoms;
+
+    }
+}
+
 /*
 
-    Neural network viewer animation rendering
+    These classes form meshes to represent the protein data
 
 */
 
-var scene = new THREE.Scene();
-const canvas = document.getElementById("bg1");
-const camera = new THREE.PerspectiveCamera( 75, canvas.clientWidth/canvas.clientHeight, 0.1, 1000 );
-const renderer = new THREE.WebGLRenderer( {
-    canvas : document.querySelector('#bg1')
-} );
+class ProteinResidueMesh {
+    constructor( residue ) {
 
-//renderer.setSize( window.innerWidth, window.innerHeight);
-//renderer.setSize( document.body.clientWidth, document.body.clientHeight );
-renderer.setSize( canvas.clientWidth, canvas.clientHeight );
-//console.log( document.body.clientWidth, document.body.clientHeight );
-//document.body.appendChild(renderer.domElement);
-document.getElementById("viewer-1").appendChild( renderer.domElement );
+        this.position = {
+            x : 0,
+            y : 0,
+            z : 0
+        }
+
+        var numAtoms = 0;
+        residue.atoms.forEach((atom) => {
+            numAtoms += 1;
+
+            this.position.x += atom.x;
+            this.position.y += atom.y;
+            this.position.z += atom.z;
+
+        });
+        
+        this.position.x /= numAtoms;
+        this.position.y /= numAtoms;
+        this.position.z /= numAtoms;
+
+    }
+}
+
+class ProteinChainMesh {
+    constructor ( chain ) {
+        this.residueMeshArray = [];
+        chain.residues.forEach((residue) => {
+            const residueMesh = new ProteinResidueMesh( residue );
+            this.residueMeshArray.push( residueMesh );
+        });
+
+        this.lines = [];
+    }
+    makeLine( position1, position2, color ) {
+        const points = [
+            new THREE.Vector3( position1.x, position1.y, position1.z),
+            new THREE.Vector3( position2.x, position2.y, position2.z)
+        ];
+      
+        const material = new THREE.LineBasicMaterial( {color : color} );
+        const geometry = new THREE.BufferGeometry().setFromPoints( points );
+        const line = new THREE.Line( geometry, material );
+        return line; 
+    }
+    makeResidueLines( color ) {
+        var lastResiduePosition = this.residueMeshArray[0].position;
+        for (let i=1; i<this.residueMeshArray.length; i++) {
+            const thisResiduePosition = this.residueMeshArray[i].position;
+            const line = this.makeLine(
+                lastResiduePosition,
+                thisResiduePosition,
+                color
+            );
+            lastResiduePosition = thisResiduePosition;
+            this.lines.push( line );
+            //console.log("making residue line");
+        }
+    }
+    addToScene( scene ) {
+        this.lines.forEach((line) => {
+            //console.log("adding residue line to scene");
+            scene.add( line );
+        });
+    }
+    transformX ( bias ) {
+        this.lines.forEach((line) => {
+            line.position.x += bias;
+        });
+    }
+    transformY ( bias ) {
+        this.lines.forEach((line) => {
+            line.position.y += bias;
+        });
+    }
+    transformZ ( bias ) {
+        this.lines.forEach((line) => {
+            line.position.z += bias;
+        });
+    }
+}
+
+class ProteinMesh {
+    constructor ( pdb ) {
+
+        this.pdb = pdb;
+        const chains = pdb.chains;
+
+        const colors = [
+            0xffea5e,
+            0xf75eff,
+            0x69ff5e,
+            0xff975e,
+            0x7c5eff,
+            0xff5e71,
+            0xd15eff,
+            0x5eb9ff,
+            0xff5e6e,
+            0xc1ff5e,
+            0x111b66,
+            0x651166,
+        ];
+
+        this.chainMeshArray = [];
+        // the pdb is an array of amino acid chains
+        for (let i=0; i<chains.length; i++) {
+            const chainMesh = new ProteinChainMesh( chains[i] );
+            chainMesh.makeResidueLines( this.generateColor() );
+            this.chainMeshArray.push( chainMesh );
+        }
+
+        this.center();
+    }
+    generateColor() {
+        var randomColor = Math.floor(Math.random()*16777215).toString(16);
+        randomColor = "#" + randomColor;
+        return randomColor;
+    }
+    center () {
+        const center = this.pdb.center;
+        this.chainMeshArray.forEach((chainMesh) => {
+            chainMesh.transformX( -center.x );
+            chainMesh.transformY( -center.y );
+            chainMesh.transformZ( -center.z );
+        });
+    }
+    addToScene( scene ) {
+        this.chainMeshArray.forEach((chainMesh) => {
+            chainMesh.addToScene( scene );
+        });
+    }
+}
+
+async function main() {
+
+    /*
+    
+        load the data for the protein that we are going to view
+
+    */
+
+    //const pdbURL = 'pdb/simple_7uo9.pdb';
+    const pdbURL = 'pdb/atp_synthase_5fil.pdb';
+    const pdbResponse = await fetch(pdbURL);
+    const pdbString = await pdbResponse.text();    
+    const pdb = new PDBData( pdbString );
+    console.log( "loaded and parsed pdb file" );
+
+    //console.log( pdb );
+    const proteinMesh = new ProteinMesh( pdb );
+    proteinMesh.addToScene( v2.scene );
+    
+}
+
+document.addEventListener('DOMContentLoaded', main );
 
 /*
 
-    main animation loop
+    This manages all of the THREE.js viewers, and should not 
+    effect the content very much
 
 */
+function isInViewport(element) {
+    const rect = element.getBoundingClientRect();
+    return (
+        rect.top >= 0 &&
+        rect.left >= 0 &&
+        rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+        rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+    );
+}
 
-//const gridHelper = new THREE.GridHelper(200,50);
-//scene.add( gridHelper );
 
-import { OrbitControls } from 'https://cdn.skypack.dev/three@0.129.0/examples/jsm/controls/OrbitControls.js';
-const controls = new OrbitControls( camera, renderer.domElement );
-controls.autoRotate=true;
+function makeViewer( id, div, nn ) {
+    var scene = new THREE.Scene();
+    const canvas = document.getElementById(id);
+    const camera = new THREE.PerspectiveCamera( 75, canvas.clientWidth/canvas.clientHeight, 0.1, 1000 );
+    const renderer = new THREE.WebGLRenderer( {
+        canvas : document.querySelector('#'+id)
+    } );
+    renderer.setSize( canvas.clientWidth, canvas.clientHeight );
+    document.getElementById(div).appendChild( renderer.domElement );
 
-camera.position.x = -32;
-camera.position.y =  43;
-camera.position.z =  26;
-camera.rotation.x = -1.2715;
-camera.rotation.y = -0.7488;
-camera.rotation.z = -1.1453;
+    const controls = new OrbitControls( camera, renderer.domElement );
+
+    if (nn) {
+        controls.autoRotate=true;
+
+        camera.position.x = -32;
+        camera.position.y =  43;
+        camera.position.z =  26;
+        camera.rotation.x = -1.2715;
+        camera.rotation.y = -0.7488;
+        camera.rotation.z = -1.1453;
+    } else {
+        //const gridHelper = new THREE.GridHelper(200,50);
+        //scene.add( gridHelper );
+
+        controls.autoRotate=true;
+        const s = 2;
+        camera.position.x = -32 * s;
+        camera.position.y =  43 * s;
+        camera.position.z =  26 * s;
+        camera.rotation.x = -1.2715;
+        camera.rotation.y = -0.7488;
+        camera.rotation.z = -1.1453;
+    }
+    
+
+    return {
+        controls : controls,
+        camera   : camera,
+        renderer : renderer,
+        scene    : scene,
+    }
+}
+
+const v1 = makeViewer( "bg1", "viewer-1", true );
+const v2 = makeViewer( "bg2", "viewer-2", false );
+
+
+
+//import { OrbitControls } from 'https://cdn.skypack.dev/three@0.129.0/examples/jsm/controls/OrbitControls.js';
+
 function animate() {
     requestAnimationFrame( animate );
-    renderer.render( scene, camera );
 
-    controls.update();
+    if (
+        isInViewport(v1.renderer.domElement)
+    ) {
+        console.log("viewing nn")
+        v1.renderer.render( v1.scene, v1.camera );
+        v1.controls.update();
+    }
+
+    if (
+        isInViewport(v2.renderer.domElement)
+    ) {
+        console.log("viewing protein");
+        v2.renderer.render( v2.scene, v2.camera );
+        v2.controls.update();
+    }
+
+    
+    
 }
 animate();
 
-document.onkeydown = function (e) {
-    console.log(camera.position);
-    console.log(camera.rotation);
-}
 
-
-/*
-
-    This manages the scene while the user is scrolling
-
-*/
-/*
-function updateCamera( ev ) {
-    //console.log(window.scrollY);
-    camera.position.z = 54 + window.scrollY / 50;
-}
-window.addEventListener( "scroll", updateCamera ); 
-*/
-
-/*
-
-    3D background for the webpage 
-
-*/
-
-function addBackground() {
-    const backgroundScene = new THREE.Scene();
-
-    const backgroundCamera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
-    const backgroundRenderer = new THREE.WebGLRenderer({
-        canvas : document.querySelector('#bg2')
-    });
-    backgroundRenderer.setSize( window.innerWidth, window.innerHeight );
-    document.body.appendChild( backgroundRenderer.domElement );
-
-    function makeStarMesh() {
-        const geometry = new THREE.SphereGeometry( 1, 8, 4 );
-        const material = new THREE.MeshBasicMaterial();
-        const sphere = new THREE.Mesh( geometry, material );
-        return sphere;
-    }
-    function addStar() {
-        const x = (Math.random() - 0.5) * 100;
-        const y = (Math.random() - 0.5) * 100;
-        const z = (Math.random() - 0.5) * 100;
-
-        const star = makeStarMesh();
-        star.position.x = x;
-        star.position.y = y;
-        star.position.z = z;
-
-        backgroundScene.add( star );
-    }
-
-    // make a bunch of randomly generated stars
-    for (let i=0;i<100;i++) {
-        addStar();
-    }
-
-    const gridHelper = new THREE.GridHelper(200,50);
-    backgroundScene.add( gridHelper );
-    const backgroundControls = new OrbitControls( camera, renderer.domElement );
-    function animateBackground() {
-        requestAnimationFrame( animateBackground );
-        backgroundRenderer.render( backgroundScene, backgroundCamera );
-        backgroundControls.update();
-    }
-    animateBackground();
-    console.log("Background added");
-}
-
-
-
-
-
-// only import this here if the NeuralNetworkViewer class being used
-// and thus it is not being used elsewhere
-//
-//import { OrbitControls } from 'https://cdn.skypack.dev/three@0.129.0/examples/jsm/controls/OrbitControls.js';
-class NeuralNetworkViewer {
-    constructor ( data ) {
-        /*
-        
-            This does all the stuff for the 3D neural network viewer,
-            This does not really work with multiple neural networks 
-            because of the div element
-
-
-            Update: this thing is useless
-        
-        */
-
-        //here works out the 3D rendering stuff
-        this.scene = new THREE.Scene();
-        const canvas = document.getElementById("bg1");
-        this.camera = new THREE.PerspectiveCamera( 75, canvas.clientWidth/canvas.clientHeight, 0.1, 1000 );
-        this.renderer = new THREE.WebGLRenderer( {
-            canvas : document.querySelector('#bg1')
-        } );
-        this.renderer.setSize( canvas.clientWidth, canvas.clientHeight );
-        document.getElementById("viewer-1").appendChild( this.renderer.domElement );
-
-        //make the tensor mesh
-        this.networkMesh = new TensorStackMesh();
-
-        //the model 
-        this.model = new Model();
-
-        // this will be the display image that should be viewed every epoch
-        this.inputImageTensor = data.nextTestBatch(1).xs.reshape([28,28,1]);
-
-        // this is just for development
-        const gridHelper = new THREE.GridHelper(200,50);
-        this.scene.add( gridHelper );
-
-        // this is for orbiting around the object
-        this.controls = new OrbitControls( this.camera, this.renderer.domElement );
-
-        this.animate();
-
-
-    }
-
-    animate() {
-        requestAnimationFrame( this.animate );
-        this.renderer.render( this.scene, this.camera );
-    
-        this.controls.update();
-    }
-
-    display () {
-        this.networkMesh.addTensor( this.inputImageTensor );
-
-        const output = this.model.inference( this.inputImageTensor );
-
-        this.networkMesh.addTensor( output[0].reshape([24,24,8]) );
-        this.networkMesh.addTensor( output[1].reshape([8,8,16]) );
-        this.networkMesh.addTensor( output[2].reshape([10,1,1]) );
-        this.networkMesh.transformX( -this.networkMesh.getWidth() / 2 );
-        this.networkMesh.transformZ( -this.networkMesh.getLength() / 2 );
-        this.networkMesh.addOutlineMesh();
-        this.networkMesh.addLayerConnections();
-        
-        this.networkMesh.addToScene();
-
-    }
-
-
-}
