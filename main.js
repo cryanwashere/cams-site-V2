@@ -587,6 +587,8 @@ async function loadData() {
     networkMesh.addOutlineMesh( v1.scene );
     networkMesh.addLayerConnections();
     networkMesh.addToScene( v1.scene );
+    v1.renderer.render( v1.scene, v1.camera );
+    console.log("rendered neural network")
 
 }
 document.addEventListener('DOMContentLoaded', loadData);
@@ -870,6 +872,8 @@ async function main() {
     //console.log( pdb );
     const proteinMesh = new ProteinMesh( pdb );
     proteinMesh.addToScene( v2.scene );
+    v2.renderer.render( v2.scene, v2.camera );
+    console.log("rendered protein mesh");
     
 }
 
@@ -945,8 +949,8 @@ const v2 = makeViewer( "bg2", "viewer-2", false );
 //import { OrbitControls } from 'https://cdn.skypack.dev/three@0.129.0/examples/jsm/controls/OrbitControls.js';
 
 //render everything for the first time
-v1.renderer.render( v1.scene, v1.camera );
-v2.renderer.render( v2.scene, v2.camera );
+
+
 
 function animate() {
     requestAnimationFrame( animate );

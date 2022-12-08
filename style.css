@@ -51,7 +51,7 @@ body {
 }
 
 div.fullscreen {
-    height: 70vh;
+    height: 80vh;
 }
 
 h1 {
@@ -63,7 +63,7 @@ section {
     display: inline-block;
     place-items: center;
     align-items: center;
-    min-height: 20vh;
+    min-height: 5vh;
 }
 
 
