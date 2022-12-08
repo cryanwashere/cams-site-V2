@@ -362,6 +362,8 @@ class TensorStackMesh {
     constructor() {
         this.tensorMeshList = [];
         this.lineList = [];
+
+        this.centerZ = 0;
     }
 
     addTensor( array ) {
@@ -373,7 +375,9 @@ class TensorStackMesh {
             const lastTensorMesh = this.tensorMeshList[this.tensorMeshList.length - 1]
 
             //move it out of the way so that it can be viewed
-            tensorMeshArray.transformZ( lastTensorMesh.position.z + lastTensorMesh.shape[2] + (lastTensorMesh.shape[0]/2) + 5 );
+            const offset = lastTensorMesh.position.z + lastTensorMesh.shape[2] + (lastTensorMesh.shape[0]/2) + 5;
+            tensorMeshArray.transformZ( offset );
+            this.centerZ =  offset;
 
             //move it behind the center of the last tensor
 
@@ -516,18 +520,24 @@ class TensorStackMesh {
     getHeight() {
         var height = 0;
         for (let i=0;i<this.tensorMeshList.length;i++) {
-            if (this.tensorMeshList[i].shape[1] > width) {
-                width = this.tensorMeshList[i].shape[1];
+            if (this.tensorMeshList[i].shape[1] > height) {
+                height = this.tensorMeshList[i].shape[1];
             }
         }
         return height;
     }
+    centerPosition() {
+        const centerX = this.getWidth() / 2;
+        const centerY = this.getHeight() / 2;
+        const centerZ = this.getLength() / 2;
+
+        this.transformX( -centerX );
+        this.transformY( -centerY );
+        this.transformZ( -centerZ );
+        
+    }
     getLength() {
-        var sum = 0;
-        for (let i=0;i<this.tensorMeshList.length;i++) {
-            sum += this.tensorMeshList[i].shape[2];
-        }
-        return sum;
+        return this.tensorMeshList[this.tensorMeshList.length - 1].position.z;
     }
     report() {
         // return the total number of cubes that are rendered
@@ -569,8 +579,9 @@ async function loadData() {
 
     networkMesh.addTensor( output[2].reshape([10,1,1]) );
     console.log( output[2].dataSync() );
-    networkMesh.transformX( -networkMesh.getWidth() / 2 );
-    networkMesh.transformZ( -networkMesh.getLength() / 2 );
+    networkMesh.centerPosition();
+    //networkMesh.transformX( -networkMesh.getWidth() / 2 );
+    ///networkMesh.transformZ( -networkMesh.getLength() / 2 );
     
 
     networkMesh.addOutlineMesh( v1.scene );
@@ -892,6 +903,8 @@ function makeViewer( id, div, nn ) {
     document.getElementById(div).appendChild( renderer.domElement );
 
     const controls = new OrbitControls( camera, renderer.domElement );
+    //const gridHelper = new THREE.GridHelper(200,50);
+    //scene.add( gridHelper );
 
     if (nn) {
         controls.autoRotate=true;
@@ -903,8 +916,7 @@ function makeViewer( id, div, nn ) {
         camera.rotation.y = -0.7488;
         camera.rotation.z = -1.1453;
     } else {
-        //const gridHelper = new THREE.GridHelper(200,50);
-        //scene.add( gridHelper );
+        
 
         controls.autoRotate=true;
         const s = 2;
@@ -931,6 +943,10 @@ const v2 = makeViewer( "bg2", "viewer-2", false );
 
 
 //import { OrbitControls } from 'https://cdn.skypack.dev/three@0.129.0/examples/jsm/controls/OrbitControls.js';
+
+//render everything for the first time
+v1.renderer.render( v1.scene, v1.camera );
+v2.renderer.render( v2.scene, v2.camera );
 
 function animate() {
     requestAnimationFrame( animate );
