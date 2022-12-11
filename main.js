@@ -876,7 +876,30 @@ async function main() {
     console.log("rendered protein mesh");
     
 }
+async function addProtein2() {
 
+    /*
+    
+        load the data for the protein that we are going to view
+
+    */
+
+    //const pdbURL = 'pdb/simple_7uo9.pdb';
+    const pdbURL = 'pdb/wildtype_structure_prediction_af2.pdb';
+    const pdbResponse = await fetch(pdbURL);
+    const pdbString = await pdbResponse.text();    
+    const pdb = new PDBData( pdbString );
+    console.log( "loaded and parsed pdb file" );
+
+    //console.log( pdb );
+    const proteinMesh = new ProteinMesh( pdb );
+    proteinMesh.addToScene( v3.scene );
+    v3.renderer.render( v3.scene, v3.camera );
+    console.log("rendered protein mesh");
+    
+}
+
+document.addEventListener('DOMContentLoaded', addProtein2 );
 document.addEventListener('DOMContentLoaded', main );
 
 /*
@@ -941,8 +964,9 @@ function makeViewer( id, div, nn ) {
     }
 }
 
-const v1 = makeViewer( "bg1", "viewer-1", true );
+const v1 = makeViewer( "bg1", "viewer-1", true  );
 const v2 = makeViewer( "bg2", "viewer-2", false );
+const v3 = makeViewer( "bg3", "viewer-3", false );
 
 
 
@@ -969,6 +993,14 @@ function animate() {
         console.log("viewing protein");
         v2.renderer.render( v2.scene, v2.camera );
         v2.controls.update();
+    }
+
+    if (
+        isInViewport(v3.renderer.domElement)
+    ) {
+        console.log("viewing protein 2");
+        v3.renderer.render( v3.scene, v3.camera );
+        v3.controls.update();
     }
 
     
