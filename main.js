@@ -722,6 +722,8 @@ class PDBData {
 class ProteinResidueMesh {
     constructor( residue ) {
 
+        this.residue = residue;
+
         this.position = {
             x : 0,
             y : 0,
@@ -746,14 +748,34 @@ class ProteinResidueMesh {
 }
 
 class ProteinChainMesh {
-    constructor ( chain ) {
+    constructor ( chain, showAtoms ) {
         this.residueMeshArray = [];
         chain.residues.forEach((residue) => {
             const residueMesh = new ProteinResidueMesh( residue );
             this.residueMeshArray.push( residueMesh );
         });
 
-        this.lines = [];
+        this.lines  = [];
+        this.meshes = [];
+        this.showMesh = showAtoms;
+    }
+    generateColor() {
+        var randomColor = Math.floor(Math.random()*16777215).toString(16);
+        randomColor = "#" + randomColor;
+        return randomColor;
+    }
+    makeAtom( position, color) {
+        const geometry = new THREE.SphereGeometry( 1, 8, 4 );
+        const material = new THREE.MeshBasicMaterial( { color : this.generateColor() } );
+        const sphere = new THREE.Mesh( geometry, material );
+
+        
+
+        sphere.position.x = position.x;
+        sphere.position.y = position.y;
+        sphere.position.z = position.z;
+
+        return sphere
     }
     makeLine( position1, position2, color ) {
         const points = [
@@ -777,7 +799,22 @@ class ProteinChainMesh {
             );
             lastResiduePosition = thisResiduePosition;
             this.lines.push( line );
-            //console.log("making residue line");
+            
+
+            // if we want to display the atoms of the protein
+            if (this.showMesh) {
+                //console.log("showing atoms...")
+                this.residueMeshArray[i].residue.atoms.forEach((atom) => {
+                    
+                    // remember that the 'atom' object already has 'x',
+                    // 'y' and 'z' attributes
+                    const atomMesh = this.makeAtom( atom, color );
+                    this.meshes.push( atomMesh );
+                    
+                });
+            }
+
+
         }
     }
     addToScene( scene ) {
@@ -785,26 +822,46 @@ class ProteinChainMesh {
             //console.log("adding residue line to scene");
             scene.add( line );
         });
+        if (this.showMesh) {
+            this.meshes.forEach((atom) => {
+                scene.add( atom );
+            });
+        }
     }
     transformX ( bias ) {
         this.lines.forEach((line) => {
             line.position.x += bias;
         });
+        if (this.showMesh) {
+            this.meshes.forEach((atom) => {
+                atom.position.x += bias;
+            });
+        }
     }
     transformY ( bias ) {
         this.lines.forEach((line) => {
             line.position.y += bias;
         });
+        if (this.showMesh) {
+            this.meshes.forEach((atom) => {
+                atom.position.x += bias;
+            });
+        }
     }
     transformZ ( bias ) {
         this.lines.forEach((line) => {
             line.position.z += bias;
         });
+        if (this.showMesh) {
+            this.meshes.forEach((atom) => {
+                atom.position.x += bias;
+            });
+        }
     }
 }
 
 class ProteinMesh {
-    constructor ( pdb ) {
+    constructor ( pdb, showAtoms ) {
 
         this.pdb = pdb;
         const chains = pdb.chains;
@@ -827,7 +884,7 @@ class ProteinMesh {
         this.chainMeshArray = [];
         // the pdb is an array of amino acid chains
         for (let i=0; i<chains.length; i++) {
-            const chainMesh = new ProteinChainMesh( chains[i] );
+            const chainMesh = new ProteinChainMesh( chains[i], showAtoms );
             chainMesh.makeResidueLines( this.generateColor() );
             this.chainMeshArray.push( chainMesh );
         }
@@ -870,7 +927,7 @@ async function main() {
     console.log( "loaded and parsed pdb file" );
 
     //console.log( pdb );
-    const proteinMesh = new ProteinMesh( pdb );
+    const proteinMesh = new ProteinMesh( pdb, false );
     proteinMesh.addToScene( v2.scene );
     v2.renderer.render( v2.scene, v2.camera );
     console.log("rendered protein mesh");
@@ -892,8 +949,10 @@ async function addProtein2() {
     console.log( "loaded and parsed pdb file" );
 
     //console.log( pdb );
-    const proteinMesh = new ProteinMesh( pdb );
+    const proteinMesh = new ProteinMesh( pdb, true );
+    //show the actual atoms of the protein, because it is a small protein
     proteinMesh.addToScene( v3.scene );
+    
     v3.renderer.render( v3.scene, v3.camera );
     console.log("rendered protein mesh");
     
