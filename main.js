@@ -758,6 +758,30 @@ class ProteinChainMesh {
         this.lines  = [];
         this.meshes = [];
         this.showMesh = showAtoms;
+
+        this.aminoAcidColors = new Map();
+        this.aminoAcidColors.set( 'ALA', this.generateColor() );
+        this.aminoAcidColors.set( 'ARG', this.generateColor() );
+        this.aminoAcidColors.set( 'ASN', this.generateColor() );
+        this.aminoAcidColors.set( 'ASP', this.generateColor() );
+        this.aminoAcidColors.set( 'CYS', this.generateColor() );
+        this.aminoAcidColors.set( 'GLU', this.generateColor() );
+        this.aminoAcidColors.set( 'GLN', this.generateColor() );
+        this.aminoAcidColors.set( 'GLY', this.generateColor() );
+        this.aminoAcidColors.set( 'HIS', this.generateColor() );
+        this.aminoAcidColors.set( 'LLE', this.generateColor() );
+        this.aminoAcidColors.set( 'LEU', this.generateColor() );
+        this.aminoAcidColors.set( 'LYS', this.generateColor() );
+        this.aminoAcidColors.set( 'MET', this.generateColor() );
+        this.aminoAcidColors.set( 'PHE', this.generateColor() );
+        this.aminoAcidColors.set( 'PRO', this.generateColor() );
+        this.aminoAcidColors.set( 'SER', this.generateColor() );
+        this.aminoAcidColors.set( 'THR', this.generateColor() );
+        this.aminoAcidColors.set( 'TRP', this.generateColor() );
+        this.aminoAcidColors.set( 'TYR', this.generateColor() );
+        this.aminoAcidColors.set( 'VAL', this.generateColor() );
+
+
     }
     generateColor() {
         var randomColor = Math.floor(Math.random()*16777215).toString(16);
@@ -766,7 +790,7 @@ class ProteinChainMesh {
     }
     makeAtom( position, color) {
         const geometry = new THREE.SphereGeometry( 1, 8, 4 );
-        const material = new THREE.MeshBasicMaterial( { color : this.generateColor() } );
+        const material = new THREE.MeshBasicMaterial( { color : this.aminoAcidColors.get( position.resName ) } );
         const sphere = new THREE.Mesh( geometry, material );
 
         
