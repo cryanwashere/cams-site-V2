@@ -828,10 +828,12 @@ class ProteinChainMesh {
             // if we want to display the atoms of the protein
             if (this.showMesh) {
                 //console.log("showing atoms...")
+                //const resColor = this.generateColor();
                 this.residueMeshArray[i].residue.atoms.forEach((atom) => {
                     
                     // remember that the 'atom' object already has 'x',
                     // 'y' and 'z' attributes
+                    
                     const atomMesh = this.makeAtom( atom, color );
                     this.meshes.push( atomMesh );
                     
@@ -991,6 +993,8 @@ document.addEventListener('DOMContentLoaded', main );
     effect the content very much
 
 */
+
+/*
 function isInViewport(element) {
     const rect = element.getBoundingClientRect();
     return (
@@ -1000,7 +1004,22 @@ function isInViewport(element) {
         rect.right <= (window.innerWidth || document.documentElement.clientWidth)
     );
 }
+*/
 
+function isInViewport(elem) {
+    let x = elem.getBoundingClientRect().left;
+    let y = elem.getBoundingClientRect().top;
+    let ww = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+    let hw = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+    let w = elem.clientWidth;
+    let h = elem.clientHeight;
+    return (
+        (y < hw &&
+         y + h > 0) &&
+        (x < ww &&
+         x + w > 0)
+    );
+}
 
 function makeViewer( id, div, nn ) {
     var scene = new THREE.Scene();
@@ -1044,6 +1063,7 @@ function makeViewer( id, div, nn ) {
         camera   : camera,
         renderer : renderer,
         scene    : scene,
+        div      : document.getElementById( div )
     }
 }
 
@@ -1081,6 +1101,7 @@ function animate() {
     if (
         isInViewport(v3.renderer.domElement)
     ) {
+        //console.log(v3.renderer.domElement);
         console.log("viewing protein 2");
         v3.renderer.render( v3.scene, v3.camera );
         v3.controls.update();
