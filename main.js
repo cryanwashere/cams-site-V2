@@ -1,41 +1,8 @@
 import { OrbitControls } from 'https://cdn.skypack.dev/three@0.129.0/examples/jsm/controls/OrbitControls.js';
 
-/*
-
-    Scroll indicator:
-    indicate how much the user has scrolled as they view the web page
-
-*/
-
-window.onscroll = () => {
-    var winScroll = document.body.scrollTop || document.documentElement.scrollTop;
-    var height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-    var scrolled = (winScroll / height) * 100;
-    document.getElementById("myBar").style.width = scrolled + "%";
-}
 
 
-/*
 
-    Scrolling elements:
-    this makes the elements scroll when they are viewed
-
-*/
-
-
-const observer = new IntersectionObserver((entries) => {
-    
-    entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-            entry.target.classList.add('show');
-        } else {
-            entry.target.classList.remove('show');
-        }
-
-    });
-})
-const hiddenElements = document.querySelectorAll('.hidden');
-hiddenElements.forEach((el) => observer.observe(el));
 
 
 /*
@@ -591,7 +558,7 @@ async function loadData() {
     console.log("rendered neural network")
 
 }
-document.addEventListener('DOMContentLoaded', loadData);
+
 
 
 class PDBData {
@@ -789,7 +756,7 @@ class ProteinChainMesh {
         return randomColor;
     }
     makeAtom( position, color) {
-        const geometry = new THREE.SphereGeometry( 1, 8, 4 );
+        const geometry = new THREE.SphereGeometry( 1.5, 8, 4 );
         const material = new THREE.MeshBasicMaterial( { color : this.aminoAcidColors.get( position.resName ) } );
         const sphere = new THREE.Mesh( geometry, material );
 
@@ -937,28 +904,7 @@ class ProteinMesh {
     }
 }
 
-async function main() {
 
-    /*
-    
-        load the data for the protein that we are going to view
-
-    */
-
-    //const pdbURL = 'pdb/simple_7uo9.pdb';
-    const pdbURL = 'pdb/atp_synthase_5fil.pdb';
-    const pdbResponse = await fetch(pdbURL);
-    const pdbString = await pdbResponse.text();    
-    const pdb = new PDBData( pdbString );
-    console.log( "loaded and parsed pdb file" );
-
-    //console.log( pdb );
-    const proteinMesh = new ProteinMesh( pdb, false );
-    proteinMesh.addToScene( v2.scene );
-    v2.renderer.render( v2.scene, v2.camera );
-    console.log("rendered protein mesh");
-    
-}
 async function addProtein2() {
 
     /*
@@ -968,7 +914,8 @@ async function addProtein2() {
     */
 
     //const pdbURL = 'pdb/simple_7uo9.pdb';
-    const pdbURL = 'pdb/wildtype_structure_prediction_af2.pdb';
+    //const pdbURL = 'pdb/wildtype_structure_prediction_af2.pdb';
+    const pdbURL = 'pdb/5xh3.pdb';
     const pdbResponse = await fetch(pdbURL);
     const pdbString = await pdbResponse.text();    
     const pdb = new PDBData( pdbString );
@@ -983,27 +930,61 @@ async function addProtein2() {
     console.log("rendered protein mesh");
     
 }
+async function addProtein3() {
 
+    /*
+    
+        load the data for the protein that we are going to view
+
+    */
+
+    //const pdbURL = 'pdb/simple_7uo9.pdb';
+    const pdbURL = 'pdb/6h04.pdb';
+    const pdbResponse = await fetch(pdbURL);
+    const pdbString = await pdbResponse.text();    
+    const pdb = new PDBData( pdbString );
+    console.log( "loaded and parsed membrane attack complex pdb file" );
+
+    //console.log( pdb );
+    const proteinMesh = new ProteinMesh( pdb, false );
+    proteinMesh.addToScene( v4.scene );
+    v2.renderer.render( v4.scene, v4.camera );
+    console.log("rendered protein mesh");
+    
+}
+async function addProtein() {
+
+    /*
+    
+        load the data for the protein that we are going to view
+
+    */
+
+    //const pdbURL = 'pdb/atp_synthase_5fil.pdb';
+    //const pdbURL = 'pdb/6h04.pdb';
+    const pdbURL = 'pdb/5xh3.pdb';
+    const pdbResponse = await fetch(pdbURL);
+    const pdbString = await pdbResponse.text();    
+    const pdb = new PDBData( pdbString );
+    console.log( "loaded and parsed pdb file" );
+
+    //console.log( pdb );
+    const proteinMesh = new ProteinMesh( pdb, false );
+    proteinMesh.addToScene( v2.scene );
+    v2.renderer.render( v2.scene, v2.camera );
+    console.log("rendered protein mesh");
+    
+}
+//document.addEventListener('DOMContentLoaded', addProtein3 );
+document.addEventListener('DOMContentLoaded', loadData);
 document.addEventListener('DOMContentLoaded', addProtein2 );
-document.addEventListener('DOMContentLoaded', main );
+//document.addEventListener('DOMContentLoaded', addProtein );
 
 /*
 
     This manages all of the THREE.js viewers, and should not 
     effect the content very much
 
-*/
-
-/*
-function isInViewport(element) {
-    const rect = element.getBoundingClientRect();
-    return (
-        rect.top >= 0 &&
-        rect.left >= 0 &&
-        rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
-        rect.right <= (window.innerWidth || document.documentElement.clientWidth)
-    );
-}
 */
 
 function isInViewport(elem) {
@@ -1021,7 +1002,7 @@ function isInViewport(elem) {
     );
 }
 
-function makeViewer( id, div, nn ) {
+function makeViewer( id, div, description ) {
     var scene = new THREE.Scene();
     const canvas = document.getElementById(id);
     const camera = new THREE.PerspectiveCamera( 75, canvas.clientWidth/canvas.clientHeight, 0.1, 1000 );
@@ -1035,12 +1016,13 @@ function makeViewer( id, div, nn ) {
     //const gridHelper = new THREE.GridHelper(200,50);
     //scene.add( gridHelper );
 
-    if (nn) {
+    if (description) {
         controls.autoRotate=true;
 
-        camera.position.x = -32;
-        camera.position.y =  43;
-        camera.position.z =  26;
+        const s =  0.7;
+        camera.position.x = -32 * s;
+        camera.position.y =  43 * s;
+        camera.position.z =  26 * s;
         camera.rotation.x = -1.2715;
         camera.rotation.y = -0.7488;
         camera.rotation.z = -1.1453;
@@ -1048,7 +1030,7 @@ function makeViewer( id, div, nn ) {
         
 
         controls.autoRotate=true;
-        const s = 2;
+        const s = 0.75;
         camera.position.x = -32 * s;
         camera.position.y =  43 * s;
         camera.position.z =  26 * s;
@@ -1068,14 +1050,9 @@ function makeViewer( id, div, nn ) {
 }
 
 const v1 = makeViewer( "bg1", "viewer-1", true  );
-const v2 = makeViewer( "bg2", "viewer-2", false );
+//const v2 = makeViewer( "bg2", "viewer-2", false );
 const v3 = makeViewer( "bg3", "viewer-3", false );
 
-
-
-//import { OrbitControls } from 'https://cdn.skypack.dev/three@0.129.0/examples/jsm/controls/OrbitControls.js';
-
-//render everything for the first time
 
 
 
@@ -1085,30 +1062,29 @@ function animate() {
     if (
         isInViewport(v1.renderer.domElement)
     ) {
-        console.log("viewing nn")
+       // console.log("viewing nn")
         v1.renderer.render( v1.scene, v1.camera );
         v1.controls.update();
     }
-
+/*
     if (
         isInViewport(v2.renderer.domElement)
     ) {
-        console.log("viewing protein");
+       // console.log("viewing protein");
         v2.renderer.render( v2.scene, v2.camera );
         v2.controls.update();
     }
-
+*/
     if (
         isInViewport(v3.renderer.domElement)
     ) {
         //console.log(v3.renderer.domElement);
-        console.log("viewing protein 2");
+       // console.log("viewing protein 2");
         v3.renderer.render( v3.scene, v3.camera );
         v3.controls.update();
     }
 
-    
-    
+
 }
 animate();
 

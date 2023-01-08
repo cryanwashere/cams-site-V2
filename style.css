@@ -17,8 +17,10 @@
     background: white;
 }
 
+
 .header {
     position: fixed;
+    left: 0;
     top: 0;
     z-index: 99;
     width: 100%;
@@ -48,14 +50,19 @@ body {
     color: white;
     padding: 0;
     margin: 10%;
-}
+}s
 
-div.fullscreen {
-    height: 80vh;
+div.top {
+    height: 1vh;
 }
 
 h1 {
     font-size: 200%;
+}
+
+p {
+    line-height: 26pt;
+    
 }
 
 section {
@@ -85,6 +92,47 @@ canvas {
     width: 100%;
     display: block;
 }
+
+#bg4{
+    width: 100%;
+}
+
+html {
+    cursor: none;
+}
+body {
+    height: 100%;
+    min-height: 100%;
+    cursor: none;
+    color:  white;
+    background-color: black;
+  }
+  
+#invertedcursor {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    background: #fff;
+    border-radius: 50%;
+    top: var(--y, 0);
+    left: var(--x, 0);
+    transform: translate(-50%, -50%);
+    z-index: 2;
+    mix-blend-mode: difference;
+    transition: transform .2s;
+    pointer-events: none;
+}
+
+.invert {
+    mix-blend-mode: difference;
+}
+
+.overlap {
+    position: absolute;
+}
+
+
+
 
 /*
 canvas.bg1 {
