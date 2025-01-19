@@ -56,6 +56,18 @@ function handleKeydown(e) {
 
     if (e.key == current_char) {correct = true;}
     if (e.key == "'" && current_char == '’') {correct = true;}
+    if (e.key == "i" && current_char == "ï") {correct = true;}
+    if (e.key == "a" && current_char == "à") {correct = true;} 
+    if (e.key == "a" && current_char == "ä") {correct = true;}
+    if (e.key == "a" && current_char == "æ") {correct = true;}
+
+    if (e.key == "o" && current_char == "ö") {correct = true;}
+    if (e.key == "o" && current_char == "ò") {correct = true;}
+    if (e.key == "u" && current_char == "ù") {correct = true;}
+    if (e.key == "u" && current_char == "ü") {correct = true;}
+    if (e.key == "." && current_char == "…") {correct = true;}
+    if (e.key == "o" && current_char == "ô") {correct = true;}
+
     if (e.key == '"' && (current_char == '“' || current_char == '”')) {correct = true;}
     
     let character_element = document.getElementById(sessionData.keyIdArray[sessionData.cursorIdx]);
