@@ -110,8 +110,8 @@ body {
   
 #invertedcursor {
     position: absolute;
-    width: 30px;
-    height: 30px;
+    width: 100px;
+    height: 100px;
     background: #fff;
     border-radius: 50%;
     top: var(--y, 0);
@@ -143,3 +143,15 @@ canvas.bg1 {
     left: 100px; 
 }
 */
+
+/*
+    For the link at the top of the page
+*/
+a {
+    color:white;
+    background-color: black;
+    font-size: large;
+}
+nav {
+    float: right;
+}

@@ -697,6 +697,7 @@ class ProteinResidueMesh {
             z : 0
         }
 
+        // the position of the residue becomes the average of its component atoms
         var numAtoms = 0;
         residue.atoms.forEach((atom) => {
             numAtoms += 1;
@@ -756,7 +757,7 @@ class ProteinChainMesh {
         return randomColor;
     }
     makeAtom( position, color) {
-        const geometry = new THREE.SphereGeometry( 1.5, 8, 4 );
+        const geometry = new THREE.SphereGeometry( 1.5, 4, 2 );
         const material = new THREE.MeshBasicMaterial( { color : this.aminoAcidColors.get( position.resName ) } );
         const sphere = new THREE.Mesh( geometry, material );
 
@@ -800,6 +801,8 @@ class ProteinChainMesh {
                     
                     // remember that the 'atom' object already has 'x',
                     // 'y' and 'z' attributes
+
+                    //console.log("showing atoms")
                     
                     const atomMesh = this.makeAtom( atom, color );
                     this.meshes.push( atomMesh );
@@ -915,14 +918,16 @@ async function addProtein2() {
 
     //const pdbURL = 'pdb/simple_7uo9.pdb';
     //const pdbURL = 'pdb/wildtype_structure_prediction_af2.pdb';
-    const pdbURL = 'pdb/5xh3.pdb';
+    //const pdbURL = 'pdb/5xh3.pdb';
+    const pdbURL = 'pdb/atp_synthase_5fil.pdb'
     const pdbResponse = await fetch(pdbURL);
     const pdbString = await pdbResponse.text();    
     const pdb = new PDBData( pdbString );
     console.log( "loaded and parsed pdb file" );
 
     //console.log( pdb );
-    const proteinMesh = new ProteinMesh( pdb, true );
+    // the boolean parameter indicates whether or not to show the atoms of the protein
+    const proteinMesh = new ProteinMesh( pdb, false );
     //show the actual atoms of the protein, because it is a small protein
     proteinMesh.addToScene( v3.scene );
     
@@ -1002,7 +1007,7 @@ function isInViewport(elem) {
     );
 }
 
-function makeViewer( id, div, description ) {
+function makeViewer( id, div, description, s ) {
     var scene = new THREE.Scene();
     const canvas = document.getElementById(id);
     const camera = new THREE.PerspectiveCamera( 75, canvas.clientWidth/canvas.clientHeight, 0.1, 1000 );
@@ -1013,13 +1018,14 @@ function makeViewer( id, div, description ) {
     document.getElementById(div).appendChild( renderer.domElement );
 
     const controls = new OrbitControls( camera, renderer.domElement );
+
     //const gridHelper = new THREE.GridHelper(200,50);
-    //scene.add( gridHelper );
+    s//cene.add( gridHelper );
 
     if (description) {
         controls.autoRotate=true;
 
-        const s =  0.7;
+        //const s =  0.7;
         camera.position.x = -32 * s;
         camera.position.y =  43 * s;
         camera.position.z =  26 * s;
@@ -1030,7 +1036,7 @@ function makeViewer( id, div, description ) {
         
 
         controls.autoRotate=true;
-        const s = 0.75;
+        //const s = 0.75;
         camera.position.x = -32 * s;
         camera.position.y =  43 * s;
         camera.position.z =  26 * s;
@@ -1049,9 +1055,9 @@ function makeViewer( id, div, description ) {
     }
 }
 
-const v1 = makeViewer( "bg1", "viewer-1", true  );
+const v1 = makeViewer( "bg1", "viewer-1", true, 0.7  );
 //const v2 = makeViewer( "bg2", "viewer-2", false );
-const v3 = makeViewer( "bg3", "viewer-3", false );
+const v3 = makeViewer( "bg3", "viewer-3", false, 2 );
 
 
 
