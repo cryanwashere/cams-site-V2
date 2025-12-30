@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cameron's Portfolio</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<script>
+    /*
+
+        Scroll indicator:
+        indicate how much the user has scrolled as they view the web page
+
+    */
+    window.onscroll = () => {
+        var winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+        var height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        var scrolled = (winScroll / height) * 100;
+        document.getElementById("myBar").style.width = scrolled + "%";
+    }
+</script>
+
+<script type="module">
+    /*
+
+        Scrolling elements:
+        this makes the elements scroll when they are viewed
+
+    */
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('show');
+            } else {
+                entry.target.classList.remove('show');
+            }
+
+        });
+    })
+    const hiddenElements = document.querySelectorAll('.hidden');
+    hiddenElements.forEach((el) => observer.observe(el));
+</script>
+
+<div id="invertedcursor"></div>
+<script type="module">
+    /*
+    
+        This creates the special cursor
+    
+    */
+    document.body.onmousemove = function(e) {
+    document.documentElement.style.setProperty (
+        '--x', (
+        e.clientX+window.scrollX
+        )
+        + 'px'
+    );
+    document.documentElement.style.setProperty (
+        '--y', (
+        e.clientY+window.scrollY
+        ) 
+        + 'px'
+    );
+    }
+</script>
+
+<div class="header">
+    <div class="progress-container">
+        <div class="progress-bar" id="myBar"></div>
+    </div>  
+    <nav style="padding: 1rem;">
+        <ul style="list-style: none; margin: 0; padding: 0; display: flex; gap: 2rem;">
+            <li><a href="/index.html">home</a></li>
+            <li><a href="https://github.com/cryanwashere">github</a></li>
+            <li><a href="portfolio.html">project portfolio</a></li>
+            <li><a href="misc.html">misc</a></li>
+        </ul>
+    </nav>
+</div>
+
+
+<body>
+    <h1>Cameron's Project Portfolio</h1>
+    <p>Over the years I have done a lot of really cool projects. This is as close as I can get to a comprehensive list of the things which I am able to share publically on the internet.</p>
+    
+    <h2>Search Engine</h2>
+    <p>I created a search engine focused on Wikipedia pages. Primarily written in Python, this search engine creates embeddings for text and images using open source CLIP models, which can be searched using a vector dataase. The various components of the search engine are compartmentalized as Docker containers. Using containers, managing the complex parts of the search engine can be made easy. For more information on this project, please view the project's public <a href="https://gitlab.com/cjryanwashere/Search_Engine_Backend">codebase</a>.</p>
+    
+    <h2>Apps (available on the iOS app store)</h2>
+
+    <ul>
+        <li>
+            <a href="https://apps.apple.com/td/app/naturify/id6447524765">Naturify</a>
+            <p>Naturify is an iOS app that can be used for identifying images of plants, animals, and fungi. The app utilizes a neural network (visual transformer architecture) that I trained in order to perform image classification.</p>
+        </li>
+        <li>
+            <a href="https://apps.apple.com/td/app/naturify-lite/id6544803863">
+                Naturify Lite
+            </a>
+            <p>This is an offline version of Naturify.  </p>
+        </li>
+        <li>
+            <a href="https://apps.apple.com/td/app/image-garden/id6446785274">Image Garden</a>
+            <p>Image Garden is an iOS app that allows you to perform semantic searches on the images in your photo library. It uses a neural network (CLIP) to perform the semantic search.</p>
+        </li>
+        <li>
+            <a href="https://apps.apple.com/td/app/earth-explore/id1632933059">Earth Explore</a>
+            <p>Earch Explore is an iOS app that classifies birds based on their calls, using a neural network. </p>
+        </li>
+        <li>
+            <a href="https://apps.apple.com/td/app/wordlab/id1584528104">wordLab.</a>
+            <p>WordLab is an app that allows users to take notes, and then as AI questions about their notes. </p>
+        </li>
+    </ul>
+
+    <h2>Smaller coding projects</h2>
+    <ul>
+        <li>
+            <a href="https://github.com/cryanwashere/Floral">Floral</a> <p>Floral is a Jax based python neural network library. Using Jax as a backend, it allows you to create, train, and save neural networks. Floral can be intstalled via Pypi. </p>
+        </li>
+        <li>
+            <a href="https://github.com/cryanwashere/dna-code">DNA code</a> 
+            <p>this C program will encode any file into a DNA sequence. The idea is that some day when data can easily be written to DNA, something like this can be used to encode files into a DNA sequence so that they may be stored in living organisms. </p>
+        </li>
+        <li>
+            <a href="https://github.com/cryanwashere/CameronOS">CameronOS</a> 
+            <p>My attempt at creating an operating system. Code written in C and assembly creates a basic bootloader, and screen driver. </p>
+        </li>
+        <li>
+            <a href="https://github.com/cryanwashere/apartment_currency">Apartment Stock Exchange</a> 
+            <p>Motivated by understanding how financial exchanges work, I created a currency, and security exchange for items in my apartment. This includes a working stock exchange which uses and order book which can be used to buy and sell securities with the currency. </p>
+        </li>
+        <li>
+            <a href="https://github.com/cryanwashere/ML-Experiments">ML Experiments</a> 
+            <p>Several experiments that I did on neural networks for my own curiosity. </p>
+        </li>
+        <li>
+            <a href="https://github.com/cryanwashere/Search_Engine_Crawler">Search Engine Crawler</a> 
+            <p>Created a basic web crawler in Rust as a prerequisite to creating my search engine. </p>
+        </li>
+        <li>
+            <a href="https://github.com/cryanwashere/cams-site-V2">This Website</a>
+            <p>
+                Creating this website took a lot of effort. Especially the 3d rendering that shows the activations of a convolutional neural network on the home page. 
+            </p>
+        </li>
+    </ul>
+    
+</body>
+</html>
