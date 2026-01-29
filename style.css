@@ -155,3 +155,11 @@ a {
 nav {
     float: right;
 }
+
+/*
+    Control how the highlighted text looks
+*/
+::selection {
+    background: white; /* Highlight color */
+    color: black; /* Text color */
+}
