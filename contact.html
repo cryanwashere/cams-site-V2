@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<script>
+    /*
+
+        Scroll indicator:
+        indicate how much the user has scrolled as they view the web page
+
+    */
+    window.onscroll = () => {
+        var winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+        var height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        var scrolled = (winScroll / height) * 100;
+        document.getElementById("myBar").style.width = scrolled + "%";
+    }
+</script>
+
+<script type="module">
+    /*
+
+        Scrolling elements:
+        this makes the elements scroll when they are viewed
+
+    */
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('show');
+            } else {
+                entry.target.classList.remove('show');
+            }
+
+        });
+    })
+    const hiddenElements = document.querySelectorAll('.hidden');
+    hiddenElements.forEach((el) => observer.observe(el));
+</script>
+
+<div id="invertedcursor"></div>
+<script type="module">
+    /*
+    
+        This creates the special cursor
+    
+    */
+    document.onmousemove = function(e) {
+    //console.log(e.clientX, e.clientY)
+    document.documentElement.style.setProperty (
+        '--x', (
+        e.clientX+window.scrollX
+        )
+        + 'px'
+    );
+    document.documentElement.style.setProperty (
+        '--y', (
+        e.clientY+window.scrollY
+        ) 
+        + 'px'
+    );
+    }
+</script>
+
+
+
+<body>
+    <div>
+            <div class="header">
+            <div class="progress-container">
+                <div class="progress-bar" id="myBar"></div>
+            </div>  
+            <nav style="padding: 1rem;">
+                <ul style="list-style: none; margin: 0; padding: 0; display: flex; gap: 2rem;">
+                    <li><a href="/index.html">Home</a></li>
+                    <li><a href="portfolio.html">Project Portfolio</a></li>
+                    <li><a href="https://github.com/cryanwashere">Github</a></li>
+                    <li><a href="https://linkedin.com/in/cameron-ryan-7b043a229">LinkedIn</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                    <li><a href="resume_materials/Cameron_Ryan_Resume_Winter2026.pdf">Resume</a></li>
+                    <li><a href="misc.html">Misc</a></li>
+                </ul>
+            </nav>
+        </div>
+        <h1>Contact</h1>
+
+        School Email: <a href="mailto:ryan.came@northeastern.edu">ryan.came@northeastern.edu</a><br>
+        Personal Email <a href="mailto:cameron@perceptrons.org">cameron@perceptrons.org</a>
+    </div>
+</body>
+</html>
