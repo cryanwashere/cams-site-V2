@@ -56,7 +56,7 @@
         This creates the special cursor
     
     */
-    document.body.onmousemove = function(e) {
+    document.onmousemove = function(e) {
     document.documentElement.style.setProperty (
         '--x', (
         e.clientX+window.scrollX
@@ -91,15 +91,22 @@
             <div class="progress-bar" id="myBar"></div>
         </div>  
 
-        <nav style="padding: 1rem;">
-            <ul style="list-style: none; margin: 0; padding: 0; display: flex; gap: 2rem;">
-                <li><a href="/index.html">home</a></li>
-                <li><a href="https://github.com/cryanwashere">github</a></li>
-                <li><a href="portfolio.html">project portfolio</a></li>
-                <li><a href="resume_materials/Cameron_Ryan_Resume_Winter2026.pdf">resume</a></li>
-                <li><a href="misc.html">misc</a></li>
-            </ul>
-        </nav>
+        <div class="header">
+            <div class="progress-container">
+                <div class="progress-bar" id="myBar"></div>
+            </div>  
+            <nav style="padding: 1rem;">
+                <ul style="list-style: none; margin: 0; padding: 0; display: flex; gap: 2rem;">
+                    <li><a href="/index.html">Home</a></li>
+                    <li><a href="portfolio.html">Project Portfolio</a></li>
+                    <li><a href="https://github.com/cryanwashere">Github</a></li>
+                    <li><a href="https://linkedin.com/in/cameron-ryan-7b043a229">LinkedIn</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                    <li><a href="resume_materials/Cameron_Ryan_Resume_Winter2026.pdf">Resume</a></li>
+                    <li><a href="misc.html">Misc</a></li>
+                </ul>
+            </nav>
+        </div>
         
     </div>
     
@@ -108,6 +115,7 @@
     <div id="top">
         <section>
             <h1 style="display:inline-block;" class="hidden">Cameron Ryan</h1>
+            <h4 style="display:inline-block" class="hidden">(This page was made in 2022 without AI)</h4>
         </section>
     </div>
 
@@ -130,7 +138,7 @@
     
 
         <div class="container">
-            <h1 class="hidden">Artificial Intelligence</h1>
+            <h1 class="hidden">Neural Networks</h1>
             <p class="hidden overlap invert">
                 
             </p> 
@@ -143,7 +151,7 @@
         </div>
 
         <div>
-            <h1 class="hidden">Bioinformatics</h1>
+            <h1 class="hidden">Proteins</h1>
             <p class="hidden">
                 ATP synthase functions like a microscopic water wheel, creating adenosine triphosphate (ATP) from a proton gradient across a membrane. This is used to power many important natural processes in living cells.
             </p>

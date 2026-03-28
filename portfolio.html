@@ -51,7 +51,7 @@
         This creates the special cursor
     
     */
-    document.body.onmousemove = function(e) {
+    document.onmousemove = function(e) {
     document.documentElement.style.setProperty (
         '--x', (
         e.clientX+window.scrollX
@@ -73,11 +73,13 @@
     </div>  
     <nav style="padding: 1rem;">
         <ul style="list-style: none; margin: 0; padding: 0; display: flex; gap: 2rem;">
-            <li><a href="/index.html">home</a></li>
-            <li><a href="https://github.com/cryanwashere">github</a></li>
-            <li><a href="portfolio.html">project portfolio</a></li>
-            <li><a href="resume_materials/Cameron_Ryan_Resume_Winter2026.pdf">resume</a></li>
-            <li><a href="misc.html">misc</a></li>
+            <li><a href="/index.html">Home</a></li>
+            <li><a href="portfolio.html">Project Portfolio</a></li>
+            <li><a href="https://github.com/cryanwashere">Github</a></li>
+            <li><a href="https://linkedin.com/in/cameron-ryan-7b043a229">LinkedIn</a></li>
+            <li><a href="contact.html">Contact</a></li>
+            <li><a href="resume_materials/Cameron_Ryan_Resume_Winter2026.pdf">Resume</a></li>
+            <li><a href="misc.html">Misc</a></li>
         </ul>
     </nav>
 </div>
@@ -92,15 +94,21 @@
     <h2>Machine Learning Material Phase Identification</h2>
     <div>
         <p>
-            I researched methods of classifying material phases from atomic coordinates using neural networks at the University of Rochester Laboratory for Laser Energetics, supervised by Shuai Zhang.
+            I researched methods of classifying material phases from atomic coordinates using neural networks.
         </p> 
+        <div>
+            <h3>Organization</h3>
+            University of Rochester Laboratory for Laser Energetics
+            <h3>Mentor</h3>
+            Shuai Zhang
+        </div>
         <h3>Contributions</h3>
         <ul>
             <li><p>
                 Replicated results from prior work on classifying material phases using Dynamic Graph Convolutional Neural Networks (DGCNNs).
             </p></li>
             <li><p>
-                Developed a modified version of DGCNN which can obtain a better test accuracy.
+                Developed a modified version of DGCNN which attains better test accuracy.
             </p></li>
             <li><p>
                 Invented Gaussian Kernel (GK) architecture, which obtains a significant performance improvement with comparable test accuracy to modified DGCNN. 
@@ -118,7 +126,7 @@
             </li>
             <li>
                 <p>
-                    I delivered a presentation for the AI/ML group in February 2026. View the presentation <a href="resume_materials/AIML_presentation_feb2026.pdf">here</a>.
+                    I delivered a presentation for the laboratory's AI/ML group in February 2026. View the presentation <a href="resume_materials/AIML_presentation_feb2026.pdf">here</a>.
                 </p>
             </li>
         </ul>
@@ -134,7 +142,23 @@
 
 
     <h2>Containerized Application Management</h2>
-    <p>I researched methods of managing applications using containers to support scientific computing projects at the University of Rochester Laboratory for Laser Energetics, supervised by Richard Kidder. Research is presented in my <a href="resume_materials/LLE_report_summer2022.pdf">project report</a>.</p>
+    <p>
+        I researched methods of managing applications using containers to support scientific computing projects, and collaboration with other labs.
+    </p>
+    <div>
+        <h3>Organization</h3>
+        University of Rochester Laboratory for Laser Energetics
+        <h3>Mentor</h3>
+        Richard Kidder
+    </div>
+    <h3>Materials</h3>
+    <ul>
+        <li>
+            <p>
+                Detailed results in my <a href="resume_materials/LLE_report_summer2022.pdf">project report</a>.
+            </p>
+        </li>
+    </ul>
     <hr>
 
     <h2>Apps (available on the iOS app store)</h2>
