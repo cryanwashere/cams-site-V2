@@ -139,6 +139,37 @@
     <p>I created a search engine focused on Wikipedia pages. Primarily written in Python, this search engine creates embeddings for text and images using open source CLIP models, which can be searched using a vector database. The various components of the search engine are compartmentalized as Docker containers. Using containers, managing the complex parts of the search engine can be made easy. For more information on this project, please view the project's public <a href="https://gitlab.com/cjryanwashere/Search_Engine_Backend">codebase</a>.</p>
     <hr>
 
+    <h2>Naturify</h2>
+    <p>
+        I created an app for identifying images of plants, animals, and fungi.
+    </p>
+    <div>
+        <h3>Contributions</h3>
+        <ul>
+            <li><p>
+                Trained neural network to perform image classification on a dataset of 10000 different species (plants, animals, fungi etc.) for my app Naturify. I used a visual transformer architecture, and trained the model with Pytorch on an Nvidia A100 GPU for several days.
+            </p></li>
+            <li><p>
+                Trained neural network to predict nearby species given latitude and longitude coordinates.
+            </p></li>
+            <li><p>
+                Created backend server for Naturify. This functions as an inference server for the iOS app, and hosts the app's website.
+            </p></li>
+        </ul>
+        <h3>Materials</h3>
+        <ul>
+            <li><p>
+                Download the <a href="https://apps.apple.com/td/app/naturify/id6447524765">app</a> on the iOS app store. 
+            </p></li>
+            <li><p>
+                Created minimal <a href="https://naturify.app/static/identify.html">web page</a> to use the neural network. 
+            </p></li>
+            <li><p>
+                The source code for training the neural networks and the inference server are not open source. 
+            </p></li>
+        </ul>
+    </div>
+    <hr>
 
 
     <h2>Containerized Application Management</h2>
@@ -166,7 +197,7 @@
     <ul>
         <li>
             <a href="https://apps.apple.com/td/app/naturify/id6447524765">Naturify</a>
-            <p>Naturify is an iOS app that can be used for identifying images of plants, animals, and fungi. The app utilizes a neural network (visual transformer architecture) that I trained in order to perform image classification.</p>
+            <p>Naturify is an iOS app that can be used for identifying images of plants, animals, and fungi.</p>
         </li>
         <li>
             <a href="https://apps.apple.com/td/app/naturify-lite/id6544803863">
@@ -192,17 +223,6 @@
 
     <h2>Smaller coding projects</h2>
     <ul>
-        <li>
-            Naturify Machine Learning
-            <ul>
-                <li><p>Trained neural network to predict nearby species given latitude and longitude coordinates.</p></li>
-                <li><p>Trained neural network to perform image classification on a dataset of 10000 different species (plants, animals, fungi etc.) for my app Naturify. I used a visual transformer architecture, and trained the model with Pytorch on an Nvidia A100 GPU for several days. </p></li>
-                <li><p>The code for this is not currently available to the public.</p></li>
-            </ul>
-        </li>
-        <li>
-            Naturify Server <p>Created backend server for Naturify. This functions as an inference server for the iOS app, and hosts the app's website. This code is not currently available to the public. </p>
-        </li>
         <li>
             <a href="https://github.com/cryanwashere/Floral">Floral</a> <p>Floral is a Jax based python neural network library. Using Jax as a backend, it allows you to create, train, and save neural networks. Floral can be intstalled via Pypi. </p>
         </li>
