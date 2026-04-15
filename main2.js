@@ -145,14 +145,14 @@ function makeLine( position1, position2 ) {
         new THREE.Vector3( position2.x, position2.y, position2.z)
     ];
 
-    const material = new THREE.LineBasicMaterial({ color: 0x000000 });
+    const material = new THREE.LineBasicMaterial({ color: window.invertedColor });
     const geometry = new THREE.BufferGeometry().setFromPoints( points );
     const line = new THREE.Line( geometry, material );
     return line; 
 }
 
 function makeLineBoxMesh( shape, transform ) {
-    const material = new THREE.LineBasicMaterial({ color: 0x000000 });
+    const material = new THREE.LineBasicMaterial({ color: window.invertedColor });
 
 
     const points = [
@@ -237,7 +237,7 @@ class MeshArray {
                     if (pixelValue > 0.1) {
                         const pixelGeometry = new THREE.BoxGeometry( 1, 1, 1 );
                         const material = new THREE.MeshBasicMaterial({
-                            color: 0x000000,
+                            color: window.invertedColor,
                             transparent : true,
                             opacity : pixelValue
                         });
@@ -263,7 +263,7 @@ class MeshArray {
                         if (pixelValue > 0.1) {
                             const pixelGeometry = new THREE.BoxGeometry( 1, 1, 1 );
                             const material = new THREE.MeshBasicMaterial({
-                                color: 0x000000,
+                                color: window.invertedColor,
                                 transparent : true,
                                 opacity : pixelValue
                             });
@@ -1011,7 +1011,13 @@ function isInViewport(elem) {
 
 function makeViewer( id, div, description, s ) {
     var scene = new THREE.Scene();
-    scene.background = new THREE.Color(document.body.style.backgroundColor);
+    var bgColor = getComputedStyle(document.body).backgroundColor;
+    scene.background = new THREE.Color(bgColor);
+    var invertedColor = new THREE.Color(bgColor);
+    invertedColor.r = 1 - invertedColor.r;
+    invertedColor.g = 1 - invertedColor.g;
+    invertedColor.b = 1 - invertedColor.b;
+    window.invertedColor = invertedColor;
     const canvas = document.getElementById(id);
     const camera = new THREE.PerspectiveCamera( 75, canvas.clientWidth/canvas.clientHeight, 0.1, 1000 );
     const renderer = new THREE.WebGLRenderer( {
