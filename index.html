@@ -14,7 +14,22 @@
             display: block;
         }
         .text-section {
-            padding: 5rem;
+            padding-top: 1rem; 
+            padding-right: 5rem; 
+            padding-bottom: 1rem; 
+            padding-left: 5rem; 
+        }
+        .hidden {
+            opacity: 0;
+            filter: blur(5px);
+            transform: translateX(-100%);
+            transition: all 0.75s;
+            padding: 10px;
+        }
+        .show {
+            opacity: 1;
+            filter: blur(0);
+            transform: translateX(0);
         }
     </style>
 
