@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cameron Ryan</title>
+
+    <link rel="stylesheet" href="style2.css">
+    <!--<link rel="stylesheet" href="fonts.css">-->
+    <style>
+        canvas {
+            width: 100%;
+            display: block;
+        }
+        .text-section {
+            padding: 5rem;
+        }
+    </style>
+
+</head>
+
+<script>
+    /*
+
+        Scroll indicator:
+        indicate how much the user has scrolled as they view the web page
+
+    */
+    window.onscroll = () => {
+        var winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+        var height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        var scrolled = (winScroll / height) * 100;
+        document.getElementById("myBar").style.width = scrolled + "%";
+    }
+</script>
+
+<script type="module">
+    /*
+
+        Scrolling elements:
+        this makes the elements scroll when they are viewed
+
+    */
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('show');
+            } else {
+                entry.target.classList.remove('show');
+            }
+
+        });
+    })
+    const hiddenElements = document.querySelectorAll('.hidden');
+    hiddenElements.forEach((el) => observer.observe(el));
+</script>
+
+
+<div id="invertedcursor"></div>
+<script type="module">
+    /*
+    
+        This creates the special cursor
+    
+    */
+    document.onmousemove = function(e) {
+    document.documentElement.style.setProperty (
+        '--x', (
+        e.clientX+window.scrollX
+        )
+        + 'px'
+    );
+    document.documentElement.style.setProperty (
+        '--y', (
+        e.clientY+window.scrollY
+        ) 
+        + 'px'
+    );
+    }
+</script>
+
+
+<body>
+
+
+
+    
+    
+    <script src="js/three.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.0.0/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-vis@1.0.2/dist/tfjs-vis.umd.min.js"></script>
+    <script type="module" src="data.js"></script>
+    <script type="module" src="main2.js"></script>
+    
+
+    <div class="header">
+        <div class="progress-container">
+            <div class="progress-bar" id="myBar"></div>
+        </div>  
+
+        <div class="header">
+            <div class="progress-container">
+                <div class="progress-bar" id="myBar"></div>
+            </div>  
+            <nav style="padding: 1rem;">
+                <ul style="list-style: none; margin: 0; padding: 0; display: flex; gap: 2rem;">
+                    <li><a href="/index.html">Home</a></li>
+                    <li><a href="portfolio.html">Project Portfolio</a></li>
+                    <li><a href="https://github.com/cryanwashere">Github</a></li>
+                    <li><a href="https://linkedin.com/in/cameron-ryan-7b043a229">LinkedIn</a></li>
+                    <li><a href="resume_materials/Cameron_Ryan_Resume_Winter2026.pdf">Resume</a></li>
+                    <li><a href="misc.html">Misc</a></li>
+                </ul>
+            </nav>
+        </div>
+        
+    </div>
+    
+    
+
+    <div id="top" class="text-section">
+        <section>
+            <h1 style="display:inline-block;" class="hidden">Cameron Ryan</h1>
+            <h4 style="display:inline-block" class="hidden">(The 3D viewers were made in 2022 without AI)</h4>
+        </section>
+        <p class="hidden">
+                Welcome to Cameron's Website! Please take a look at my project portfolio for a detailed list of projects that I have worked on. Sometimes the 3D viewers may load slowly. 
+                <!--
+                I am passionate about science outside of the classroom, and here I would like
+                to present to you some of my science related interests. Currently, the purpose 
+                of this webpage is not to list my experiences, but to simply give you an insight
+                into my interests. 
+                -->
+        </p>
+    </div>
+
+    <div>
+
+    
+
+        <div class="container text-section">
+            <h1 class="hidden">Neural Networks</h1>
+            <p class="hidden overlap invert">
+                
+            </p> 
+            
+            <p class="hidden">Convolutional neural networks are models of the biological vision system, which computers use to process visual information like living things. Here we can see how the neurons in a convolutional neural network activate in order to classify a specific type of handwritten digit. 
+               </p>
+            <div id="viewer-1" class=>
+                <canvas id="bg1"></canvas>  
+            </div>
+        </div>
+
+        <div class="text-section">
+            <h1 class="hidden">Proteins</h1>
+            <p class="hidden">
+                ATP synthase functions like a microscopic water wheel, creating adenosine triphosphate (ATP) from a proton gradient across a membrane. This is used to power many important natural processes in living cells.
+            </p>
+            
+            <!--
+            <p class="hidden overlap invert">
+                Protein Viewer
+            </p>
+            -->
+            <div id="viewer-3">
+                <canvas id="bg3"></canvas>
+            </div>
+           
+        </div>
+
+
+    </div>
+    <!--
+
+    <div id="viewer-1">
+        <small>tip: you get a new image every time you refresh</small>
+        <canvas id="bg1"></canvas>  
+    </div>
+    
+    <div id="viewer-2">
+        <small>tip: you get new colors every time you refresh</small>
+        <canvas id="bg2"></canvas> 
+    </div>
+
+    <div id="viewer-3">
+        <canvas id="bg3"></canvas>
+    </div>
+
+    -->
+
+    
+
+   
+    
+    
+</body>
+</html>
