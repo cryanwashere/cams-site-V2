@@ -4,75 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cameron's Portfolio</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style2.css">
 </head>
 
-<script>
-    /*
-
-        Scroll indicator:
-        indicate how much the user has scrolled as they view the web page
-
-    */
-    window.onscroll = () => {
-        var winScroll = document.body.scrollTop || document.documentElement.scrollTop;
-        var height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-        var scrolled = (winScroll / height) * 100;
-        document.getElementById("myBar").style.width = scrolled + "%";
-    }
-</script>
-
-<script type="module">
-    /*
-
-        Scrolling elements:
-        this makes the elements scroll when they are viewed
-
-    */
-
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('show');
-            } else {
-                entry.target.classList.remove('show');
-            }
-
-        });
-    })
-    const hiddenElements = document.querySelectorAll('.hidden');
-    hiddenElements.forEach((el) => observer.observe(el));
-</script>
+<body>
 
 <div id="invertedcursor"></div>
 <script type="module">
-    /*
-    
-        This creates the special cursor
-    
-    */
     document.onmousemove = function(e) {
-    document.documentElement.style.setProperty (
-        '--x', (
-        e.clientX+window.scrollX
-        )
-        + 'px'
-    );
-    document.documentElement.style.setProperty (
-        '--y', (
-        e.clientY+window.scrollY
-        ) 
-        + 'px'
-    );
-    }
+        document.documentElement.style.setProperty('--x', (e.clientX + window.scrollX) + 'px');
+        document.documentElement.style.setProperty('--y', (e.clientY + window.scrollY) + 'px');
+    };
 </script>
 
+<div class="progress-container">
+    <div class="progress-bar" id="myBar"></div>
+</div>
+
 <div class="header">
-    <div class="progress-container">
-        <div class="progress-bar" id="myBar"></div>
-    </div>  
-    <nav style="padding: 1rem;">
-        <ul style="list-style: none; margin: 0; padding: 0; display: flex; gap: 2rem;">
+    <nav>
+        <ul>
             <li><a href="/index.html">Home</a></li>
             <li><a href="portfolio.html">Project Portfolio</a></li>
             <li><a href="https://github.com/cryanwashere">Github</a></li>
@@ -84,182 +35,388 @@
     </nav>
 </div>
 
-
-<body>
+<div class="page">
     <h1>Cameron's Project Portfolio</h1>
-    <p>Over the years I have done a lot of really cool projects. This is as close as I can get to a comprehensive list of the things which I am able to share publically on the internet.</p>
+    <p class="subtitle">A comprehensive list of projects I'm able to share publicly.</p>
 
-    <hr>
-
-    <h2>Machine Learning Material Phase Identification</h2>
-    <div>
-        <p>
-            I researched methods of classifying material phases from atomic coordinates using neural networks.
-        </p> 
-        <div>
-            <h3>Organization</h3>
-            University of Rochester Laboratory for Laser Energetics
-            <h3>Mentor</h3>
-            Shuai Zhang
+    <div class="controls">
+        <div class="control-row">
+            <span class="control-label">Sort by</span>
+            <select id="sort-select">
+                <option value="effort-desc">Effort (most first)</option>
+                <option value="effort-asc">Effort (least first)</option>
+                <option value="date-desc">Date Started (newest first)</option>
+                <option value="date-asc">Date Started (oldest first)</option>
+                <option value="title-asc">Title (A–Z)</option>
+            </select>
         </div>
-        <h3>Contributions</h3>
-        <ul>
-            <li><p>
-                Replicated results from prior work on classifying material phases using Dynamic Graph Convolutional Neural Networks (DGCNNs).
-            </p></li>
-            <li><p>
-                Developed a modified version of DGCNN which attains better test accuracy.
-            </p></li>
-            <li><p>
-                Invented Gaussian Kernel (GK) architecture, which obtains a significant performance improvement with comparable test accuracy to modified DGCNN. 
-            </p></li>
-            <li><p>
-                Researched scaling of GK models with respect to various hyperparameters. 
-            </p></li>
-        </ul>
-        <h3>Materials</h3>
-        <ul>
-            <li>
-                <p>
-                    I presented a poster showing research progress at the IFE-SURE conference in Washington DC, August 2025. View the poster <a href="resume_materials/Cameron_Ryan_Project.pdf">here</a>.
-                </p>
-            </li>
-            <li>
-                <p>
-                    I delivered a presentation for the laboratory's AI/ML group in February 2026. View the presentation <a href="resume_materials/AIML_presentation_feb2026.pdf">here</a>.
-                </p>
-            </li>
-        </ul>
+        <div class="control-row">
+            <span class="control-label">Tags</span>
+            <div class="pill-group" id="tag-filters"></div>
+        </div>
+        <div class="control-row">
+            <span class="control-label">Organization</span>
+            <div class="pill-group" id="org-filters"></div>
+        </div>
     </div>
-    <hr>
-   
-    
 
-    <h2>Search Engine</h2>
-    <p>I created a search engine focused on Wikipedia pages. Primarily written in Python, this search engine creates embeddings for text and images using open source CLIP models, which can be searched using a vector database. The various components of the search engine are compartmentalized as Docker containers. Using containers, managing the complex parts of the search engine can be made easy. For more information on this project, please view the project's public <a href="https://gitlab.com/cjryanwashere/Search_Engine_Backend">codebase</a>.</p>
-    <hr>
+    <div class="results-meta" id="results-meta"></div>
+    <div class="project-list" id="project-list"></div>
 
-    <h2>Naturify</h2>
-    <p>
-        I created an app for identifying images of plants, animals, and fungi.
-    </p>
-    <div>
-        <h3>Contributions</h3>
-        <ul>
-            <li><p>
-                Trained neural network to perform image classification on a dataset of 10000 different species (plants, animals, fungi etc.) for my app Naturify. I used a visual transformer architecture, and trained the model with Pytorch on an Nvidia A100 GPU for several days.
-            </p></li>
-            <li><p>
-                Trained neural network to predict nearby species given latitude and longitude coordinates.
-            </p></li>
-            <li><p>
-                Created backend server for Naturify. This functions as an inference server for the iOS app, and hosts the app's website.
-            </p></li>
-        </ul>
-        <h3>Materials</h3>
-        <ul>
-            <li><p>
-                Download the <a href="https://apps.apple.com/td/app/naturify/id6447524765">app</a> on the iOS app store. 
-            </p></li>
-            <li><p>
-                Created minimal <a href="https://naturify.app/static/identify.html">web page</a> to use the neural network. 
-            </p></li>
-            <li><p>
-                The source code for training the neural networks and the inference server are not open source. 
-            </p></li>
-        </ul>
-    </div>
-    <hr>
+    <hr class="divider">
+    <p class="footer">Projects marked with effort dots (●) represent relative time investment, 1–5 scale.</p>
+</div>
 
+<script>
+// ─────────────────────────────────────────────
+//  PROJECT DATA — edit this to add new projects
+// ─────────────────────────────────────────────
+const PROJECTS = [
+    {
+        id: "ml-phase-id",
+        title: "Machine Learning Material Phase Identification",
+        description: "Researched methods of classifying material phases from atomic coordinates using neural networks. Invented the Gaussian Kernel (GK) architecture, which achieves significant performance improvements over baseline Dynamic Graph Convolutional Neural Network (DGCNN) approaches.",
+        startDate: "2025-05-01",
+        effort: 5,
+        organization: "University of Rochester LLE",
+        mentor: "Shuai Zhang",
+        tags: ["neural networks", "theoretical physics", "python", "HPC", "model training", "intertial confinement fusion"],
+        links: [
+            { label: "IFE SURE Symposium Poster (Aug 2025)", href: "resume_materials/Cameron_Ryan_Project.pdf" },
+            { label: "AI/ML Group Presentation (Feb 2026)", href: "resume_materials/AIML_presentation_feb2026.pdf" }
+        ],
+        contributions: [
+            "Replicated results from prior work on DGCNNs for material phase classification.",
+            "Developed a modified DGCNN with better test accuracy.",
+            "Invented Gaussian Kernel (GK) architecture with significant performance gains.",
+            "Researched hyperparameter scaling of GK models."
+        ]
+    },
+    {
+        id: "search-engine",
+        title: "Wikipedia Search Engine",
+        description: "A search engine focused on Wikipedia pages. Creates embeddings for text and images using open source CLIP models, stored and queried via a vector database. All components are containerized with Docker for modular management.",
+        startDate: "2024-06-01",
+        effort: 5,
+        organization: null,
+        tags: ["systems architecture", "neural networks", "information retrieval", "latent space", "docker", "python"],
+        links: [
+            { label: "Codebase (GitLab)", href: "https://gitlab.com/cjryanwashere/Search_Engine_Backend" }
+        ]
+    },
+    {
+        id: "naturify",
+        title: "Naturify",
+        description: "An iOS app for identifying plants, animals, and fungi from photos. Trained a visual transformer on 10,000 species using PyTorch on an Nvidia A100 GPU. Also includes a geolocation model that predicts nearby species from lat/lng coordinates.",
+        startDate: "2023-09-01",
+        effort: 5,
+        organization: null,
+        tags: ["neural networks", "mobile app", "computer vision", "python", "model training", "docker"],
+        links: [
+            { label: "iOS App", href: "https://apps.apple.com/td/app/naturify/id6447524765" },
+            { label: "Web demo", href: "https://naturify.app/static/identify.html" }
+        ],
+        contributions: [
+            "Trained neural network to perform image classification on a dataset of 10000 different species (plants, animals, fungi etc.) for my app Naturify. I used a visual transformer architecture, and trained the model with Pytorch on an Nvidia A100 GPU for several days.",
+            "Trained neural network to predict nearby species given latitude and longitude coordinates.",
+            "Created backend server for Naturify. This functions as an inference server for the iOS app, and hosts the app's website."
+        ]
+    },
+    {
+        id: "container-mgmt",
+        title: "Containerized Application Management",
+        description: "Researched methods of managing applications using containers to support scientific computing projects and collaboration with other labs at the Laboratory for Laser Energetics.",
+        startDate: "2022-05-01",
+        effort: 4,
+        organization: "University of Rochester LLE",
+        mentor: "Richard Kidder",
+        tags: ["systems architecture", "dev ops", "docker"],
+        links: [
+            { label: "Project report", href: "resume_materials/LLE_report_summer2022.pdf" }
+        ]
+    },
+    {
+        id: "floral",
+        title: "Floral — JAX Neural Network Library",
+        description: "A JAX-based Python neural network library. Allows creating, training, and saving neural networks with a clean API. Available on PyPI.",
+        startDate: "2023-01-01",
+        effort: 3,
+        organization: null,
+        tags: ["neural networks", "python"],
+        links: [
+            { label: "GitHub", href: "https://github.com/cryanwashere/Floral" }
+        ]
+    },
+    {
+        id: "dna-code",
+        title: "DNA File Encoder",
+        description: "A C program that encodes any file into a DNA sequence. Motivated by future applications in biological data storage — when DNA writing matures, this could store arbitrary files inside living organisms.",
+        startDate: "2023-03-01",
+        effort: 2,
+        organization: null,
+        tags: ["theoretical biology", "C"],
+        links: [
+            { label: "GitHub", href: "https://github.com/cryanwashere/dna-code" }
+        ]
+    },
+    {
+        id: "cameronos",
+        title: "CameronOS",
+        description: "An attempt at writing an operating system from scratch in C and assembly. Implements a basic bootloader and screen driver.",
+        startDate: "2022-11-01",
+        effort: 1,
+        organization: null,
+        tags: ["assembly", "operating systems", "C"],
+        links: [
+            { label: "GitHub", href: "https://github.com/cryanwashere/CameronOS" }
+        ]
+    },
+    {
+        id: "apartment-exchange",
+        title: "Apartment Stock Exchange",
+        description: "A working currency and security exchange for items in my apartment. Implements a full order book for buying and selling securities with the custom currency.",
+        startDate: "2025-09-01",
+        effort: 3,
+        organization: null,
+        tags: ["finance", "systems architecture"],
+        links: [
+            { label: "GitHub", href: "https://github.com/cryanwashere/apartment_currency" }
+        ]
+    },
+    {
+        id: "image-garden",
+        title: "Image Garden",
+        description: "An iOS app that performs semantic searches on photos in your photo library using a CLIP neural network.",
+        startDate: "2022-09-01",
+        effort: 4,
+        organization: null,
+        tags: ["neural networks", "mobile app", "computer vision", "latent space", "information retrieval", "AI Integration"],
+        links: [
+            { label: "iOS App", href: "https://apps.apple.com/td/app/image-garden/id6446785274" }
+        ]
+    },
+    {
+        id: "earth-explore",
+        title: "Earth Explore",
+        description: "An iOS app that classifies birds from their calls using a neural network.",
+        startDate: "2022-06-01",
+        effort: 3,
+        organization: null,
+        tags: ["neural networks", "mobile app", "audio classification", "AI Integration"],
+        links: [
+            { label: "iOS App", href: "https://apps.apple.com/td/app/earth-explore/id1632933059" }
+        ]
+    },
+    {
+        id: "wordlab",
+        title: "wordLab",
+        description: "An iOS app for taking notes and querying them with AI.",
+        startDate: "2021-09-01",
+        effort: 4,
+        organization: null,
+        tags: ["mobile app", "AI Integration"],
+        links: [
+            { label: "iOS App", href: "https://apps.apple.com/td/app/wordlab/id1584528104" }
+        ]
+    },
+    {
+        id: "search-crawler",
+        title: "Search Engine Crawler",
+        description: "A basic web crawler written in Rust, built as a prerequisite to the Wikipedia search engine project.",
+        startDate: "2024-04-01",
+        effort: 3,
+        organization: null,
+        tags: ["systems architecture", "rust", "information retrieval"],
+        links: [
+            { label: "GitHub", href: "https://github.com/cryanwashere/Search_Engine_Crawler" }
+        ]
+    },
+    {
+        id: "stock-prediction",
+        title: "Stock Prediction Neural Network",
+        description: "Predicts future stock returns from historical returns by outputting a normal distribution over expected future performance.",
+        startDate: "2025-06-01",
+        effort: 2,
+        organization: null,
+        tags: ["neural networks", "finance", "python", "model training"],
+        links: [
+            { label: "GitHub", href: "https://github.com/cryanwashere/stock_prediction_neural_net" }
+        ]
+    },
+    {
+        id: "atomdance-paper",
+        title: "ATOMDANCE (Published in Biophysical Journal)",
+        description: "Co-authored paper on kernel-based denoising and choreographic analysis for protein dynamic comparison. Published in Biophysical Journal, 2024.",
+        startDate: "2021-01-01",
+        effort: 2,
+        organization: "Rochester Institute of Technology",
+        tags: ["theoretical physics", "neural networks", "biophysics"],
+        links: [
+            { label: "DOI", href: "https://doi.org/10.1016/j.bpj.2024.03.024" }
+        ]
+    }
+];
 
-    <h2>Containerized Application Management</h2>
-    <p>
-        I researched methods of managing applications using containers to support scientific computing projects, and collaboration with other labs.
-    </p>
-    <div>
-        <h3>Organization</h3>
-        University of Rochester Laboratory for Laser Energetics
-        <h3>Mentor</h3>
-        Richard Kidder
-    </div>
-    <h3>Materials</h3>
-    <ul>
-        <li>
-            <p>
-                Detailed results in my <a href="resume_materials/LLE_report_summer2022.pdf">project report</a>.
-            </p>
-        </li>
-    </ul>
-    <hr>
+// ─────────────────────────────────────────────
+//  Toggle contributions
+// ─────────────────────────────────────────────
+function toggleContrib(id, btn) {
+    const el = document.getElementById("contrib-" + id);
+    const open = el.classList.toggle("open");
+    btn.textContent = open ? "– contributions" : "+ contributions";
+}
 
-    <h2>Apps (available on the iOS app store)</h2>
+// ─────────────────────────────────────────────
+//  App state
+// ─────────────────────────────────────────────
+let activeTags = new Set();
+let activeOrgs = new Set();
+let sortMode = "effort-desc";
 
-    <ul>
-        <li>
-            <a href="https://apps.apple.com/td/app/naturify/id6447524765">Naturify</a>
-            <p>Naturify is an iOS app that can be used for identifying images of plants, animals, and fungi.</p>
-        </li>
-        <li>
-            <a href="https://apps.apple.com/td/app/naturify-lite/id6544803863">
-                Naturify Lite
-            </a>
-            <p>This is an offline version of Naturify.  </p>
-        </li>
-        <li>
-            <a href="https://apps.apple.com/td/app/image-garden/id6446785274">Image Garden</a>
-            <p>Image Garden is an iOS app that allows you to perform semantic searches on the images in your photo library. It uses a neural network (CLIP) to perform the semantic search.</p>
-        </li>
-        <li>
-            <a href="https://apps.apple.com/td/app/earth-explore/id1632933059">Earth Explore</a>
-            <p>Earch Explore is an iOS app that classifies birds based on their calls, using a neural network. </p>
-        </li>
-        <li>
-            <a href="https://apps.apple.com/td/app/wordlab/id1584528104">wordLab.</a>
-            <p>WordLab is an app that allows users to take notes, and then as AI questions about their notes. </p>
-        </li>
-    </ul>
+// Derive all unique tags and orgs from data
+const allTags = [...new Set(PROJECTS.flatMap(p => p.tags))].sort();
+const allOrgs = [...new Set(PROJECTS.map(p => p.organization).filter(Boolean))].sort();
 
-    <hr>
+// ─────────────────────────────────────────────
+//  Render controls
+// ─────────────────────────────────────────────
+function buildPills(containerId, items, activeSet, onToggle) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = "";
+    items.forEach(item => {
+        const pill = document.createElement("button");
+        pill.className = "pill" + (activeSet.has(item) ? " active" : "");
+        pill.textContent = item;
+        pill.addEventListener("click", () => onToggle(item));
+        container.appendChild(pill);
+    });
+}
 
-    <h2>Smaller coding projects</h2>
-    <ul>
-        <li>
-            <a href="https://github.com/cryanwashere/Floral">Floral</a> <p>Floral is a Jax based python neural network library. Using Jax as a backend, it allows you to create, train, and save neural networks. Floral can be intstalled via Pypi. </p>
-        </li>
-        <li>
-            <a href="https://github.com/cryanwashere/dna-code">DNA code</a> 
-            <p>this C program will encode any file into a DNA sequence. The idea is that some day when data can easily be written to DNA, something like this can be used to encode files into a DNA sequence so that they may be stored in living organisms. </p>
-        </li>
-        <li>
-            <a href="https://github.com/cryanwashere/CameronOS">CameronOS</a> 
-            <p>My attempt at creating an operating system. Code written in C and assembly creates a basic bootloader, and screen driver. </p>
-        </li>
-        <li>
-            <a href="https://github.com/cryanwashere/apartment_currency">Apartment Stock Exchange</a> 
-            <p>Motivated by understanding how financial exchanges work, I created a currency, and security exchange for items in my apartment. This includes a working stock exchange which uses and order book which can be used to buy and sell securities with the currency. </p>
-        </li>
-        <li>
-            <a href="https://github.com/cryanwashere/ML-Experiments">ML Experiments</a> 
-            <p>Several experiments that I did on neural networks for my own curiosity. </p>
-        </li>
-        <li>
-            <a href="https://github.com/cryanwashere/Search_Engine_Crawler">Search Engine Crawler</a> 
-            <p>Created a basic web crawler in Rust as a prerequisite to creating my search engine. </p>
-        </li>
-        <li>
-            <a href="https://github.com/cryanwashere/cams-site-V2">This Website</a>
-            <p>
-                Creating this website took a lot of effort. You can check out the repo for the code here. 
-            </p>
-        </li>
-    </ul>
+function initControls() {
+    buildPills("tag-filters", allTags, activeTags, tag => {
+        activeTags.has(tag) ? activeTags.delete(tag) : activeTags.add(tag);
+        buildPills("tag-filters", allTags, activeTags, arguments.callee);
+        renderProjects();
+    });
 
-    <hr>
+    buildPills("org-filters", allOrgs, activeOrgs, org => {
+        activeOrgs.has(org) ? activeOrgs.delete(org) : activeOrgs.add(org);
+        buildPills("org-filters", allOrgs, activeOrgs, arguments.callee);
+        renderProjects();
+    });
 
-    <h2>Papers</h2>
-    <div class="csl-bib-body">
-    <div data-csl-entry-id="Babbitt2024" class="csl-entry">Babbitt, G. A., Rajendran, M., Lynch, M. L., Asare-Bediako, R., Mouli, L. T., Ryan, C. J., Srivastava, H., Rynkiewicz, P., Phadke, K., Reed, M. L., Moore, N., Ferran, M. C., &#38; Fokoue, E. P. (2024). ATOMDANCE: Kernel-based denoising and choreographic analysis for protein dynamic comparison. <i>Biophysical Journal</i>, <i>123</i>(17), 2705–2715. <a href="https://doi.org/10.1016/j.bpj.2024.03.024">https://doi.org/10.1016/j.bpj.2024.03.024</a></div>
-    </div>
-    
+    document.getElementById("sort-select").addEventListener("change", e => {
+        sortMode = e.target.value;
+        renderProjects();
+    });
+}
+
+// ─────────────────────────────────────────────
+//  Filter + sort
+// ─────────────────────────────────────────────
+function getFiltered() {
+    return PROJECTS.filter(p => {
+        if (activeTags.size > 0 && ![...activeTags].every(t => p.tags.includes(t))) return false;
+        if (activeOrgs.size > 0 && !activeOrgs.has(p.organization)) return false;
+        return true;
+    });
+}
+
+function getSorted(projects) {
+    return [...projects].sort((a, b) => {
+        if (sortMode === "effort-desc") return b.effort - a.effort;
+        if (sortMode === "effort-asc") return a.effort - b.effort;
+        if (sortMode === "date-desc") return new Date(b.startDate) - new Date(a.startDate);
+        if (sortMode === "date-asc") return new Date(a.startDate) - new Date(b.startDate);
+        if (sortMode === "title-asc") return a.title.localeCompare(b.title);
+        return 0;
+    });
+}
+
+// ─────────────────────────────────────────────
+//  Render projects
+// ─────────────────────────────────────────────
+function effortDots(n) {
+    let html = '<div class="effort-dots" title="Effort: ' + n + '/5">';
+    for (let i = 1; i <= 5; i++) {
+        html += '<div class="dot' + (i <= n ? " filled" : "") + '"></div>';
+    }
+    html += "</div>";
+    return html;
+}
+
+function formatDate(dateStr) {
+    const d = new Date(dateStr + "T00:00:00");
+    return d.toLocaleDateString("en-US", { month: "short", year: "numeric" });
+}
+
+function renderProjects() {
+    const filtered = getFiltered();
+    const sorted = getSorted(filtered);
+
+    const meta = document.getElementById("results-meta");
+    meta.textContent = sorted.length + " of " + PROJECTS.length + " projects";
+
+    const list = document.getElementById("project-list");
+    if (sorted.length === 0) {
+        list.innerHTML = '<div class="no-results">No projects match the selected filters.</div>';
+        return;
+    }
+
+    list.innerHTML = sorted.map(p => {
+        const metaBadges = [
+            '<span class="meta-badge">' + formatDate(p.startDate) + "</span>",
+            p.organization ? '<span class="meta-badge org">' + p.organization + "</span>" : "",
+            p.mentor ? '<span class="meta-badge mentor">Mentor: ' + p.mentor + "</span>" : ""
+        ].filter(Boolean).join("");
+
+        const tags = p.tags.map(t =>
+            '<span class="tag">' + t + "</span>"
+        ).join("");
+
+        const links = p.links.length > 0
+            ? '<div class="project-links">' + p.links.map(l =>
+                '<a href="' + l.href + '" target="_blank">' + l.label + "</a>"
+              ).join("") + "</div>"
+            : "";
+
+        const contributionsHtml = p.contributions && p.contributions.length > 0
+            ? `<div class="contributions" id="contrib-${p.id}">
+                <ul>${p.contributions.map(c => '<li>' + c + '</li>').join("")}</ul>
+               </div>
+               <button class="read-more-btn" onclick="toggleContrib('${p.id}', this)">+ contributions</button>`
+            : "";
+
+        return `
+        <div class="project-card">
+            <div class="project-header">
+                <div class="project-title">${p.title}</div>
+                ${effortDots(p.effort)}
+            </div>
+            <div class="project-meta">${metaBadges}</div>
+            <p class="project-desc">${p.description}</p>
+            <div class="project-tags">${tags}</div>
+            ${links}
+            ${contributionsHtml}
+        </div>`;
+    }).join("");
+}
+
+// ─────────────────────────────────────────────
+//  Scroll progress
+// ─────────────────────────────────────────────
+window.onscroll = () => {
+    const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+    const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+    document.getElementById("myBar").style.width = (winScroll / height * 100) + "%";
+};
+
+// ─────────────────────────────────────────────
+//  Init
+// ─────────────────────────────────────────────
+initControls();
+renderProjects();
+</script>
+
 </body>
 </html>

@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cameron's Portfolio</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<script>
+    /*
+
+        Scroll indicator:
+        indicate how much the user has scrolled as they view the web page
+
+    */
+    window.onscroll = () => {
+        var winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+        var height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        var scrolled = (winScroll / height) * 100;
+        document.getElementById("myBar").style.width = scrolled + "%";
+    }
+</script>
+
+<script type="module">
+    /*
+
+        Scrolling elements:
+        this makes the elements scroll when they are viewed
+
+    */
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('show');
+            } else {
+                entry.target.classList.remove('show');
+            }
+
+        });
+    })
+    const hiddenElements = document.querySelectorAll('.hidden');
+    hiddenElements.forEach((el) => observer.observe(el));
+</script>
+
+<div id="invertedcursor"></div>
+<script type="module">
+    /*
+    
+        This creates the special cursor
+    
+    */
+    document.onmousemove = function(e) {
+    document.documentElement.style.setProperty (
+        '--x', (
+        e.clientX+window.scrollX
+        )
+        + 'px'
+    );
+    document.documentElement.style.setProperty (
+        '--y', (
+        e.clientY+window.scrollY
+        ) 
+        + 'px'
+    );
+    }
+</script>
+
+<div class="header">
+    <div class="progress-container">
+        <div class="progress-bar" id="myBar"></div>
+    </div>  
+    <nav style="padding: 1rem;">
+        <ul style="list-style: none; margin: 0; padding: 0; display: flex; gap: 2rem;">
+            <li><a href="/index.html">Home</a></li>
+            <li><a href="portfolio.html">Project Portfolio</a></li>
+            <li><a href="https://github.com/cryanwashere">Github</a></li>
+            <li><a href="https://linkedin.com/in/cameron-ryan-7b043a229">LinkedIn</a></li>
+            <li><a href="contact.html">Contact</a></li>
+            <li><a href="resume_materials/Cameron_Ryan_Resume_Winter2026.pdf">Resume</a></li>
+            <li><a href="misc.html">Misc</a></li>
+        </ul>
+    </nav>
+</div>
+
+
+<body>
+    <h1>Cameron's Project Portfolio</h1>
+    <p>Over the years I have done a lot of really cool projects. This is as close as I can get to a comprehensive list of the things which I am able to share publically on the internet.</p>
+
+    <hr>
+
+    <h2>Machine Learning Material Phase Identification</h2>
+    <div>
+        <p>
+            I researched methods of classifying material phases from atomic coordinates using neural networks.
+        </p> 
+        <div>
+            <h3>Organization</h3>
+            University of Rochester Laboratory for Laser Energetics
+            <h3>Mentor</h3>
+            Shuai Zhang
+        </div>
+        <h3>Contributions</h3>
+        <ul>
+            <li><p>
+                Replicated results from prior work on classifying material phases using Dynamic Graph Convolutional Neural Networks (DGCNNs).
+            </p></li>
+            <li><p>
+                Developed a modified version of DGCNN which attains better test accuracy.
+            </p></li>
+            <li><p>
+                Invented Gaussian Kernel (GK) architecture, which obtains a significant performance improvement with comparable test accuracy to modified DGCNN. 
+            </p></li>
+            <li><p>
+                Researched scaling of GK models with respect to various hyperparameters. 
+            </p></li>
+        </ul>
+        <h3>Materials</h3>
+        <ul>
+            <li>
+                <p>
+                    I presented a poster showing research progress at the IFE-SURE conference in Washington DC, August 2025. View the poster <a href="resume_materials/Cameron_Ryan_Project.pdf">here</a>.
+                </p>
+            </li>
+            <li>
+                <p>
+                    I delivered a presentation for the laboratory's AI/ML group in February 2026. View the presentation <a href="resume_materials/AIML_presentation_feb2026.pdf">here</a>.
+                </p>
+            </li>
+        </ul>
+    </div>
+    <hr>
+   
+    
+
+    <h2>Search Engine</h2>
+    <p>I created a search engine focused on Wikipedia pages. Primarily written in Python, this search engine creates embeddings for text and images using open source CLIP models, which can be searched using a vector database. The various components of the search engine are compartmentalized as Docker containers. Using containers, managing the complex parts of the search engine can be made easy. For more information on this project, please view the project's public <a href="https://gitlab.com/cjryanwashere/Search_Engine_Backend">codebase</a>.</p>
+    <hr>
+
+    <h2>Naturify</h2>
+    <p>
+        I created an app for identifying images of plants, animals, and fungi.
+    </p>
+    <div>
+        <h3>Contributions</h3>
+        <ul>
+            <li><p>
+                Trained neural network to perform image classification on a dataset of 10000 different species (plants, animals, fungi etc.) for my app Naturify. I used a visual transformer architecture, and trained the model with Pytorch on an Nvidia A100 GPU for several days.
+            </p></li>
+            <li><p>
+                Trained neural network to predict nearby species given latitude and longitude coordinates.
+            </p></li>
+            <li><p>
+                Created backend server for Naturify. This functions as an inference server for the iOS app, and hosts the app's website.
+            </p></li>
+        </ul>
+        <h3>Materials</h3>
+        <ul>
+            <li><p>
+                Download the <a href="https://apps.apple.com/td/app/naturify/id6447524765">app</a> on the iOS app store. 
+            </p></li>
+            <li><p>
+                Created minimal <a href="https://naturify.app/static/identify.html">web page</a> to use the neural network. 
+            </p></li>
+            <li><p>
+                The source code for training the neural networks and the inference server are not open source. 
+            </p></li>
+        </ul>
+    </div>
+    <hr>
+
+
+    <h2>Containerized Application Management</h2>
+    <p>
+        I researched methods of managing applications using containers to support scientific computing projects, and collaboration with other labs.
+    </p>
+    <div>
+        <h3>Organization</h3>
+        University of Rochester Laboratory for Laser Energetics
+        <h3>Mentor</h3>
+        Richard Kidder
+    </div>
+    <h3>Materials</h3>
+    <ul>
+        <li>
+            <p>
+                Detailed results in my <a href="resume_materials/LLE_report_summer2022.pdf">project report</a>.
+            </p>
+        </li>
+    </ul>
+    <hr>
+
+    <h2>Apps (available on the iOS app store)</h2>
+
+    <ul>
+        <li>
+            <a href="https://apps.apple.com/td/app/naturify/id6447524765">Naturify</a>
+            <p>Naturify is an iOS app that can be used for identifying images of plants, animals, and fungi.</p>
+        </li>
+        <li>
+            <a href="https://apps.apple.com/td/app/naturify-lite/id6544803863">
+                Naturify Lite
+            </a>
+            <p>This is an offline version of Naturify.  </p>
+        </li>
+        <li>
+            <a href="https://apps.apple.com/td/app/image-garden/id6446785274">Image Garden</a>
+            <p>Image Garden is an iOS app that allows you to perform semantic searches on the images in your photo library. It uses a neural network (CLIP) to perform the semantic search.</p>
+        </li>
+        <li>
+            <a href="https://apps.apple.com/td/app/earth-explore/id1632933059">Earth Explore</a>
+            <p>Earch Explore is an iOS app that classifies birds based on their calls, using a neural network. </p>
+        </li>
+        <li>
+            <a href="https://apps.apple.com/td/app/wordlab/id1584528104">wordLab.</a>
+            <p>WordLab is an app that allows users to take notes, and then as AI questions about their notes. </p>
+        </li>
+    </ul>
+
+    <hr>
+
+    <h2>Smaller coding projects</h2>
+    <ul>
+        <li>
+            <a href="https://github.com/cryanwashere/Floral">Floral</a> <p>Floral is a Jax based python neural network library. Using Jax as a backend, it allows you to create, train, and save neural networks. Floral can be intstalled via Pypi. </p>
+        </li>
+        <li>
+            <a href="https://github.com/cryanwashere/dna-code">DNA code</a> 
+            <p>this C program will encode any file into a DNA sequence. The idea is that some day when data can easily be written to DNA, something like this can be used to encode files into a DNA sequence so that they may be stored in living organisms. </p>
+        </li>
+        <li>
+            <a href="https://github.com/cryanwashere/CameronOS">CameronOS</a> 
+            <p>My attempt at creating an operating system. Code written in C and assembly creates a basic bootloader, and screen driver. </p>
+        </li>
+        <li>
+            <a href="https://github.com/cryanwashere/apartment_currency">Apartment Stock Exchange</a> 
+            <p>Motivated by understanding how financial exchanges work, I created a currency, and security exchange for items in my apartment. This includes a working stock exchange which uses and order book which can be used to buy and sell securities with the currency. </p>
+        </li>
+        <li>
+            <a href="https://github.com/cryanwashere/ML-Experiments">ML Experiments</a> 
+            <p>Several experiments that I did on neural networks for my own curiosity. </p>
+        </li>
+        <li>
+            <a href="https://github.com/cryanwashere/Search_Engine_Crawler">Search Engine Crawler</a> 
+            <p>Created a basic web crawler in Rust as a prerequisite to creating my search engine. </p>
+        </li>
+        <li>
+            <a href="https://github.com/cryanwashere/cams-site-V2">This Website</a>
+            <p>
+                Creating this website took a lot of effort. You can check out the repo for the code here. 
+            </p>
+        </li>
+        <li>
+            <a href="https://github.com/cryanwashere/stock_prediction_neural_net">Stock Prediction Neural Network</a> 
+            <p>Try to predict the future returns of stocks using their historical returns. Creates a normal distribution. </p>
+        </li>
+    </ul>
+
+    <hr>
+
+    <h2>Papers</h2>
+    <div class="csl-bib-body">
+    <div data-csl-entry-id="Babbitt2024" class="csl-entry">Babbitt, G. A., Rajendran, M., Lynch, M. L., Asare-Bediako, R., Mouli, L. T., Ryan, C. J., Srivastava, H., Rynkiewicz, P., Phadke, K., Reed, M. L., Moore, N., Ferran, M. C., &#38; Fokoue, E. P. (2024). ATOMDANCE: Kernel-based denoising and choreographic analysis for protein dynamic comparison. <i>Biophysical Journal</i>, <i>123</i>(17), 2705–2715. <a href="https://doi.org/10.1016/j.bpj.2024.03.024">https://doi.org/10.1016/j.bpj.2024.03.024</a></div>
+    </div>
+    
+</body>
+</html>

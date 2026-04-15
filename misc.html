@@ -4,12 +4,39 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Misc</title>
+    <link rel="stylesheet" href="style2.css">
 </head>
 <body>
-    <nav style="padding: 1rem;">
+    <div id="invertedcursor"></div>
+    <script type="module">
+        document.onmousemove = function(e) {
+            document.documentElement.style.setProperty('--x', (e.clientX + window.scrollX) + 'px');
+            document.documentElement.style.setProperty('--y', (e.clientY + window.scrollY) + 'px');
+        };
+    </script>
+
+    <div class="progress-container">
+        <div class="progress-bar" id="myBar"></div>
+    </div>
+
+    <div class="header">
+        <nav>
+            <ul>
+                <li><a href="/index.html">Home</a></li>
+                <li><a href="portfolio.html">Project Portfolio</a></li>
+                <li><a href="https://github.com/cryanwashere">Github</a></li>
+                <li><a href="https://linkedin.com/in/cameron-ryan-7b043a229">LinkedIn</a></li>
+                <li><a href="resume_materials/Cameron_Ryan_Resume_Winter2026.pdf">Resume</a></li>
+                <li><a href="misc.html">Misc</a></li>
+            </ul>
+        </nav>
+    </div>
+
+    <nav style="padding: 5rem;">
             <ul >
                 <li><a href="typing/">typing practice</a></li>
                 <li><a href="research_blog/">neural network experiments</a></li>
+                <li><a href="old_index.html">the older version of my landing page</a></li>
             </ul>
     </nav>
 </body>

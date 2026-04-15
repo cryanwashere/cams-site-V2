@@ -6,32 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cameron Ryan</title>
 
-    <link rel="stylesheet" href="style2.css">
+    <link rel="stylesheet" href="style.css">
     <!--<link rel="stylesheet" href="fonts.css">-->
-    <style>
-        canvas {
-            width: 100%;
-            display: block;
-        }
-        .text-section {
-            padding-top: 1rem; 
-            padding-right: 5rem; 
-            padding-bottom: 1rem; 
-            padding-left: 5rem; 
-        }
-        .hidden {
-            opacity: 0;
-            filter: blur(5px);
-            transform: translateX(-100%);
-            transition: all 0.75s;
-            padding: 10px;
-        }
-        .show {
-            opacity: 1;
-            filter: blur(0);
-            transform: translateX(0);
-        }
-    </style>
 
 </head>
 
@@ -107,7 +83,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.0.0/dist/tf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-vis@1.0.2/dist/tfjs-vis.umd.min.js"></script>
     <script type="module" src="data.js"></script>
-    <script type="module" src="main2.js"></script>
+    <script type="module" src="main.js"></script>
     
 
     <div class="header">
@@ -135,12 +111,20 @@
     
     
 
-    <div id="top" class="text-section">
+    <div id="top">
         <section>
             <h1 style="display:inline-block;" class="hidden">Cameron Ryan</h1>
-            <h4 style="display:inline-block" class="hidden">(The 3D viewers were made in 2022 without AI)</h4>
+            <h4 style="display:inline-block" class="hidden">(This page was made in 2022 without AI)</h4>
         </section>
-        <p class="hidden">
+    </div>
+
+    <div>
+
+        
+        <div>
+            <!-- <h1 class="hidden">About me</h1>-->
+            
+            <p class="hidden">
                 Welcome to Cameron's Website! Please take a look at my project portfolio for a detailed list of projects that I have worked on. Sometimes the 3D viewers may load slowly. 
                 <!--
                 I am passionate about science outside of the classroom, and here I would like
@@ -148,14 +132,11 @@
                 of this webpage is not to list my experiences, but to simply give you an insight
                 into my interests. 
                 -->
-        </p>
-    </div>
-
-    <div>
-
+            </p>
+        </div>
     
 
-        <div class="container text-section">
+        <div class="container">
             <h1 class="hidden">Neural Networks</h1>
             <p class="hidden overlap invert">
                 
@@ -168,7 +149,7 @@
             </div>
         </div>
 
-        <div class="text-section">
+        <div>
             <h1 class="hidden">Proteins</h1>
             <p class="hidden">
                 ATP synthase functions like a microscopic water wheel, creating adenosine triphosphate (ATP) from a proton gradient across a membrane. This is used to power many important natural processes in living cells.
