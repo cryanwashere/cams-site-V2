@@ -359,3 +359,8 @@ select:hover ~ #invertedcursor,
     color: var(--color-accent-text);
     border-color: var(--color-accent);
 }
+
+::selection {
+  color: #000000;           /* The text color when selected */
+  background-color: var(--color-accent); /* The highlight color */
+}
