@@ -10,6 +10,16 @@
 <body>
 
 <div id="invertedcursor"></div>
+
+<div id="lightbox">
+    <img id="lightbox-img" src="" alt="">
+</div>
+
+<div id="html-lightbox">
+    <div class="html-lightbox-inner">
+        <iframe id="html-lightbox-iframe" src="" sandbox="allow-scripts allow-same-origin"></iframe>
+    </div>
+</div>
 <script type="module">
     document.onmousemove = function(e) {
         document.documentElement.style.setProperty('--x', (e.clientX + window.scrollX) + 'px');
@@ -40,7 +50,7 @@
     <p class="subtitle">A comprehensive list of projects I'm able to share publicly.</p>
 
     <div class="controls">
-        <div class="control-row">
+        <div class="control-row" id="sort-row">
             <span class="control-label">Sort by</span>
             <select id="sort-select">
                 <option value="effort-desc">Effort (most first)</option>
@@ -58,6 +68,11 @@
             <span class="control-label">Organization</span>
             <div class="pill-group" id="org-filters"></div>
         </div>
+    </div>
+
+    <div class="view-toggle">
+        <button class="view-pill active" id="view-projects" onclick="switchView('projects')">Projects</button>
+        <button class="view-pill" id="view-feed" onclick="switchView('feed')">Feed</button>
     </div>
 
     <div class="results-meta" id="results-meta"></div>
@@ -95,7 +110,7 @@ const PROJECTS = [
         organization: "Northeastern University",
         mentor: "Lee Peng Lee", 
         collaborators: ["Ally Descoteaux","Stone Liu", "Alison Ryan", "Lucas Kroon"],
-        tags: ["reinforcement learning, neural networks"],
+        tags: ["reinforcement learning", "neural networks"],
         links: [
             {label : "Final Report", href: "resume_materials/MATH4025_Final_Paper.pdf"}
         ]
@@ -274,7 +289,7 @@ const PROJECTS = [
     {
         id: "atomdance-paper",
         title: "ATOMDANCE (Published in Biophysical Journal)",
-        description: "Co-authored paper on kernel-based denoising and choreographic analysis for protein dynamic comparison. Published in Biophysical Journal, 2024.",
+        description: "Contributed to research on kernel-based denoising and choreographic analysis for protein dynamic comparison. Published in Biophysical Journal, 2024.",
         startDate: "2021-01-01",
         effort: 2,
         organization: "Rochester Institute of Technology",
@@ -283,6 +298,46 @@ const PROJECTS = [
             { label: "DOI", href: "https://doi.org/10.1016/j.bpj.2024.03.024" }
         ]
     }
+];
+
+// ─────────────────────────────────────────────
+//  FEED DATA — edit this to add new feed items
+// ─────────────────────────────────────────────
+const FEED = [
+    {
+        date: "2026-04-20",
+        text: "Submitted my final project for Mathematical and Computational Problem Solving Methods for Physics. I did several interesting computational experiments on the learning capacities of perceptrons. I am very thankful to my professor Armen Stepenyants for helping me with this project. ",
+        tags: ["perceptrons", "MATLAB", "theoretical physics"],
+        organization: "Northeastern University",
+        pdf: "resume_materials/Math_Methods_Final_Project.pdf",
+        pdfLabel: "Experiments in the learning capacity of perceptrons",
+        project: "math-methods-perceptron"
+    },
+    {
+        date: "2026-03-15",
+        text: "Gave a presentation on Minecraft RL methods to the Applied Math capstone class. Covered PPO, SAC, and RLHF approaches side by side.",
+        tags: ["reinforcement learning, neural networks"],
+        organization: "Northeastern University",
+        project: "capstone-minecraft-rl"
+    },
+    {
+        date: "2026-02-10",
+        text: "Presented findings from my research during summer and winter break 2025 to the AI/ML group at the Laboratory for Laser Energetics. I talked about understanding the previous research by Erhard et al., the modfied DGCNN architecture, and the Gaussian Kernel architecture. I am very thankful to Shuai Zhang, and Mark Guardelben for helping me with my slides, and inviting me to give the presentation.",
+        tags: ["neural networks", "theoretical physics", "HPC"],
+        pdf: "resume_materials/AIML_presentation_feb2026.pdf",
+        pdfLabel: "Presentation delivered to the LLE AI/ML group",
+        organization: "University of Rochester LLE",
+        project: "ml-phase-id"
+    },
+    {
+        date: "2025-08-05",
+        text: "I went to Washington DC to present a poster with my research progress at the IFE SURE symposiom. This poster mainly focuses on the modified DGCNN model. It was really great to be able to meet other undergraduate students from around the US doing research that relates to ICF energy!",
+        pdf: "resume_materials/Cameron_Ryan_Project.pdf",
+        pdfLabel: "IFE SURE Symposium poster",
+        tags: ["neural networks", "theoretical physics", "intertial confinement fusion"],
+        organization: "University of Rochester LLE",
+        project: "ml-phase-id"
+    },
 ];
 
 // ─────────────────────────────────────────────
@@ -300,10 +355,33 @@ function toggleContrib(id, btn) {
 let activeTags = new Set();
 let activeOrgs = new Set();
 let sortMode = "effort-desc";
+let currentView = "projects"; // "projects" | "feed"
 
-// Derive all unique tags and orgs from data
-const allTags = [...new Set(PROJECTS.flatMap(p => p.tags))].sort();
-const allOrgs = [...new Set(PROJECTS.map(p => p.organization).filter(Boolean))].sort();
+// Derive unique tags and orgs for each dataset
+const allProjectTags = [...new Set(PROJECTS.flatMap(p => p.tags))].sort();
+const allProjectOrgs = [...new Set(PROJECTS.map(p => p.organization).filter(Boolean))].sort();
+const allFeedTags    = [...new Set(FEED.flatMap(f => f.tags || []))].sort();
+const allFeedOrgs    = [...new Set(FEED.map(f => f.organization).filter(Boolean))].sort();
+
+function currentTags() { return currentView === "projects" ? allProjectTags : allFeedTags; }
+function currentOrgs() { return currentView === "projects" ? allProjectOrgs : allFeedOrgs; }
+
+// ─────────────────────────────────────────────
+//  View switcher
+// ─────────────────────────────────────────────
+function switchView(view) {
+    currentView = view;
+    activeTags.clear();
+    activeOrgs.clear();
+    document.getElementById("view-projects").classList.toggle("active", view === "projects");
+    document.getElementById("view-feed").classList.toggle("active", view === "feed");
+
+    // Show/hide sort control — not applicable to feed (always date-desc)
+    document.getElementById("sort-row").style.display = view === "projects" ? "" : "none";
+
+    rebuildPills();
+    render();
+}
 
 // ─────────────────────────────────────────────
 //  Render controls
@@ -320,29 +398,31 @@ function buildPills(containerId, items, activeSet, onToggle) {
     });
 }
 
-function initControls() {
-    buildPills("tag-filters", allTags, activeTags, tag => {
+function rebuildPills() {
+    buildPills("tag-filters", currentTags(), activeTags, tag => {
         activeTags.has(tag) ? activeTags.delete(tag) : activeTags.add(tag);
-        buildPills("tag-filters", allTags, activeTags, arguments.callee);
-        renderProjects();
+        rebuildPills();
+        render();
     });
-
-    buildPills("org-filters", allOrgs, activeOrgs, org => {
+    buildPills("org-filters", currentOrgs(), activeOrgs, org => {
         activeOrgs.has(org) ? activeOrgs.delete(org) : activeOrgs.add(org);
-        buildPills("org-filters", allOrgs, activeOrgs, arguments.callee);
-        renderProjects();
+        rebuildPills();
+        render();
     });
+}
 
+function initControls() {
+    rebuildPills();
     document.getElementById("sort-select").addEventListener("change", e => {
         sortMode = e.target.value;
-        renderProjects();
+        render();
     });
 }
 
 // ─────────────────────────────────────────────
-//  Filter + sort
+//  Filter + sort (projects)
 // ─────────────────────────────────────────────
-function getFiltered() {
+function getFilteredProjects() {
     return PROJECTS.filter(p => {
         if (activeTags.size > 0 && ![...activeTags].every(t => p.tags.includes(t))) return false;
         if (activeOrgs.size > 0 && !activeOrgs.has(p.organization)) return false;
@@ -359,6 +439,26 @@ function getSorted(projects) {
         if (sortMode === "title-asc") return a.title.localeCompare(b.title);
         return 0;
     });
+}
+
+// ─────────────────────────────────────────────
+//  Filter (feed)
+// ─────────────────────────────────────────────
+function getFilteredFeed() {
+    return FEED.filter(f => {
+        const tags = f.tags || [];
+        if (activeTags.size > 0 && ![...activeTags].every(t => tags.includes(t))) return false;
+        if (activeOrgs.size > 0 && !activeOrgs.has(f.organization)) return false;
+        return true;
+    }).sort((a, b) => new Date(b.date) - new Date(a.date));
+}
+
+// ─────────────────────────────────────────────
+//  Master render dispatcher
+// ─────────────────────────────────────────────
+function render() {
+    if (currentView === "projects") renderProjects();
+    else renderFeed();
 }
 
 // ─────────────────────────────────────────────
@@ -379,7 +479,7 @@ function formatDate(dateStr) {
 }
 
 function renderProjects() {
-    const filtered = getFiltered();
+    const filtered = getFilteredProjects();
     const sorted = getSorted(filtered);
 
     const meta = document.getElementById("results-meta");
@@ -431,6 +531,115 @@ function renderProjects() {
 }
 
 // ─────────────────────────────────────────────
+//  Render feed
+// ─────────────────────────────────────────────
+function renderFeed() {
+    const filtered = getFilteredFeed();
+    const meta = document.getElementById("results-meta");
+    meta.textContent = filtered.length + " of " + FEED.length + " feed items";
+
+    const list = document.getElementById("project-list");
+    if (filtered.length === 0) {
+        list.innerHTML = '<div class="no-results">No feed items match the selected filters.</div>';
+        return;
+    }
+
+    list.innerHTML = filtered.map(f => {
+        const projectObj = f.project ? PROJECTS.find(p => p.id === f.project) : null;
+        const projectBadge = projectObj
+            ? `<a class="feed-project-link" href="#${projectObj.id}" onclick="switchView('projects')">${projectObj.title}</a>`
+            : "";
+        const orgBadge = f.organization
+            ? `<span class="meta-badge org">${f.organization}</span>`
+            : "";
+        const tags = (f.tags || []).map(t => `<span class="tag">${t}</span>`).join("");
+
+        // images: accept a single path string or an array of paths
+        const imgs = f.images
+            ? (Array.isArray(f.images) ? f.images : [f.images])
+            : [];
+        const imagesHtml = imgs.length > 0
+            ? `<div class="feed-images feed-images-${Math.min(imgs.length, 3)}">
+                ${imgs.map(src => `<img src="${src}" alt="" loading="lazy" onclick="openLightbox('${src}')">`).join("")}
+               </div>`
+            : "";
+
+        // pdf: inline scrollable iframe viewer
+        const pdfHtml = f.pdf
+            ? `<div class="feed-pdf">
+                <div class="feed-pdf-bar">
+                    <span class="feed-pdf-label">📄 ${f.pdfLabel || f.pdf.split('/').pop()}</span>
+                    <a class="feed-pdf-open" href="${f.pdf}" target="_blank">open ↗</a>
+                </div>
+                <iframe class="feed-pdf-iframe" src="${f.pdf}" loading="lazy"></iframe>
+               </div>`
+            : "";
+
+        // html preview: inline iframe with expand button
+        const htmlPreviewHtml = f.htmlPreview
+            ? `<div class="feed-html-preview">
+                <div class="feed-html-bar">
+                    <span class="feed-html-label">Live preview</span>
+                    <a class="feed-html-open" href="${f.htmlPreview}" target="_blank">open ↗</a>
+                </div>
+                <div class="feed-iframe-wrap">
+                    <iframe src="${f.htmlPreview}" loading="lazy" sandbox="allow-scripts allow-same-origin" scrolling="no"></iframe>
+                    <div class="feed-iframe-expand" onclick="openHtmlLightbox('${f.htmlPreview}')" title="Expand"></div>
+                </div>
+               </div>`
+            : "";
+
+        return `
+        <div class="feed-item">
+            <div class="feed-date">${formatDate(f.date)}</div>
+            <p class="feed-text">${f.text}</p>
+            ${imagesHtml}
+            ${pdfHtml}
+            ${htmlPreviewHtml}
+            <div class="feed-footer">
+                <div class="project-tags">${tags}</div>
+                <div class="feed-meta">
+                    ${orgBadge}
+                    ${projectBadge}
+                </div>
+            </div>
+        </div>`;
+    }).join("");
+}
+
+// ─────────────────────────────────────────────
+//  Lightbox
+// ─────────────────────────────────────────────
+function openLightbox(src) {
+    const lb = document.getElementById("lightbox");
+    document.getElementById("lightbox-img").src = src;
+    lb.classList.add("open");
+}
+
+function openHtmlLightbox(src) {
+    const lb = document.getElementById("html-lightbox");
+    document.getElementById("html-lightbox-iframe").src = src;
+    lb.classList.add("open");
+}
+
+document.addEventListener("click", e => {
+    if (e.target.id === "lightbox") document.getElementById("lightbox").classList.remove("open");
+    if (e.target.id === "html-lightbox") {
+        const lb = document.getElementById("html-lightbox");
+        lb.classList.remove("open");
+        document.getElementById("html-lightbox-iframe").src = "";
+    }
+});
+document.addEventListener("keydown", e => {
+    if (e.key === "Escape") {
+        document.getElementById("lightbox").classList.remove("open");
+        const lb = document.getElementById("html-lightbox");
+        lb.classList.remove("open");
+        document.getElementById("html-lightbox-iframe").src = "";
+    }
+});
+
+// ─────────────────────────────────────────────
 //  Scroll progress
 // ─────────────────────────────────────────────
 window.onscroll = () => {
@@ -443,7 +652,7 @@ window.onscroll = () => {
 //  Init
 // ─────────────────────────────────────────────
 initControls();
-renderProjects();
+render();
 </script>
 
 </body>
