@@ -368,20 +368,29 @@ select:hover ~ #invertedcursor,
 /* ── View toggle (Projects / Feed) ── */
 .view-toggle {
     display: flex;
-    gap: 6px;
-    margin-bottom: 1rem;
+    gap: 0;
+    margin-bottom: 1.5rem;
+    border: 0.5px solid var(--color-border-strong);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    background: var(--color-bg-secondary);
 }
 
 .view-pill {
-    font-size: 13px;
+    flex: 1;
+    font-size: 14px;
     font-weight: 500;
-    padding: 5px 16px;
-    border-radius: 999px;
-    border: 0.5px solid var(--color-border-strong);
-    background: var(--color-bg);
+    padding: 10px 0;
+    border: none;
+    border-radius: 0;
+    background: transparent;
     color: var(--color-text-secondary);
     cursor: pointer;
-    transition: background 0.15s, color 0.15s, border-color 0.15s;
+    transition: background 0.15s, color 0.15s;
+    letter-spacing: 0.01em;
+}
+.view-pill:first-child {
+    border-right: 0.5px solid var(--color-border-strong);
 }
 .view-pill:hover {
     background: var(--color-bg-tertiary);
@@ -390,7 +399,7 @@ select:hover ~ #invertedcursor,
 .view-pill.active {
     background: var(--color-accent-bg);
     color: var(--color-accent-text);
-    border-color: var(--color-accent);
+    font-weight: 600;
 }
 
 /* ── Feed items ── */
