@@ -1,0 +1,35 @@
+name: Weekly Backup to Backblaze B2
+
+on:
+  schedule:
+    - cron: '0 2 * * 0'  # Every Sunday at 2:00 AM UTC
+  workflow_dispatch:       # Also allows manual trigger from the Actions tab
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout full repo history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Important — fetches ALL commits, not just the latest
+
+      - name: Install Backblaze B2 CLI
+        run: pip install b2
+
+      - name: Authorize B2 account
+        run: b2 authorize-account ${{ secrets.B2_APPLICATION_KEY_ID }} ${{ secrets.B2_APPLICATION_KEY }}
+
+      - name: Bundle repo into a single file
+        run: |
+          TIMESTAMP=$(date +%Y-%m-%d)
+          REPO_NAME=$(basename "$GITHUB_REPOSITORY")
+          git bundle create "${REPO_NAME}-${TIMESTAMP}.bundle" --all
+          echo "BUNDLE_FILE=${REPO_NAME}-${TIMESTAMP}.bundle" >> $GITHUB_ENV
+
+      - name: Upload bundle to Backblaze B2
+        run: b2 upload-file ${{ secrets.B2_BUCKET_NAME }} "${{ env.BUNDLE_FILE }}" "backups/${{ env.BUNDLE_FILE }}"
+
+      - name: Confirm upload
+        run: echo "Backup complete — ${{ env.BUNDLE_FILE }} uploaded to B2."
