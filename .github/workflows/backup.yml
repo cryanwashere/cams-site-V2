@@ -29,7 +29,7 @@ jobs:
           echo "BUNDLE_FILE=${REPO_NAME}-${TIMESTAMP}.bundle" >> $GITHUB_ENV
 
       - name: Upload bundle to Backblaze B2
-        run: b2 upload-file ${{ secrets.B2_BUCKET_NAME }} "${{ env.BUNDLE_FILE }}" "backups/${{ env.BUNDLE_FILE }}"
+        run: b2 file upload ${{ secrets.B2_BUCKET_NAME }} "${{ env.BUNDLE_FILE }}" "backups/${{ env.BUNDLE_FILE }}"
 
       - name: Confirm upload
         run: echo "Backup complete — ${{ env.BUNDLE_FILE }} uploaded to B2."
