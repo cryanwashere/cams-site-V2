@@ -7,41 +7,322 @@
     <title>Cameron Ryan</title>
 
     <link rel="stylesheet" href="style2.css">
-    <!--<link rel="stylesheet" href="fonts.css">-->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+
     <style>
         canvas {
             width: 100%;
             display: block;
         }
-        .text-section {
-            padding-top: 1rem; 
-            padding-right: 5rem; 
-            padding-bottom: 1rem; 
-            padding-left: 5rem; 
-        }
+
+        /* ── Scroll-in animation ── */
         .hidden {
             opacity: 0;
-            filter: blur(5px);
-            transform: translateX(-100%);
-            transition: all 0.75s;
-            padding: 10px;
+            filter: blur(4px);
+            transform: translateY(28px);
+            transition: opacity 0.7s ease, filter 0.7s ease, transform 0.7s ease;
         }
         .show {
             opacity: 1;
             filter: blur(0);
-            transform: translateX(0);
+            transform: translateY(0);
+        }
+
+        /* ── Page layout ── */
+        .site-body {
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 0 2rem 6rem;
+        }
+
+        /* ── Hero ── */
+        .hero {
+            padding: 5rem 0 3.5rem;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            align-items: end;
+            gap: 2rem;
+            margin-bottom: 4rem;
+        }
+
+        .hero-eyebrow {
+            font-family: 'DM Mono', monospace;
+            font-size: 11px;
+            font-weight: 400;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: var(--color-accent-text);
+            margin-bottom: 1rem;
+            opacity: 0.85;
+        }
+
+        .hero-name {
+            font-family: 'DM Serif Display', serif;
+            font-size: clamp(52px, 7vw, 84px);
+            font-weight: 400;
+            line-height: 1.0;
+            color: var(--color-text);
+            margin: 0 0 1.25rem;
+            letter-spacing: -0.02em;
+        }
+
+        .hero-name em {
+            font-style: italic;
+            color: var(--color-accent-text);
+        }
+
+        .hero-desc {
+            font-size: 16px;
+            color: var(--color-text-secondary);
+            max-width: 480px;
+            line-height: 1.75;
+            margin-bottom: 2rem;
+        }
+
+        .hero-note {
+            font-family: 'DM Mono', monospace;
+            font-size: 11px;
+            color: var(--color-text-tertiary);
+            letter-spacing: 0.04em;
+        }
+
+        /* ── Portfolio button ── */
+        .portfolio-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-family: 'DM Mono', monospace;
+            font-size: 13px;
+            font-weight: 500;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--color-bg);
+            background: var(--color-text);
+            text-decoration: none;
+            padding: 13px 26px;
+            border-radius: 2px;
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.15s;
+            position: relative;
+            overflow: hidden;
+        }
+        .portfolio-btn::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--color-accent);
+            transform: translateX(-101%);
+            transition: transform 0.25s cubic-bezier(.4,0,.2,1);
+            z-index: 0;
+        }
+        .portfolio-btn:hover::after { transform: translateX(0); }
+        .portfolio-btn span, .portfolio-btn svg { position: relative; z-index: 1; }
+        .portfolio-btn svg {
+            transition: transform 0.2s;
+        }
+        .portfolio-btn:hover svg { transform: translateX(4px); }
+
+        /* ── Section layout ── */
+        .viewer-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5px;
+            background: var(--color-border);
+            border: 0.5px solid var(--color-border);
+            border-radius: 14px;
+            overflow: hidden;
+            margin-bottom: 5rem;
+        }
+
+        .viewer-panel {
+            background: var(--color-bg);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .viewer-panel:first-child {
+            border-right: none;
+        }
+
+        .viewer-canvas-wrap {
+            width: 100%;
+            flex: 1;
+            min-height: 320px;
+            background: var(--color-bg-tertiary);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .viewer-canvas-wrap canvas {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover;
+        }
+
+        .viewer-label {
+            padding: 1.4rem 1.6rem 1.6rem;
+            border-top: 0.5px solid var(--color-border);
+        }
+
+        .viewer-index {
+            font-family: 'DM Mono', monospace;
+            font-size: 10px;
+            font-weight: 500;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--color-accent-text);
+            opacity: 0.7;
+            margin-bottom: 0.5rem;
+        }
+
+        .viewer-title {
+            font-family: 'DM Serif Display', serif;
+            font-size: 22px;
+            font-weight: 400;
+            color: var(--color-text);
+            margin-bottom: 0.6rem;
+            letter-spacing: -0.01em;
+        }
+
+        .viewer-desc {
+            font-size: 14px;
+            color: var(--color-text-secondary);
+            line-height: 1.65;
+        }
+
+        /* ── Clickable viewer label ── */
+        a.viewer-label {
+            text-decoration: none;
+            display: block;
+            transition: background 0.2s;
+        }
+        a.viewer-label:hover {
+            background: var(--color-bg-tertiary, rgba(0,0,0,0.03));
+        }
+        a.viewer-label .viewer-title {
+            transition: color 0.2s;
+        }
+        a.viewer-label:hover .viewer-title {
+            color: var(--color-accent-text);
+        }
+
+        /* ── Staggered animation delays ── */
+        .hero-eyebrow.hidden { transition-delay: 0s; }
+        .hero-name.hidden    { transition-delay: 0.1s; }
+        .hero-desc.hidden    { transition-delay: 0.2s; }
+        .portfolio-btn.hidden { transition-delay: 0.3s; }
+
+        /* ── Background viewer wrapper ── */
+        #bg-viewer-wrap {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            min-height: 520px;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        #bg-viewer-wrap canvas {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100% !important;
+            height: 100% !important;
+            display: block;
+            cursor: grab;
+        }
+
+        #bg-viewer-wrap canvas:active {
+            cursor: grabbing;
+        }
+
+        /* ── Dot navigation ── */
+        #viewer-dots {
+            position: absolute;
+            bottom: 1.2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            z-index: 10;
+            pointer-events: auto;
+        }
+
+        .viewer-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--color-text-tertiary, #aaa);
+            opacity: 0.4;
+            cursor: pointer;
+            border: none;
+            padding: 0;
+            transition: opacity 0.3s, transform 0.3s, background 0.3s;
+        }
+
+        .viewer-dot.active {
+            opacity: 1;
+            transform: scale(1.35);
+            background: var(--color-accent-text, var(--color-text, #222));
+        }
+
+        .site-body {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ── Two-column page layout ── */
+        .page-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            align-items: start;
+            padding-top: 2rem;
+        }
+
+        .page-left {
+            position: sticky;
+            top: 5rem;
+        }
+
+        .viewer-container {
+            position: relative;
+            border: 0.5px solid var(--color-border);
+            border-radius: 14px;
+            overflow: hidden;
+            background: var(--color-bg-tertiary);
+        }
+
+        .viewer-hint {
+            font-family: 'DM Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--color-text-tertiary);
+            opacity: 0.6;
+            text-align: center;
+            padding: 0.6rem 0 0.75rem;
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 840px) {
+            .page-layout {
+                grid-template-columns: 1fr;
+            }
+            .page-left {
+                position: static;
+            }
+            #bg-viewer-wrap {
+                min-height: 360px;
+            }
         }
     </style>
-
 </head>
 
 <script>
-    /*
-
-        Scroll indicator:
-        indicate how much the user has scrolled as they view the web page
-
-    */
     window.onscroll = () => {
         var winScroll = document.body.scrollTop || document.documentElement.scrollTop;
         var height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
@@ -51,13 +332,6 @@
 </script>
 
 <script type="module">
-    /*
-
-        Scrolling elements:
-        this makes the elements scroll when they are viewed
-
-    */
-
     const observer = new IntersectionObserver((entries) => {
         entries.forEach((entry) => {
             if (entry.isIntersecting) {
@@ -65,151 +339,81 @@
             } else {
                 entry.target.classList.remove('show');
             }
-
         });
-    })
+    }, { threshold: 0.1 });
     const hiddenElements = document.querySelectorAll('.hidden');
     hiddenElements.forEach((el) => observer.observe(el));
 </script>
 
-
 <div id="invertedcursor"></div>
 <script type="module">
-    /*
-    
-        This creates the special cursor
-    
-    */
     document.onmousemove = function(e) {
-    document.documentElement.style.setProperty (
-        '--x', (
-        e.clientX+window.scrollX
-        )
-        + 'px'
-    );
-    document.documentElement.style.setProperty (
-        '--y', (
-        e.clientY+window.scrollY
-        ) 
-        + 'px'
-    );
+        document.documentElement.style.setProperty('--x', (e.clientX + window.scrollX) + 'px');
+        document.documentElement.style.setProperty('--y', (e.clientY + window.scrollY) + 'px');
     }
 </script>
 
-
 <body>
 
-
-
-    
-    
     <script src="js/three.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.0.0/dist/tf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-vis@1.0.2/dist/tfjs-vis.umd.min.js"></script>
     <script type="module" src="data.js"></script>
-    <script type="module" src="main2.js"></script>
-    
+    <script type="module" src="solar_system.js"></script>
 
+    <!-- Progress bar + Nav -->
     <div class="header">
         <div class="progress-container">
             <div class="progress-bar" id="myBar"></div>
-        </div>  
-
-        <div class="header">
-            <div class="progress-container">
-                <div class="progress-bar" id="myBar"></div>
-            </div>  
-            <nav style="padding: 1rem;">
-                <ul style="list-style: none; margin: 0; padding: 0; display: flex; gap: 2rem;">
-                    <li><a href="/index.html">Home</a></li>
-                    <li><a href="portfolio.html">Project Portfolio</a></li>
-                    <li><a href="https://github.com/cryanwashere">Github</a></li>
-                    <li><a href="https://linkedin.com/in/cameron-ryan-7b043a229">LinkedIn</a></li>
-                    <li><a href="resume_materials/Cameron_Ryan_Resume_Winter2026.pdf">Resume</a></li>
-                    <li><a href="https://scholar.google.com/citations?user=CGqafTAAAAAJ&hl=en">Google Scholar</a></li>
-                    <li><a href="misc.html">Misc</a></li>
-                </ul>
-            </nav>
         </div>
-        
-    </div>
-    
-    
-
-    <div id="top" class="text-section">
-        <section>
-            <h1 style="display:inline-block;" class="hidden">Cameron Ryan</h1>
-            <h4 style="display:inline-block" class="hidden">(The 3D viewers were made in 2022 without AI)</h4>
-        </section>
-        <p class="hidden">
-                Welcome to Cameron's Website! Please take a look at my project portfolio for a detailed list of projects that I have worked on. Sometimes the 3D viewers may load slowly. 
-                <!--
-                I am passionate about science outside of the classroom, and here I would like
-                to present to you some of my science related interests. Currently, the purpose 
-                of this webpage is not to list my experiences, but to simply give you an insight
-                into my interests. 
-                -->
-        </p>
+        <nav style="padding: 0.6rem 0;">
+            <ul style="list-style: none; margin: 0; padding: 0; display: flex; gap: 2rem; flex-wrap: wrap;">
+                <li><a href="/index.html">Home</a></li>
+                <li><a href="portfolio.html">Project Portfolio</a></li>
+                <li><a href="https://github.com/cryanwashere">Github</a></li>
+                <li><a href="https://linkedin.com/in/cameron-ryan-7b043a229">LinkedIn</a></li>
+                <li><a href="resume_materials/Cameron_Ryan_Resume_Winter2026.pdf">Resume</a></li>
+                <li><a href="https://scholar.google.com/citations?user=CGqafTAAAAAJ&hl=en">Google Scholar</a></li>
+                <li><a href="misc.html">Misc</a></li>
+            </ul>
+        </nav>
     </div>
 
-    <div>
+    <div class="site-body">
+        <div class="page-layout">
 
-    
-
-        <div class="container text-section">
-            <h1 class="hidden">Neural Networks</h1>
-            <p class="hidden overlap invert">
-                
-            </p> 
-            
-            <p class="hidden">Convolutional neural networks are models of the biological vision system, which computers use to process visual information like living things. Here we can see how the neurons in a convolutional neural network activate in order to classify a specific type of handwritten digit. 
-               </p>
-            <div id="viewer-1" class=>
-                <canvas id="bg1"></canvas>  
+            <!-- ── Left: Hero ── -->
+            <div class="page-left">
+                <section class="hero" style="padding-top: 3rem; margin-bottom: 0;">
+                    <div>
+                        <p class="hero-eyebrow hidden">Portfolio &amp; Research</p>
+                        <h1 class="hero-name hidden">Cameron<br><em>Ryan</em></h1>
+                        <p class="hero-desc hidden">
+                            Welcome to my corner of the web. Here you can learn about my projects
+                        </p>
+                        <a href="portfolio.html" class="portfolio-btn hidden">
+                            <span>View Project Portfolio</span>
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M1 7H13M7 1L13 7L7 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </a>
+                    </div>
+                </section>
             </div>
-        </div>
 
-        <div class="text-section">
-            <h1 class="hidden">Proteins</h1>
-            <p class="hidden">
-                ATP synthase functions like a microscopic water wheel, creating adenosine triphosphate (ATP) from a proton gradient across a membrane. This is used to power many important natural processes in living cells.
-            </p>
-            
-            <!--
-            <p class="hidden overlap invert">
-                Protein Viewer
-            </p>
-            -->
-            <div id="viewer-3">
-                <canvas id="bg3"></canvas>
+            <!-- ── Right: Interactive 3D Viewer ── -->
+            <div style="padding-top: 3rem;">
+                <div class="viewer-container">
+                    <div id="bg-viewer-wrap">
+                        <canvas id="bg-shared"></canvas>
+                        <div id="viewer-dots"></div>
+                    </div>
+                    <p class="viewer-hint">drag to rotate &nbsp;·&nbsp; scroll to zoom</p>
+                </div>
             </div>
-           
+
         </div>
-
-
-    </div>
-    <!--
-
-    <div id="viewer-1">
-        <small>tip: you get a new image every time you refresh</small>
-        <canvas id="bg1"></canvas>  
-    </div>
-    
-    <div id="viewer-2">
-        <small>tip: you get new colors every time you refresh</small>
-        <canvas id="bg2"></canvas> 
     </div>
 
-    <div id="viewer-3">
-        <canvas id="bg3"></canvas>
-    </div>
-
-    -->
-
-    
-
-   
-    
-    
 </body>
 </html>

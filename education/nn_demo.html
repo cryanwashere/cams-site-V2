@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Neural Network Demo</title>
+  <link rel="stylesheet" href="../style2.css">
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.20.0/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+  <style>
+    /* ── NN Demo page-specific styles ── */
+
+    .nn-section {
+      background: var(--color-bg-secondary);
+      border: 0.5px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .nn-section h2 {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 0.35rem;
+    }
+
+    .nn-section .section-desc {
+      font-size: 14px;
+      color: var(--color-text-secondary);
+      margin-bottom: 1.25rem;
+      line-height: 1.6;
+    }
+
+    /* Status / log */
+    .status-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 13px;
+      color: var(--color-text-tertiary);
+      padding: 0.5rem 0.75rem;
+      background: var(--color-bg-tertiary);
+      border-radius: var(--radius-md);
+      border: 0.5px solid var(--color-border);
+      margin-bottom: 1.5rem;
+      min-height: 36px;
+    }
+    .status-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--color-text-tertiary);
+      flex-shrink: 0;
+      transition: background 0.3s;
+    }
+    .status-dot.loading { background: #f59e0b; animation: pulse 1s infinite; }
+    .status-dot.done    { background: #22c55e; }
+    .status-dot.error   { background: #ef4444; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+    /* Start button */
+    .start-btn {
+      font-size: 14px;
+      font-weight: 500;
+      padding: 9px 22px;
+      border-radius: var(--radius-md);
+      border: 0.5px solid var(--color-accent);
+      background: var(--color-accent-bg);
+      color: var(--color-accent-text);
+      cursor: pointer;
+      transition: opacity 0.15s;
+      margin-bottom: 1.5rem;
+    }
+    .start-btn:hover { opacity: 0.8; }
+    .start-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    /* Charts row */
+    .charts-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    @media (max-width: 600px) { .charts-row { grid-template-columns: 1fr; } }
+
+    .chart-card {
+      background: var(--color-bg);
+      border: 0.5px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: 1rem;
+    }
+    .chart-card h4 {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--color-text-tertiary);
+      margin-bottom: 0.5rem;
+    }
+    .chart-card canvas { display: block; }
+
+    /* Epoch strip */
+    .epoch-strip {
+      overflow-x: auto;
+      padding-bottom: 0.5rem;
+    }
+    .epoch-strip-inner {
+      display: flex;
+      gap: 10px;
+      min-width: min-content;
+    }
+
+    .epoch-block {
+      flex-shrink: 0;
+      background: var(--color-bg);
+      border: 0.5px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: 0.6rem 0.8rem;
+      min-width: 130px;
+    }
+    .epoch-block.current { border-color: var(--color-accent); background: var(--color-accent-bg); }
+    .epoch-block-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--color-text-tertiary);
+      margin-bottom: 0.4rem;
+    }
+    .epoch-block.current .epoch-block-label { color: var(--color-accent-text); }
+    .epoch-block-stats {
+      font-size: 12px;
+      color: var(--color-text-secondary);
+      line-height: 1.7;
+    }
+    .epoch-block-stats strong { color: var(--color-text); font-weight: 500; }
+
+    /* Activations display */
+    .activation-scroll {
+      overflow-x: auto;
+      padding-bottom: 0.5rem;
+    }
+    .activation-timeline {
+      display: flex;
+      gap: 12px;
+      min-width: min-content;
+      align-items: flex-start;
+    }
+
+    .act-card {
+      flex-shrink: 0;
+      background: var(--color-bg);
+      border: 0.5px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: 0.75rem;
+      min-width: 160px;
+    }
+    .act-card.current { border-color: var(--color-accent); }
+    .act-card-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--color-text-tertiary);
+      margin-bottom: 0.5rem;
+    }
+    .act-card.current .act-card-label { color: var(--color-accent-text); }
+
+    .act-input-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 0.5rem;
+    }
+    .act-input-row img {
+      width: 32px; height: 32px;
+      image-rendering: pixelated;
+      border-radius: 3px;
+      border: 0.5px solid var(--color-border);
+    }
+    .act-pred {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-accent-text);
+    }
+
+    .act-layer-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--color-text-tertiary);
+      margin: 0.4rem 0 0.25rem;
+    }
+    .act-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2px;
+    }
+    .act-row img {
+      image-rendering: pixelated;
+      border-radius: 2px;
+      border: 0.5px solid var(--color-border);
+    }
+
+    /* ── Explainer: what is a neural net ── */
+    .explainer-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+    @media (max-width: 600px) { .explainer-grid { grid-template-columns: 1fr; } }
+
+    .explainer-card {
+      background: var(--color-bg);
+      border: 0.5px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: 0.9rem 1rem;
+    }
+    .explainer-card h4 {
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 0.3rem;
+      color: var(--color-text);
+    }
+    .explainer-card p {
+      font-size: 13px;
+      color: var(--color-text-secondary);
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    /* ── Interactive neuron toy ── */
+    #neuron-toy {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      align-items: flex-start;
+      margin-top: 0.75rem;
+    }
+    .neuron-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      min-width: 200px;
+    }
+    .neuron-slider-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 13px;
+    }
+    .neuron-slider-row label { min-width: 70px; color: var(--color-text-secondary); }
+    .neuron-slider-row input[type=range] { flex: 1; }
+    .neuron-slider-row .val { 
+      min-width: 38px; 
+      text-align: right; 
+      font-variant-numeric: tabular-nums; 
+      font-size: 12px;
+      color: var(--color-text);
+    }
+    #neuron-output {
+      flex: 1;
+      min-width: 180px;
+      background: var(--color-bg);
+      border: 0.5px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: 1rem;
+    }
+    .neuron-eq {
+      font-size: 13px;
+      color: var(--color-text-secondary);
+      margin-bottom: 0.5rem;
+      font-family: ui-monospace, monospace;
+    }
+    .neuron-result {
+      font-size: 26px;
+      font-weight: 600;
+      color: var(--color-accent-text);
+      margin-bottom: 0.35rem;
+    }
+    .neuron-fired {
+      font-size: 13px;
+      font-weight: 500;
+    }
+    .neuron-fired.yes { color: #22c55e; }
+    .neuron-fired.no  { color: #ef4444; }
+
+    /* ── Conv filter visualizer ── */
+    #filter-viz {
+      margin-top: 0.75rem;
+    }
+    .filter-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-top: 0.75rem;
+    }
+    .filter-item {
+      background: var(--color-bg);
+      border: 0.5px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: 0.6rem 0.8rem;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.15s;
+    }
+    .filter-item:hover, .filter-item.selected { border-color: var(--color-accent); }
+    .filter-item canvas { image-rendering: pixelated; display: block; margin: 0 auto 4px; }
+    .filter-item span { font-size: 11px; color: var(--color-text-tertiary); }
+
+    #filter-result {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+      align-items: flex-start;
+    }
+    .filter-result-card {
+      background: var(--color-bg);
+      border: 0.5px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: 0.75rem;
+      text-align: center;
+    }
+    .filter-result-card span {
+      display: block;
+      font-size: 11px;
+      color: var(--color-text-tertiary);
+      margin-top: 4px;
+    }
+    .filter-result-card canvas { 
+      image-rendering: pixelated; 
+      display: block;
+    }
+
+    /* ── Accuracy meter ── */
+    .acc-meter {
+      height: 10px;
+      background: var(--color-bg-tertiary);
+      border-radius: 999px;
+      overflow: hidden;
+      margin: 0.5rem 0;
+      border: 0.5px solid var(--color-border);
+    }
+    .acc-meter-fill {
+      height: 100%;
+      background: var(--color-accent);
+      border-radius: 999px;
+      width: 0%;
+      transition: width 0.6s ease;
+    }
+
+    /* placeholder text for empty areas */
+    .empty-hint {
+      font-size: 13px;
+      color: var(--color-text-tertiary);
+      padding: 1.5rem;
+      text-align: center;
+      border: 0.5px dashed var(--color-border-strong);
+      border-radius: var(--radius-md);
+    }
+  </style>
+</head>
+<body>
+<div id="invertedcursor"></div>
+
+<div class="progress-container"><div class="progress-bar" id="progressBar"></div></div>
+
+<header class="header">
+  <nav>
+    <ul>
+      <li><a href="#">Home</a></li>
+      <li><a href="#intro">What is a Neural Network?</a></li>
+      <li><a href="#neuron-section">Single Neuron</a></li>
+      <li><a href="#convolution-section">Convolution</a></li>
+      <li><a href="#training-section">Live Training</a></li>
+      <li><a href="#activations-section">Activations</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main class="page">
+  <h1>Neural Networks in Your Browser</h1>
+  <p class="subtitle">Watch a convolutional neural network learn to read handwritten digits — live, in your browser, powered by TensorFlow.js.</p>
+
+  <!-- ── 1. WHAT IS A NEURAL NETWORK ── -->
+  <section id="intro" class="nn-section">
+    <h2>What is a Neural Network?</h2>
+    <p class="section-desc">
+      A neural network is a stack of mathematical operations loosely inspired by the brain. 
+      Data flows in, each layer transforms it, and a final prediction comes out.
+      Training adjusts millions of numerical "weights" so the output gets closer to the right answer.
+    </p>
+    <div class="explainer-grid">
+      <div class="explainer-card">
+        <h4>🧠 Layers</h4>
+        <p>Each layer applies a transformation — a matrix multiply, a non-linearity, a pooling operation. Early layers detect edges; later layers combine them into shapes, then objects.</p>
+      </div>
+      <div class="explainer-card">
+        <h4>📉 Loss Function</h4>
+        <p>A number measuring how wrong the model is. For classification, we use <em>cross-entropy</em>: it penalises confident wrong answers much more harshly than uncertain ones.</p>
+      </div>
+      <div class="explainer-card">
+        <h4>⛰️ Gradient Descent</h4>
+        <p>We compute the derivative of the loss with respect to every weight (backpropagation), then nudge each weight slightly in the direction that reduces the loss. Repeat millions of times.</p>
+      </div>
+      <div class="explainer-card">
+        <h4>🔍 Convolution</h4>
+        <p>A small filter (e.g. 5×5 pixels) slides across the image multiplying pixel values. Different filters activate for different features — horizontal edges, corners, textures.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 2. SINGLE NEURON TOY ── -->
+  <section id="neuron-section" class="nn-section">
+    <h2>Interactive: A Single Neuron</h2>
+    <p class="section-desc">
+      The basic building block of a network. A neuron computes a weighted sum of its inputs, adds a bias, then passes the result through an <strong>activation function</strong> (here, ReLU — which simply clips negative values to zero). Drag the sliders to see it live.
+    </p>
+    <div id="neuron-toy">
+      <div class="neuron-controls">
+        <div class="neuron-slider-row">
+          <label>Input x₁</label>
+          <input type="range" id="x1" min="-2" max="2" step="0.05" value="1.0">
+          <span class="val" id="x1v">1.00</span>
+        </div>
+        <div class="neuron-slider-row">
+          <label>Input x₂</label>
+          <input type="range" id="x2" min="-2" max="2" step="0.05" value="0.5">
+          <span class="val" id="x2v">0.50</span>
+        </div>
+        <div class="neuron-slider-row">
+          <label>Weight w₁</label>
+          <input type="range" id="w1" min="-3" max="3" step="0.05" value="0.8">
+          <span class="val" id="w1v">0.80</span>
+        </div>
+        <div class="neuron-slider-row">
+          <label>Weight w₂</label>
+          <input type="range" id="w2" min="-3" max="3" step="0.05" value="-1.2">
+          <span class="val" id="w2v">-1.20</span>
+        </div>
+        <div class="neuron-slider-row">
+          <label>Bias b</label>
+          <input type="range" id="bias" min="-3" max="3" step="0.05" value="0.3">
+          <span class="val" id="biasv">0.30</span>
+        </div>
+      </div>
+      <div id="neuron-output">
+        <div class="neuron-eq" id="neuron-eq">z = w₁x₁ + w₂x₂ + b</div>
+        <div class="neuron-eq" id="neuron-z">z = ?</div>
+        <div class="neuron-result" id="neuron-result">ReLU(z) = ?</div>
+        <div class="neuron-fired" id="neuron-fired"></div>
+        <div style="margin-top:0.75rem; font-size:12px; color:var(--color-text-tertiary);">
+          ReLU(z) = max(0, z) — the neuron only "fires" if z &gt; 0
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 3. CONVOLUTION VISUALIZER ── -->
+  <section id="convolution-section" class="nn-section">
+    <h2>Interactive: Convolution Filters</h2>
+    <p class="section-desc">
+      Click a filter below to see how it transforms a sample MNIST digit. Each filter is a small grid of numbers that slides across the image — multiplying and summing as it goes — producing a new image called a <strong>feature map</strong>. The network learns what filters are useful during training.
+    </p>
+    <div id="filter-viz">
+      <div class="filter-row" id="filter-buttons"></div>
+      <div id="filter-result">
+        <div class="empty-hint" id="filter-hint">← Select a filter above to see the convolution applied to a digit.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 4. TRAINING ── -->
+  <section id="training-section" class="nn-section">
+    <h2>Live Training Demo</h2>
+    <p class="section-desc">
+      This trains a small convolutional neural network on MNIST (handwritten digits 0–9) <em>entirely in your browser</em>. 
+      The model uses 3×3 kernels with 4 then 8 filters — about <strong>1,400 parameters</strong> total, roughly 15× lighter than a typical toy CNN.
+      The loss and accuracy charts update <em>every 5 batches</em>, so you can watch the model improve in near real-time.
+    </p>
+
+    <button class="start-btn" id="startBtn" onclick="startTraining()">Load Dataset &amp; Train</button>
+
+    <div class="status-bar">
+      <div class="status-dot" id="statusDot"></div>
+      <span id="statusText">Click "Load Dataset &amp; Train" to begin.</span>
+    </div>
+
+    <div class="charts-row">
+      <div class="chart-card">
+        <h4>Loss (lower = better)</h4>
+        <canvas id="lossChart" height="120"></canvas>
+      </div>
+      <div class="chart-card">
+        <h4>Accuracy (higher = better)</h4>
+        <canvas id="accChart" height="120"></canvas>
+        <div class="acc-meter"><div class="acc-meter-fill" id="accFill"></div></div>
+      </div>
+    </div>
+
+    <div class="epoch-strip" id="epochStrip">
+      <div class="epoch-strip-inner" id="epochInner">
+        <div class="empty-hint" style="width:100%;">Epoch results will appear here as training progresses.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 5. ACTIVATIONS ── -->
+  <section id="activations-section" class="nn-section">
+    <h2>Activation Maps Over Time</h2>
+    <p class="section-desc">
+      After each epoch, the network processes a single test image. Below you can see what the first two convolutional layers "see" — their <strong>activation maps</strong>. At first (epoch 0) the activations look like noise. As the network learns, specific filters start responding to real features: edges, curves, stroke endings. Each small image below shows one filter's response to the input.
+    </p>
+    <div class="activation-scroll">
+      <div class="activation-timeline" id="activationTimeline">
+        <div class="empty-hint" style="white-space:nowrap; min-width:200px;">Activations will appear here after training starts.</div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+  <footer class="footer">
+    <p>Powered by <a href="https://www.tensorflow.org/js" style="color:var(--color-accent-text)">TensorFlow.js</a>. Every page load trains a fresh model — same architecture, different random weights, same result. That's generalisation.</p>
+  </footer>
+</main>
+
+<div id="lightbox" onclick="this.classList.remove('open')">
+  <img id="lightboxImg" src="" alt="">
+</div>
+
+<script type="module">
+// ─────────────────────────────────────────────
+// Cursor
+// ─────────────────────────────────────────────
+const cursor = document.getElementById('invertedcursor');
+document.addEventListener('mousemove', e => {
+  cursor.style.setProperty('--x', e.clientX + window.scrollX + 'px');
+  cursor.style.setProperty('--y', e.clientY + window.scrollY + 'px');
+});
+document.addEventListener('mousedown', () => cursor.style.transform = 'translate(-50%,-50%) scale(0.75)');
+document.addEventListener('mouseup',   () => cursor.style.transform = 'translate(-50%,-50%) scale(1)');
+
+// Progress bar on scroll
+const pb = document.getElementById('progressBar');
+window.addEventListener('scroll', () => {
+  const pct = window.scrollY / (document.body.scrollHeight - window.innerHeight) * 100;
+  pb.style.width = Math.min(pct, 100) + '%';
+});
+
+// ─────────────────────────────────────────────
+// Neuron toy
+// ─────────────────────────────────────────────
+function updateNeuron() {
+  const x1 = +document.getElementById('x1').value;
+  const x2 = +document.getElementById('x2').value;
+  const w1 = +document.getElementById('w1').value;
+  const w2 = +document.getElementById('w2').value;
+  const b  = +document.getElementById('bias').value;
+  document.getElementById('x1v').textContent   = x1.toFixed(2);
+  document.getElementById('x2v').textContent   = x2.toFixed(2);
+  document.getElementById('w1v').textContent   = w1.toFixed(2);
+  document.getElementById('w2v').textContent   = w2.toFixed(2);
+  document.getElementById('biasv').textContent = b.toFixed(2);
+  const z = w1*x1 + w2*x2 + b;
+  const relu = Math.max(0, z);
+  document.getElementById('neuron-eq').textContent = `z = ${w1.toFixed(2)}×${x1.toFixed(2)} + ${w2.toFixed(2)}×${x2.toFixed(2)} + ${b.toFixed(2)}`;
+  document.getElementById('neuron-z').textContent  = `z = ${z.toFixed(4)}`;
+  document.getElementById('neuron-result').textContent = `ReLU(z) = ${relu.toFixed(4)}`;
+  const fired = document.getElementById('neuron-fired');
+  if (z > 0) { fired.textContent = '✓ Neuron fires'; fired.className = 'neuron-fired yes'; }
+  else        { fired.textContent = '✗ Neuron silent'; fired.className = 'neuron-fired no'; }
+}
+['x1','x2','w1','w2','bias'].forEach(id => document.getElementById(id).addEventListener('input', updateNeuron));
+updateNeuron();
+
+// ─────────────────────────────────────────────
+// Convolution demo filters
+// ─────────────────────────────────────────────
+const FILTERS = [
+  { name: 'Horizontal edge', kernel: [[-1,-1,-1],[0,0,0],[1,1,1]] },
+  { name: 'Vertical edge',   kernel: [[-1,0,1],[-1,0,1],[-1,0,1]] },
+  { name: 'Diagonal edge',   kernel: [[2,-1,-1],[-1,2,-1],[-1,-1,2]] },
+  { name: 'Sharpen',         kernel: [[0,-1,0],[-1,5,-1],[0,-1,0]] },
+  { name: 'Blur',            kernel: [[1/9,1/9,1/9],[1/9,1/9,1/9],[1/9,1/9,1/9]] },
+  { name: 'Emboss',          kernel: [[-2,-1,0],[-1,1,1],[0,1,2]] },
+];
+
+// Draw a 3×3 filter kernel on a canvas
+function drawFilter(kernel) {
+  const c = document.createElement('canvas');
+  c.width = 36; c.height = 36;
+  const ctx = c.getContext('2d');
+  const flat = kernel.flat();
+  const mx = Math.max(...flat.map(Math.abs)) || 1;
+  for (let r=0;r<3;r++) for (let col=0;col<3;col++) {
+    const v = kernel[r][col] / mx; // -1..1
+    const lightness = Math.round((v + 1) / 2 * 255);
+    ctx.fillStyle = `rgb(${lightness},${lightness},${lightness})`;
+    ctx.fillRect(col*12, r*12, 12, 12);
+  }
+  return c;
+}
+
+// A small sample digit (28×28 grayscale, hand-crafted "7")
+// We'll generate it via canvas
+function makeSampleDigit() {
+  const c = document.createElement('canvas');
+  c.width = 28; c.height = 28;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0,0,28,28);
+  ctx.strokeStyle = '#fff';
+  ctx.lineWidth = 2.5;
+  ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(6,5); ctx.lineTo(22,5); ctx.stroke(); // top bar
+  ctx.beginPath(); ctx.moveTo(22,5); ctx.lineTo(13,23); ctx.stroke(); // diagonal
+  return c;
+}
+
+function applyConv(imgData, kernel, W, H) {
+  const out = new Float32Array(W * H);
+  for (let y=1;y<H-1;y++) for (let x=1;x<W-1;x++) {
+    let s=0;
+    for (let ky=-1;ky<=1;ky++) for (let kx=-1;kx<=1;kx++) {
+      const px = imgData[(y+ky)*W + (x+kx)];
+      s += px * kernel[ky+1][kx+1];
+    }
+    out[y*W+x] = s;
+  }
+  return out;
+}
+
+function renderGray(data, W, H, scale=4) {
+  const c = document.createElement('canvas');
+  c.width = W*scale; c.height = H*scale;
+  const ctx = c.getContext('2d');
+  // normalise
+  let mn=Infinity, mx=-Infinity;
+  data.forEach(v=>{ if(v<mn)mn=v; if(v>mx)mx=v; });
+  const rng = mx-mn || 1;
+  const id = ctx.createImageData(W*scale, H*scale);
+  for (let y=0;y<H;y++) for (let x=0;x<W;x++) {
+    const v = Math.round((data[y*W+x]-mn)/rng*255);
+    for (let dy=0;dy<scale;dy++) for (let dx=0;dx<scale;dx++) {
+      const i = ((y*scale+dy)*W*scale + (x*scale+dx))*4;
+      id.data[i]=v; id.data[i+1]=v; id.data[i+2]=v; id.data[i+3]=255;
+    }
+  }
+  ctx.putImageData(id, 0, 0);
+  return c;
+}
+
+const sampleDigit = makeSampleDigit();
+// extract gray pixel array
+const tmpCtx = sampleDigit.getContext('2d');
+const raw = tmpCtx.getImageData(0,0,28,28).data;
+const grayPixels = new Float32Array(28*28);
+for(let i=0;i<28*28;i++) grayPixels[i] = raw[i*4]/255;
+
+// Build filter buttons
+const filterBtns = document.getElementById('filter-buttons');
+FILTERS.forEach((f,i) => {
+  const div = document.createElement('div');
+  div.className = 'filter-item';
+  div.dataset.idx = i;
+  div.appendChild(drawFilter(f.kernel));
+  const span = document.createElement('span');
+  span.textContent = f.name;
+  div.appendChild(span);
+  div.addEventListener('click', () => selectFilter(i, div));
+  filterBtns.appendChild(div);
+});
+
+function selectFilter(idx, el) {
+  document.querySelectorAll('.filter-item').forEach(d=>d.classList.remove('selected'));
+  el.classList.add('selected');
+  const f = FILTERS[idx];
+  const result = document.getElementById('filter-result');
+  result.innerHTML = '';
+
+  // Original
+  const origCard = document.createElement('div');
+  origCard.className = 'filter-result-card';
+  const origC = document.createElement('canvas');
+  origC.width = 112; origC.height = 112;
+  const oCtx = origC.getContext('2d');
+  oCtx.imageSmoothingEnabled = false;
+  oCtx.drawImage(sampleDigit, 0, 0, 112, 112);
+  origCard.appendChild(origC);
+  const s1 = document.createElement('span'); s1.textContent = 'Input';
+  origCard.appendChild(s1);
+  result.appendChild(origCard);
+
+  // Convolved
+  const convolved = applyConv(grayPixels, f.kernel, 28, 28);
+  const convCard = document.createElement('div');
+  convCard.className = 'filter-result-card';
+  const convC = renderGray(convolved, 28, 28, 4);
+  convCard.appendChild(convC);
+  const s2 = document.createElement('span'); s2.textContent = `After: ${f.name}`;
+  convCard.appendChild(s2);
+  result.appendChild(convCard);
+
+  // ReLU
+  const reluData = convolved.map(v=>Math.max(0,v));
+  const reluCard = document.createElement('div');
+  reluCard.className = 'filter-result-card';
+  const reluC = renderGray(reluData, 28, 28, 4);
+  reluCard.appendChild(reluC);
+  const s3 = document.createElement('span'); s3.textContent = 'After ReLU';
+  reluCard.appendChild(s3);
+  result.appendChild(reluCard);
+}
+
+// ─────────────────────────────────────────────
+// Chart setup
+// ─────────────────────────────────────────────
+const chartDefaults = {
+  type: 'line',
+  options: {
+    animation: { duration: 300 },
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { color: 'rgba(128,128,128,0.12)' }, ticks: { color: '#888' } },
+      y: { grid: { color: 'rgba(128,128,128,0.12)' }, ticks: { color: '#888' } }
+    }
+  }
+};
+
+const lossChart = new Chart(document.getElementById('lossChart'), {
+  ...chartDefaults,
+  data: {
+    labels: [],
+    datasets: [{ data: [], borderColor: 'var(--color-accent)', borderWidth: 2, pointRadius: 3, fill: false, tension: 0.3 }]
+  },
+  options: { ...chartDefaults.options, scales: { ...chartDefaults.options.scales, y: { ...chartDefaults.options.scales.y, min: 0 } } }
+});
+
+const accChart = new Chart(document.getElementById('accChart'), {
+  ...chartDefaults,
+  data: {
+    labels: [],
+    datasets: [{ data: [], borderColor: '#22c55e', borderWidth: 2, pointRadius: 3, fill: false, tension: 0.3 }]
+  },
+  options: { ...chartDefaults.options, scales: { ...chartDefaults.options.scales, y: { ...chartDefaults.options.scales.y, min: 0, max: 1 } } }
+});
+
+// ─────────────────────────────────────────────
+// Status helpers
+// ─────────────────────────────────────────────
+function setStatus(text, state='idle') {
+  document.getElementById('statusText').textContent = text;
+  const dot = document.getElementById('statusDot');
+  dot.className = 'status-dot';
+  if (state !== 'idle') dot.classList.add(state);
+}
+
+// ─────────────────────────────────────────────
+// MNIST Data loader (inline, no module import)
+// ─────────────────────────────────────────────
+const IMAGE_SIZE = 784;
+const NUM_CLASSES = 10;
+const NUM_DATASET_ELEMENTS = 65000;
+const NUM_TRAIN_ELEMENTS = 55000;
+const NUM_TEST_ELEMENTS = 10000;
+
+class MnistData {
+  constructor() { this.shuffledTrainIndex = 0; this.shuffledTestIndex = 0; }
+  async load() {
+    const img = new Image();
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    await new Promise((resolve, reject) => {
+      img.crossOrigin = '';
+      img.onload = () => {
+        img.width = img.naturalWidth; img.height = img.naturalHeight;
+        const buf = new ArrayBuffer(NUM_DATASET_ELEMENTS * IMAGE_SIZE * 4);
+        const chunkSize = 5000;
+        canvas.width = img.width; canvas.height = chunkSize;
+        for (let i = 0; i < NUM_DATASET_ELEMENTS / chunkSize; i++) {
+          const view = new Float32Array(buf, i * IMAGE_SIZE * chunkSize * 4, IMAGE_SIZE * chunkSize);
+          ctx.drawImage(img, 0, i*chunkSize, img.width, chunkSize, 0, 0, img.width, chunkSize);
+          const id = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          for (let j = 0; j < id.data.length/4; j++) view[j] = id.data[j*4]/255;
+        }
+        this.datasetImages = new Float32Array(buf);
+        resolve();
+      };
+      img.onerror = reject;
+      img.src = 'https://storage.googleapis.com/learnjs-data/model-builder/mnist_images.png';
+    });
+    const resp = await fetch('https://storage.googleapis.com/learnjs-data/model-builder/mnist_labels_uint8');
+    this.datasetLabels = new Uint8Array(await resp.arrayBuffer());
+    this.trainIndices = tf.util.createShuffledIndices(NUM_TRAIN_ELEMENTS);
+    this.testIndices  = tf.util.createShuffledIndices(NUM_TEST_ELEMENTS);
+    this.trainImages  = this.datasetImages.slice(0, IMAGE_SIZE * NUM_TRAIN_ELEMENTS);
+    this.testImages   = this.datasetImages.slice(IMAGE_SIZE * NUM_TRAIN_ELEMENTS);
+    this.trainLabels  = this.datasetLabels.slice(0, NUM_CLASSES * NUM_TRAIN_ELEMENTS);
+    this.testLabels   = this.datasetLabels.slice(NUM_CLASSES * NUM_TRAIN_ELEMENTS);
+  }
+  nextTrainBatch(n) { return this._batch(n, [this.trainImages, this.trainLabels], () => { this.shuffledTrainIndex=(this.shuffledTrainIndex+1)%this.trainIndices.length; return this.trainIndices[this.shuffledTrainIndex]; }); }
+  nextTestBatch(n)  { return this._batch(n, [this.testImages,  this.testLabels],  () => { this.shuffledTestIndex =(this.shuffledTestIndex +1)%this.testIndices.length;  return this.testIndices [this.shuffledTestIndex];  }); }
+  _batch(n, data, idx) {
+    const imgs = new Float32Array(n*IMAGE_SIZE), lbls = new Uint8Array(n*NUM_CLASSES);
+    for (let i=0;i<n;i++) {
+      const id=idx();
+      imgs.set(data[0].slice(id*IMAGE_SIZE, id*IMAGE_SIZE+IMAGE_SIZE), i*IMAGE_SIZE);
+      lbls.set(data[1].slice(id*NUM_CLASSES, id*NUM_CLASSES+NUM_CLASSES), i*NUM_CLASSES);
+    }
+    return { xs: tf.tensor2d(imgs,[n,IMAGE_SIZE]), labels: tf.tensor2d(lbls,[n,NUM_CLASSES]) };
+  }
+}
+
+// ─────────────────────────────────────────────
+// Model
+// ─────────────────────────────────────────────
+function buildModel() {
+  // Lightweight model: 3×3 kernels, 4 then 8 filters (~1,400 params vs ~22,000 before)
+  const m = tf.sequential();
+  m.add(tf.layers.conv2d({ inputShape:[28,28,1], kernelSize:3, filters:4,  strides:1, activation:'relu', kernelInitializer:'varianceScaling' }));
+  m.add(tf.layers.maxPooling2d({ poolSize:[2,2], strides:[2,2] }));
+  m.add(tf.layers.conv2d({ kernelSize:3, filters:8, strides:1, activation:'relu', kernelInitializer:'varianceScaling' }));
+  m.add(tf.layers.maxPooling2d({ poolSize:[2,2], strides:[2,2] }));
+  m.add(tf.layers.flatten());
+  m.add(tf.layers.dense({ units:10, kernelInitializer:'varianceScaling', activation:'softmax' }));
+  m.compile({ optimizer: tf.train.adam(), loss:'categoricalCrossentropy', metrics:['accuracy'] });
+  return m;
+}
+
+// ─────────────────────────────────────────────
+// Activation extraction
+// ─────────────────────────────────────────────
+async function getActivations(model, inputTensor) {
+  // layers: 0=conv2d(4f), 1=maxpool, 2=conv2d(8f), 3=maxpool, 4=flatten, 5=dense
+  const interimModel = tf.model({
+    inputs: model.inputs,
+    outputs: [
+      model.layers[0].output, // conv1 output [1,26,26,4]
+      model.layers[2].output, // conv2 output [1,11,11,8]
+      model.layers[5].output  // softmax output
+    ]
+  });
+  const result = interimModel.predict(inputTensor);
+  return result;
+}
+
+async function makeImage(tensor2d, size, scale=2) {
+  const c = document.createElement('canvas');
+  c.width = size*scale; c.height = size*scale;
+  // normalise to 0-1
+  const min = tensor2d.min();
+  const max = tensor2d.max();
+  const norm = tensor2d.sub(min).div(max.sub(min).add(1e-8));
+  const reshaped = norm.reshape([size,size,1]);
+  await tf.browser.toPixels(reshaped, c);
+  // scale up
+  const c2 = document.createElement('canvas');
+  c2.width = size*scale; c2.height = size*scale;
+  // already correct size, just return
+  norm.dispose(); reshaped.dispose(); min.dispose(); max.dispose();
+  return c;
+}
+
+async function captureAndDisplayActivations(model, mnistData, epochLabel) {
+  const batch = mnistData.nextTestBatch(1);
+  const inputTensor = batch.xs.reshape([1,28,28,1]);
+
+  const [act1, act2, softmaxOut] = await getActivations(model, inputTensor);
+
+  // Input image
+  const inputCanvas = document.createElement('canvas');
+  inputCanvas.width = 28; inputCanvas.height = 28;
+  await tf.browser.toPixels(inputTensor.reshape([28,28,1]), inputCanvas);
+
+  // Prediction
+  const predArr = Array.from(softmaxOut.dataSync());
+  const pred = predArr.indexOf(Math.max(...predArr));
+
+  // Build act card
+  const card = document.createElement('div');
+  card.className = 'act-card' + (epochLabel === 'Epoch 0 (baseline)' ? '' : ' current');
+
+  const label = document.createElement('div');
+  label.className = 'act-card-label';
+  label.textContent = epochLabel;
+  card.appendChild(label);
+
+  const inputRow = document.createElement('div');
+  inputRow.className = 'act-input-row';
+  const inputImg = document.createElement('img');
+  inputImg.src = inputCanvas.toDataURL();
+  inputRow.appendChild(inputImg);
+  const predEl = document.createElement('div');
+  predEl.className = 'act-pred';
+  predEl.textContent = `→ ${pred}`;
+  inputRow.appendChild(predEl);
+  card.appendChild(inputRow);
+
+  // Layer 1 filters (4 filters)
+  const l1label = document.createElement('div');
+  l1label.className = 'act-layer-label';
+  l1label.textContent = 'Conv 1 (4 filters)';
+  card.appendChild(l1label);
+  const l1row = document.createElement('div');
+  l1row.className = 'act-row';
+  const act1sq = act1.squeeze(); // [26,26,4]
+  const act1shape = act1sq.shape;
+  for (let f=0;f<act1shape[2];f++) {
+    const slice = act1sq.slice([0,0,f],[act1shape[0],act1shape[1],1]).reshape([act1shape[0],act1shape[1]]);
+    const fc = await makeImage(slice, act1shape[0], 1);
+    fc.style.width = '20px'; fc.style.height = '20px';
+    l1row.appendChild(fc);
+    slice.dispose();
+  }
+  act1sq.dispose();
+  card.appendChild(l1row);
+
+  // Layer 2 filters (8 filters)
+  const l2label = document.createElement('div');
+  l2label.className = 'act-layer-label';
+  l2label.textContent = 'Conv 2 (8 filters)';
+  card.appendChild(l2label);
+  const l2row = document.createElement('div');
+  l2row.className = 'act-row';
+  const act2sq = act2.squeeze();
+  const act2shape = act2sq.shape;
+  for (let f=0;f<act2shape[2];f++) {
+    const h = act2shape[0], w = act2shape[1];
+    const slice = act2sq.slice([0,0,f],[h,w,1]).reshape([h,w]);
+    const fc = await makeImage(slice, h, 2);
+    fc.style.width = '18px'; fc.style.height = '18px';
+    l2row.appendChild(fc);
+    slice.dispose();
+  }
+  act2sq.dispose();
+  card.appendChild(l2row);
+
+  // Confidence bar
+  const confLabel = document.createElement('div');
+  confLabel.className = 'act-layer-label';
+  confLabel.textContent = `Confidence: ${(Math.max(...predArr)*100).toFixed(1)}%`;
+  card.appendChild(confLabel);
+
+  // Cleanup
+  batch.xs.dispose(); batch.labels.dispose();
+  inputTensor.dispose(); act1.dispose(); act2.dispose(); softmaxOut.dispose();
+
+  return card;
+}
+
+// ─────────────────────────────────────────────
+// Training
+// ─────────────────────────────────────────────
+window.startTraining = async function() {
+  const btn = document.getElementById('startBtn');
+  btn.disabled = true;
+
+  // clear epoch/activation areas
+  document.getElementById('epochInner').innerHTML = '';
+  document.getElementById('activationTimeline').innerHTML = '';
+  lossChart.data.labels = [];
+  lossChart.data.datasets[0].data = [];
+  accChart.data.labels = [];
+  accChart.data.datasets[0].data = [];
+  lossChart.update();
+  accChart.update();
+
+  setStatus('Loading MNIST dataset (≈12 MB)…', 'loading');
+  const mnistData = new MnistData();
+  try {
+    await mnistData.load();
+  } catch(e) {
+    setStatus('Failed to load dataset. Check your connection.', 'error');
+    btn.disabled = false;
+    return;
+  }
+  setStatus('Dataset loaded. Building model…', 'loading');
+
+  const model = buildModel();
+  setStatus('Model ready. Capturing baseline activations…', 'loading');
+
+  // Baseline activations (before any training)
+  const baseCard = await captureAndDisplayActivations(model, mnistData, 'Epoch 0 (baseline)');
+  baseCard.classList.remove('current');
+  const timeline = document.getElementById('activationTimeline');
+  timeline.innerHTML = '';
+  timeline.appendChild(baseCard);
+
+  const EPOCHS = 10;
+  const BATCH = 64;
+  const TRAIN_N = 4000;
+  const TEST_N  = 800;
+
+  const [trainXs, trainYs] = tf.tidy(() => {
+    const d = mnistData.nextTrainBatch(TRAIN_N);
+    return [d.xs.reshape([TRAIN_N,28,28,1]), d.labels];
+  });
+  const [testXs, testYs] = tf.tidy(() => {
+    const d = mnistData.nextTestBatch(TEST_N);
+    return [d.xs.reshape([TEST_N,28,28,1]), d.labels];
+  });
+
+  setStatus('Training… epoch 1 / ' + EPOCHS, 'loading');
+
+  // Track batch position within epoch for live chart x-axis labels
+  let batchCounter = 0;
+  const batchesPerEpoch = Math.ceil(TRAIN_N / BATCH);
+  const CHART_UPDATE_EVERY = 5; // update charts every N batches
+
+  await model.fit(trainXs, trainYs, {
+    batchSize: BATCH,
+    validationData: [testXs, testYs],
+    epochs: EPOCHS,
+    shuffle: true,
+    callbacks: {
+      onBatchEnd: async (batch, logs) => {
+        batchCounter++;
+        if (batchCounter % CHART_UPDATE_EVERY !== 0) return;
+        // x-axis label: "E2 B5" style
+        const ep = Math.floor(batchCounter / batchesPerEpoch) + 1;
+        const b  = batchCounter % batchesPerEpoch || batchesPerEpoch;
+        lossChart.data.labels.push(`E${ep}·${b}`);
+        lossChart.data.datasets[0].data.push(logs.loss);
+        accChart.data.labels.push(`E${ep}·${b}`);
+        accChart.data.datasets[0].data.push(logs.acc);
+        lossChart.update('none'); // 'none' skips animation for speed
+        accChart.update('none');
+        document.getElementById('accFill').style.width = (logs.acc * 100) + '%';
+        await tf.nextFrame();
+      },
+      onEpochEnd: async (epoch, logs) => {
+        const ep = epoch + 1;
+        setStatus(`Epoch ${ep}/${EPOCHS} complete — loss: ${logs.loss.toFixed(4)}, acc: ${(logs.acc*100).toFixed(1)}%`, 'loading');
+
+        // Epoch strip
+        const strip = document.getElementById('epochInner');
+        const block = document.createElement('div');
+        block.className = 'epoch-block' + (ep === EPOCHS ? ' current' : '');
+        block.innerHTML = `<div class="epoch-block-label">Epoch ${ep}</div><div class="epoch-block-stats">Loss: <strong>${logs.loss.toFixed(4)}</strong><br>Acc: <strong>${(logs.acc*100).toFixed(1)}%</strong></div>`;
+        strip.appendChild(block);
+        strip.scrollLeft = strip.scrollWidth;
+
+        // Activations
+        const actCard = await captureAndDisplayActivations(model, mnistData, `Epoch ${ep}`);
+        timeline.appendChild(actCard);
+        timeline.scrollLeft = timeline.scrollWidth;
+
+        await tf.nextFrame();
+      }
+    }
+  });
+
+  trainXs.dispose(); trainYs.dispose(); testXs.dispose(); testYs.dispose();
+  setStatus('Training complete! The model is now fully trained.', 'done');
+  btn.textContent = 'Train Again';
+  btn.disabled = false;
+};
+</script>
+</body>
+</html>

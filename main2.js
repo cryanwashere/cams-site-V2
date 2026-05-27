@@ -1,19 +1,19 @@
 import { OrbitControls } from 'https://cdn.skypack.dev/three@0.129.0/examples/jsm/controls/OrbitControls.js';
-
-
-
-
-
-
+ 
+ 
+ 
+ 
+ 
+ 
 /*
-
+ 
     initialize the model
-
+ 
 */
-
+ 
 function getModel() {
     const model = tf.sequential();
-
+ 
     const IMAGE_WIDTH = 28;
     const IMAGE_HEIGHT = 28;
     const IMAGE_CHANNELS = 1; 
@@ -78,23 +78,23 @@ function inferenceModel( model, batch ) {
     batch = batch.xs.reshape([1,28,28,1]);
     return [newModel.predict(batch), batch];
 }
-
+ 
 class Model {
     constructor() {
         this.model = getModel();
     }
-
+ 
     async load () {
         this.model = await tf.loadLayersModel("model/my-model.json");
         console.log("loaded model");
     }
-
+ 
     inference( xs ) {
         const newModel = tf.model({inputs: this.model.inputs, outputs: [this.model.layers[0].output, this.model.layers[2].output, this.model.layers[5].output]});
         const batch = xs.reshape([1,28,28,1]);
         return newModel.predict(batch);
     }
-
+ 
     async train ( data, epochs ) {
         const BATCH_SIZE = 128;
         const TRAIN_DATA_SIZE = 5500;
@@ -107,7 +107,7 @@ class Model {
                 d.labels
             ];
         });
-
+ 
         const [testXs, testYs] = tf.tidy(() => {
             const d = data.nextTestBatch(TEST_DATA_SIZE);
             return [
@@ -115,7 +115,7 @@ class Model {
                 d.labels
             ];
         });
-
+ 
         await this.model.fit( trainXs, trainYs, {
             batchSize : BATCH_SIZE,
             validationData : [testXs, testYs],
@@ -127,34 +127,34 @@ class Model {
                 }
             }
         });
-
+ 
     }
     
 }
-
+ 
 /*
-
+ 
     making the 3D animation
-
+ 
 */
-
-
+ 
+ 
 function makeLine( position1, position2 ) {
     const points = [
         new THREE.Vector3( position1.x, position1.y, position1.z),
         new THREE.Vector3( position2.x, position2.y, position2.z)
     ];
-
+ 
     const material = new THREE.LineBasicMaterial({ color: window.invertedColor });
     const geometry = new THREE.BufferGeometry().setFromPoints( points );
     const line = new THREE.Line( geometry, material );
     return line; 
 }
-
+ 
 function makeLineBoxMesh( shape, transform ) {
     const material = new THREE.LineBasicMaterial({ color: window.invertedColor });
-
-
+ 
+ 
     const points = [
         new THREE.Vector3( 0, 0, 0),
         new THREE.Vector3( 0, shape[1], 0),
@@ -180,33 +180,33 @@ function makeLineBoxMesh( shape, transform ) {
     })
     const geometry = new THREE.BufferGeometry().setFromPoints( points );
     const line = new THREE.Line( geometry, material );
-
+ 
     
     return line;
 }
-
+ 
 /*
-
+ 
     Classes for displaying tensors in 3D
-
+ 
 */
-
-
+ 
+ 
 class MeshArray {
-
+ 
     /*
     
         This stores an array of cube meshes, which can represent a tensor
     
     */
-
+ 
     constructor( tensor ) { 
         /* 
        
         take a 3D tensor, and turn it into a 3D mesh of each value of the tensor
-
+ 
         */
-
+ 
         this.meshArray = [];
         this.position = {
             x : 0,
@@ -215,11 +215,11 @@ class MeshArray {
         };
         this.shape = tensor.shape;
         const shape = tensor.shape;
-
-
+ 
+ 
         tensor = tensor.transpose();   
         for (let i=0;i<this.shape[2];i++) {  // iterate through each channel of the tensor
-
+ 
             var meshSlice = tf.gather( tensor, i ).transpose();
             const min = meshSlice.min();
             const max = meshSlice.max();
@@ -230,10 +230,10 @@ class MeshArray {
             
             if (shape[0] == 10) {
                 console.log("hi");
-
+ 
                 for (let m=0;m<10;m++) {
                     var pixelValue = meshArray[m];
-
+ 
                     if (pixelValue > 0.1) {
                         const pixelGeometry = new THREE.BoxGeometry( 1, 1, 1 );
                         const material = new THREE.MeshBasicMaterial({
@@ -245,13 +245,13 @@ class MeshArray {
                         mesh.position.x = m;
                         mesh.position.y = 1; // matrix 'y' indexes move downwards
                         mesh.position.z = 0;
-
+ 
                         this.meshArray.push(mesh);
                     }
                 }
-
+ 
             } else {
-
+ 
                 for (let m=0;m<shape[0];m++) {
                     for (let n=0;n<shape[1];n++) {
                         
@@ -259,7 +259,7 @@ class MeshArray {
                         
                         const index = (m*shape[0]) + n;
                         var pixelValue = meshArray[index];
-
+ 
                         if (pixelValue > 0.1) {
                             const pixelGeometry = new THREE.BoxGeometry( 1, 1, 1 );
                             const material = new THREE.MeshBasicMaterial({
@@ -271,22 +271,22 @@ class MeshArray {
                             mesh.position.x = n;
                             mesh.position.y = shape[1]-m; // matrix 'y' indexes move downwards
                             mesh.position.z = i;
-
+ 
                             this.meshArray.push(mesh);
                         }
                     }
                 }
             }
         }
-
+ 
     }
-
+ 
     addOutlineMesh( scene ) {
         const lineMesh = makeLineBoxMesh( this.shape, 
             [this.position.x - 0.5, this.position.y + 0.5, this.position.z - 0.5] );
         scene.add( lineMesh );
     }
-
+ 
     report() {
         return this.meshArray.length;
     }
@@ -295,7 +295,7 @@ class MeshArray {
             scene.add( mesh );
         })
     }
-
+ 
     transformX( bias ) {
         this.position.x += bias;
         this.meshArray.forEach((mesh) => {
@@ -315,10 +315,10 @@ class MeshArray {
         });
     }
 }
-
-
-
-
+ 
+ 
+ 
+ 
 class TensorStackMesh {
     /*
     
@@ -331,10 +331,10 @@ class TensorStackMesh {
     constructor() {
         this.tensorMeshList = [];
         this.lineList = [];
-
+ 
         this.centerZ = 0;
     }
-
+ 
     addTensor( array ) {
         const tensorMeshArray = new MeshArray( array );
         
@@ -342,14 +342,14 @@ class TensorStackMesh {
         // the last tensor.
         if (this.tensorMeshList.length != 0) {
             const lastTensorMesh = this.tensorMeshList[this.tensorMeshList.length - 1]
-
+ 
             //move it out of the way so that it can be viewed
             const offset = lastTensorMesh.position.z + lastTensorMesh.shape[2] + (lastTensorMesh.shape[0]/2) + 5;
             tensorMeshArray.transformZ( offset );
             this.centerZ =  offset;
-
+ 
             //move it behind the center of the last tensor
-
+ 
             //transform along the X axis
             if (tensorMeshArray.shape[0] > lastTensorMesh.shape[0]) {
                 const dX = parseInt(tensorMeshArray.shape[0] / 2) - parseInt(lastTensorMesh.shape[0] / 2);
@@ -369,12 +369,12 @@ class TensorStackMesh {
                 tensorMeshArray.transformY( dY );
             }
             tensorMeshArray.transformY( lastTensorMesh.position.y );
-
+ 
         } 
-
+ 
         this.tensorMeshList.push( tensorMeshArray );
     }
-
+ 
     addLayerConnections() {
         for (let i=1;i<this.tensorMeshList.length;i++) {
             const lastTensorMesh = this.tensorMeshList[i - 1];
@@ -448,7 +448,7 @@ class TensorStackMesh {
             }
         );
     }
-
+ 
     addOutlineMesh( scene ) {
         this.tensorMeshList.forEach((tensorMesh) => {
             tensorMesh.addOutlineMesh( scene );
@@ -499,7 +499,7 @@ class TensorStackMesh {
         const centerX = this.getWidth() / 2;
         const centerY = this.getHeight() / 2;
         const centerZ = this.getLength() / 2;
-
+ 
         this.transformX( -centerX );
         this.transformY( -centerY );
         this.transformZ( -centerZ );
@@ -517,11 +517,11 @@ class TensorStackMesh {
         return sum;
     }
 }
-
-
-
-
-
+ 
+ 
+ 
+ 
+ 
 import { MnistData } from "./data.js";
 async function loadData() {    
     const data = new MnistData();
@@ -533,36 +533,36 @@ async function loadData() {
     
     const inputImageTensor = data.nextTestBatch(1).xs.reshape([28,28,1]);
     
-
-
+ 
+ 
     // it is not an actual tensorflow model class
     //await model.train( data, 10 );
     //await model.model.save('downloads://my-model');
-
-
+ 
+ 
     const networkMesh = new TensorStackMesh();
     networkMesh.addTensor( inputImageTensor );
     const output = model.inference( inputImageTensor );
     networkMesh.addTensor( output[0].reshape([24,24,8]) );
     networkMesh.addTensor( output[1].reshape([8,8,16]) );
-
+ 
     networkMesh.addTensor( output[2].reshape([10,1,1]) );
     console.log( output[2].dataSync() );
     networkMesh.centerPosition();
     //networkMesh.transformX( -networkMesh.getWidth() / 2 );
     ///networkMesh.transformZ( -networkMesh.getLength() / 2 );
     
-
+ 
     networkMesh.addOutlineMesh( v1.scene );
     networkMesh.addLayerConnections();
     networkMesh.addToScene( v1.scene );
     v1.renderer.render( v1.scene, v1.camera );
     console.log("rendered neural network")
-
+ 
 }
-
-
-
+ 
+ 
+ 
 class PDBData {
     /*
     
@@ -571,19 +571,19 @@ class PDBData {
         interface with the protein data
     
     */
-
+ 
     constructor( PDBString ) {
         this.parse( PDBString );
     }
     parse( string ) {
         const lines = string.split('\n');
-
+ 
         const atoms = [];
         var chains = new Map();
-
+ 
         lines.forEach((line) => {
             
-
+ 
             if (line.substring(0,6) === "ATOM  ") {   // find the atoms in the file
                 const atomRecord = {
                     serial: parseInt(line.substring(6,11)),
@@ -600,7 +600,7 @@ class PDBData {
                     element: line.substring(76,78).trim(),
                     charge: line.substring(78,80).trim()
                 };
-
+ 
                 // check if the chain has already been documented, and if
                 // it has not, then add it to the chain map
                 if (!chains.get(atomRecord.chainID)) {
@@ -612,7 +612,7 @@ class PDBData {
                 atoms.push( atomRecord );
             } 
         });
-
+ 
         // for each of the chains, add all of the atoms that 
         // are in the chain
         chains.forEach((chain) => {
@@ -620,7 +620,7 @@ class PDBData {
                 atom.chainID === chain.chainID
             );
         });
-
+ 
         // for each of the chains, group all of the atoms into
         // residues
         chains.forEach((chain) => {
@@ -639,11 +639,11 @@ class PDBData {
             })
             chain.residues = residues;
         });
-
+ 
         console.log("Loaded PDB file:");
         console.log("chains: "+chains.size);
         console.log("atoms:  "+atoms.length);
-
+ 
        
         
         chains = Array.from(chains.values());
@@ -651,15 +651,15 @@ class PDBData {
             chain.residues = Array.from(chain.residues.values());
         });
         console.log(chains);
-
+ 
         this.chains = chains;
         this.atoms  = atoms;
-
+ 
         this.findCenter();
-
+ 
     }
     findCenter() {
-
+ 
         this.center = {
             x : 0,
             y : 0,
@@ -668,55 +668,55 @@ class PDBData {
         
         
         this.numAtoms = this.atoms.length;
-
+ 
         this.atoms.forEach((atom) => {
             this.center.x += atom.x;
             this.center.y += atom.y;
             this.center.z += atom.z;
         });
-
+ 
         this.center.x /= this.numAtoms;
         this.center.y /= this.numAtoms;
         this.center.z /= this.numAtoms;
-
+ 
     }
 }
-
+ 
 /*
-
+ 
     These classes form meshes to represent the protein data
-
+ 
 */
-
+ 
 class ProteinResidueMesh {
     constructor( residue ) {
-
+ 
         this.residue = residue;
-
+ 
         this.position = {
             x : 0,
             y : 0,
             z : 0
         }
-
+ 
         // the position of the residue becomes the average of its component atoms
         var numAtoms = 0;
         residue.atoms.forEach((atom) => {
             numAtoms += 1;
-
+ 
             this.position.x += atom.x;
             this.position.y += atom.y;
             this.position.z += atom.z;
-
+ 
         });
         
         this.position.x /= numAtoms;
         this.position.y /= numAtoms;
         this.position.z /= numAtoms;
-
+ 
     }
 }
-
+ 
 class ProteinChainMesh {
     constructor ( chain, showAtoms ) {
         this.residueMeshArray = [];
@@ -724,11 +724,11 @@ class ProteinChainMesh {
             const residueMesh = new ProteinResidueMesh( residue );
             this.residueMeshArray.push( residueMesh );
         });
-
+ 
         this.lines  = [];
         this.meshes = [];
         this.showMesh = showAtoms;
-
+ 
         this.aminoAcidColors = new Map();
         this.aminoAcidColors.set( 'ALA', this.generateColor() );
         this.aminoAcidColors.set( 'ARG', this.generateColor() );
@@ -750,8 +750,8 @@ class ProteinChainMesh {
         this.aminoAcidColors.set( 'TRP', this.generateColor() );
         this.aminoAcidColors.set( 'TYR', this.generateColor() );
         this.aminoAcidColors.set( 'VAL', this.generateColor() );
-
-
+ 
+ 
     }
     generateColor() {
         var randomColor = Math.floor(Math.random()*16777215).toString(16);
@@ -762,13 +762,13 @@ class ProteinChainMesh {
         const geometry = new THREE.SphereGeometry( 1.5, 4, 2 );
         const material = new THREE.MeshBasicMaterial( { color : this.aminoAcidColors.get( position.resName ) } );
         const sphere = new THREE.Mesh( geometry, material );
-
+ 
         
-
+ 
         sphere.position.x = position.x;
         sphere.position.y = position.y;
         sphere.position.z = position.z;
-
+ 
         return sphere
     }
     makeLine( position1, position2, color ) {
@@ -794,7 +794,7 @@ class ProteinChainMesh {
             lastResiduePosition = thisResiduePosition;
             this.lines.push( line );
             
-
+ 
             // if we want to display the atoms of the protein
             if (this.showMesh) {
                 //console.log("showing atoms...")
@@ -803,7 +803,7 @@ class ProteinChainMesh {
                     
                     // remember that the 'atom' object already has 'x',
                     // 'y' and 'z' attributes
-
+ 
                     //console.log("showing atoms")
                     
                     const atomMesh = this.makeAtom( atom, color );
@@ -811,8 +811,8 @@ class ProteinChainMesh {
                     
                 });
             }
-
-
+ 
+ 
         }
     }
     addToScene( scene ) {
@@ -857,13 +857,13 @@ class ProteinChainMesh {
         }
     }
 }
-
+ 
 class ProteinMesh {
     constructor ( pdb, showAtoms ) {
-
+ 
         this.pdb = pdb;
         const chains = pdb.chains;
-
+ 
         const colors = [
             0xffea5e,
             0xf75eff,
@@ -878,7 +878,7 @@ class ProteinMesh {
             0x111b66,
             0x651166,
         ];
-
+ 
         this.chainMeshArray = [];
         // the pdb is an array of amino acid chains
         for (let i=0; i<chains.length; i++) {
@@ -886,7 +886,7 @@ class ProteinMesh {
             chainMesh.makeResidueLines( this.generateColor() );
             this.chainMeshArray.push( chainMesh );
         }
-
+ 
         this.center();
     }
     generateColor() {
@@ -908,16 +908,16 @@ class ProteinMesh {
         });
     }
 }
-
-
+ 
+ 
 async function addProtein2() {
-
+ 
     /*
     
         load the data for the protein that we are going to view
-
+ 
     */
-
+ 
     //const pdbURL = 'pdb/simple_7uo9.pdb';
     //const pdbURL = 'pdb/wildtype_structure_prediction_af2.pdb';
     //const pdbURL = 'pdb/5xh3.pdb';
@@ -926,7 +926,7 @@ async function addProtein2() {
     const pdbString = await pdbResponse.text();    
     const pdb = new PDBData( pdbString );
     console.log( "loaded and parsed pdb file" );
-
+ 
     //console.log( pdb );
     // the boolean parameter indicates whether or not to show the atoms of the protein
     const proteinMesh = new ProteinMesh( pdb, false );
@@ -938,20 +938,20 @@ async function addProtein2() {
     
 }
 async function addProtein3() {
-
+ 
     /*
     
         load the data for the protein that we are going to view
-
+ 
     */
-
+ 
     //const pdbURL = 'pdb/simple_7uo9.pdb';
     const pdbURL = 'pdb/6h04.pdb';
     const pdbResponse = await fetch(pdbURL);
     const pdbString = await pdbResponse.text();    
     const pdb = new PDBData( pdbString );
     console.log( "loaded and parsed membrane attack complex pdb file" );
-
+ 
     //console.log( pdb );
     const proteinMesh = new ProteinMesh( pdb, false );
     proteinMesh.addToScene( v4.scene );
@@ -960,13 +960,13 @@ async function addProtein3() {
     
 }
 async function addProtein() {
-
+ 
     /*
     
         load the data for the protein that we are going to view
-
+ 
     */
-
+ 
     //const pdbURL = 'pdb/atp_synthase_5fil.pdb';
     //const pdbURL = 'pdb/6h04.pdb';
     const pdbURL = 'pdb/5xh3.pdb';
@@ -974,7 +974,7 @@ async function addProtein() {
     const pdbString = await pdbResponse.text();    
     const pdb = new PDBData( pdbString );
     console.log( "loaded and parsed pdb file" );
-
+ 
     //console.log( pdb );
     const proteinMesh = new ProteinMesh( pdb, false );
     proteinMesh.addToScene( v2.scene );
@@ -986,14 +986,14 @@ async function addProtein() {
 document.addEventListener('DOMContentLoaded', loadData);
 document.addEventListener('DOMContentLoaded', addProtein2 );
 //document.addEventListener('DOMContentLoaded', addProtein );
-
+ 
 /*
-
+ 
     This manages all of the THREE.js viewers, and should not 
     effect the content very much
-
+ 
 */
-
+ 
 function isInViewport(elem) {
     let x = elem.getBoundingClientRect().left;
     let y = elem.getBoundingClientRect().top;
@@ -1008,7 +1008,7 @@ function isInViewport(elem) {
          x + w > 0)
     );
 }
-
+ 
 function makeViewer( id, div, description, s ) {
     var scene = new THREE.Scene();
     var bgColor = getComputedStyle(document.body).backgroundColor;
@@ -1018,62 +1018,48 @@ function makeViewer( id, div, description, s ) {
     invertedColor.g = 1 - invertedColor.g;
     invertedColor.b = 1 - invertedColor.b;
     window.invertedColor = invertedColor;
+ 
+    // All viewers share the single background canvas
     const canvas = document.getElementById(id);
-    const camera = new THREE.PerspectiveCamera( 75, canvas.clientWidth/canvas.clientHeight, 0.1, 1000 );
-    const renderer = new THREE.WebGLRenderer( {
-        canvas : document.querySelector('#'+id)
-    } );
-    renderer.setSize( canvas.clientWidth, canvas.clientHeight );
-    document.getElementById(div).appendChild( renderer.domElement );
-
+    const wrap   = document.getElementById(div);
+    const cw = (wrap ? wrap.clientWidth  : 0) || 480;
+    const ch = (wrap ? wrap.clientHeight : 0) || 320;
+ 
+    const camera = new THREE.PerspectiveCamera( 75, cw / ch, 0.1, 1000 );
+    const renderer = new THREE.WebGLRenderer( { canvas } );
+    renderer.setSize( cw, ch );
+ 
     const controls = new OrbitControls( camera, renderer.domElement );
-
-    //const gridHelper = new THREE.GridHelper(200,50);
+ 
     s//cene.add( gridHelper );
-
-    if (description) {
-        controls.autoRotate=true;
-
-        //const s =  0.7;
-        camera.position.x = -32 * s;
-        camera.position.y =  43 * s;
-        camera.position.z =  26 * s;
-        camera.rotation.x = -1.2715;
-        camera.rotation.y = -0.7488;
-        camera.rotation.z = -1.1453;
-    } else {
-        
-
-        controls.autoRotate=true;
-        //const s = 0.75;
-        camera.position.x = -32 * s;
-        camera.position.y =  43 * s;
-        camera.position.z =  26 * s;
-        camera.rotation.x = -1.2715;
-        camera.rotation.y = -0.7488;
-        camera.rotation.z = -1.1453;
-    }
-    
-
+ 
+    controls.autoRotate = true;
+    camera.position.x = -32 * s;
+    camera.position.y =  43 * s;
+    camera.position.z =  26 * s;
+    camera.rotation.x = -1.2715;
+    camera.rotation.y = -0.7488;
+    camera.rotation.z = -1.1453;
+ 
     return {
         controls : controls,
         camera   : camera,
         renderer : renderer,
         scene    : scene,
-        div      : document.getElementById( div )
+        div      : wrap
     }
 }
-
+ 
 const v1 = makeViewer( "bg1", "viewer-1", true, 0.7  );
 //const v2 = makeViewer( "bg2", "viewer-2", false );
 const v3 = makeViewer( "bg3", "viewer-3", false, 2 );
-
-
-
-
+ 
+ 
+ 
+ 
 function animate() {
     requestAnimationFrame( animate );
-
+ 
     if (
         isInViewport(v1.renderer.domElement)
     ) {
@@ -1081,15 +1067,6 @@ function animate() {
         v1.renderer.render( v1.scene, v1.camera );
         v1.controls.update();
     }
-/*
-    if (
-        isInViewport(v2.renderer.domElement)
-    ) {
-       // console.log("viewing protein");
-        v2.renderer.render( v2.scene, v2.camera );
-        v2.controls.update();
-    }
-*/
     if (
         isInViewport(v3.renderer.domElement)
     ) {
@@ -1098,9 +1075,9 @@ function animate() {
         v3.renderer.render( v3.scene, v3.camera );
         v3.controls.update();
     }
-
-
+    
 }
 animate();
-
-
+ 
+ 
+ 
