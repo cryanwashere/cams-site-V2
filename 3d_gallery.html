@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cameron Ryan — Gallery</title>
+
+    <link rel="stylesheet" href="style2.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
+
+    <style>
+
+        /* ─────────────────────────────────────────
+           GALLERY THEME — follows system preference
+        ───────────────────────────────────────── */
+
+        /* Light mode (default) */
+        :root {
+            --gallery-bg:       #f5f2ed;
+            --gallery-wall:     #edeae4;
+            --gallery-border:   #d0cbc3;
+            --gallery-accent:   #8c6d3f;
+            --gallery-text:     #1a1714;
+            --gallery-muted:    #8a8178;
+            --gallery-dim:      #b0a89e;
+            --frame-shadow:     0 8px 48px rgba(0,0,0,0.12), 0 2px 12px rgba(0,0,0,0.08);
+            --frame-glow:       0 0 0 1px #ccc6bd, 0 0 0 6px #e8e4de, var(--frame-shadow);
+            --nav-bg:           rgba(245, 242, 237, 0.92);
+            --frame-bg:         #e8e4dc;
+            --vignette-color:   rgba(0,0,0,0.06);
+        }
+
+        /* Dark mode */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --gallery-bg:       #0d0d0d;
+                --gallery-wall:     #111111;
+                --gallery-border:   #2a2a2a;
+                --gallery-accent:   #c8a96e;
+                --gallery-text:     #e8e4dc;
+                --gallery-muted:    #6b6560;
+                --gallery-dim:      #4a4540;
+                --frame-shadow:     0 8px 48px rgba(0,0,0,0.7), 0 2px 12px rgba(0,0,0,0.5);
+                --frame-glow:       0 0 0 1px #2e2a24, 0 0 0 6px #1a1714, var(--frame-shadow);
+                --nav-bg:           rgba(13, 13, 13, 0.92);
+                --frame-bg:         #080808;
+                --vignette-color:   rgba(0,0,0,0.35);
+            }
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html, body {
+            background: var(--gallery-bg);
+            color: var(--gallery-text);
+            min-height: 100vh;
+        }
+
+        /* ── Noise grain overlay ── */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 1000;
+            opacity: 0.4;
+        }
+
+        /* ── Navigation ── */
+        .gallery-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.1rem 3rem;
+            border-bottom: 0.5px solid var(--gallery-border);
+            background: var(--nav-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        .nav-wordmark {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 17px;
+            font-weight: 300;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            color: var(--gallery-text);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            list-style: none;
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            font-family: 'DM Mono', monospace;
+            font-size: 10px;
+            font-weight: 400;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--gallery-muted);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--gallery-accent);
+        }
+
+        /* ── Progress bar ── */
+        .progress-rail {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: transparent;
+            z-index: 200;
+        }
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: var(--gallery-accent);
+            transition: width 0.1s linear;
+        }
+
+        /* ── Gallery body ── */
+        .gallery-body {
+            max-width: 1160px;
+            margin: 0 auto;
+            padding: 8rem 3rem 8rem;
+        }
+
+        /* ── Exhibition header ── */
+        .exhibition-header {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            margin-bottom: 5rem;
+            padding-bottom: 2rem;
+            border-bottom: 0.5px solid var(--gallery-border);
+            opacity: 0;
+            transform: translateY(16px);
+            animation: fadeUp 0.9s ease 0.1s forwards;
+        }
+
+        .exhibition-meta {
+            font-family: 'DM Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--gallery-muted);
+            margin-bottom: 1rem;
+        }
+
+        .exhibition-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(36px, 5vw, 60px);
+            font-weight: 300;
+            font-style: italic;
+            letter-spacing: -0.01em;
+            line-height: 1.1;
+            color: var(--gallery-text);
+        }
+
+        .exhibition-title strong {
+            font-style: normal;
+            font-weight: 400;
+            color: var(--gallery-accent);
+        }
+
+        .exhibition-count {
+            font-family: 'DM Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: var(--gallery-muted);
+            text-align: right;
+            line-height: 1.8;
+        }
+
+        /* ── Fade-up animation ── */
+        @keyframes fadeUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-in {
+            opacity: 0;
+            transform: translateY(24px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+        .animate-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ── Artwork frame wrapper ── */
+        .artwork {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .artwork-frame {
+            position: relative;
+            background: var(--frame-bg);
+            border-radius: 3px;
+            box-shadow: var(--frame-glow);
+            overflow: hidden;
+            transition: box-shadow 0.4s ease;
+        }
+
+        .artwork-frame:hover {
+            box-shadow:
+                0 0 0 1px #3e3830,
+                0 0 0 6px #1f1c18,
+                0 12px 64px rgba(0,0,0,0.8),
+                0 2px 16px rgba(0,0,0,0.6);
+        }
+
+        /* Subtle spotlight vignette */
+        .artwork-frame::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at 50% 0%, transparent 60%, var(--vignette-color) 100%);
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .artwork-frame canvas {
+            display: block;
+            width: 100% !important;
+            height: 100% !important;
+            position: absolute;
+            top: 0; left: 0;
+            cursor: grab;
+        }
+
+        .artwork-frame canvas:active {
+            cursor: grabbing;
+        }
+
+        /* canvas height spacer */
+        .artwork-frame-inner {
+            width: 100%;
+            position: relative;
+        }
+
+        /* ── Museum placard ── */
+        .placard {
+            margin-top: 1.6rem;
+            padding-left: 0.1rem;
+        }
+
+        .placard-number {
+            font-family: 'DM Mono', monospace;
+            font-size: 9px;
+            letter-spacing: 0.24em;
+            text-transform: uppercase;
+            color: var(--gallery-accent);
+            opacity: 0.8;
+            margin-bottom: 0.55rem;
+        }
+
+        .placard-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 26px;
+            font-weight: 400;
+            font-style: italic;
+            color: var(--gallery-text);
+            letter-spacing: -0.01em;
+            line-height: 1.2;
+            margin-bottom: 0.5rem;
+        }
+
+        .placard-medium {
+            font-family: 'DM Mono', monospace;
+            font-size: 10px;
+            font-weight: 300;
+            letter-spacing: 0.1em;
+            color: var(--gallery-muted);
+            margin-bottom: 0.9rem;
+        }
+
+        .placard-desc {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 14.5px;
+            font-weight: 300;
+            line-height: 1.75;
+            color: var(--gallery-dim);
+            max-width: 42ch;
+        }
+
+        .placard-interact {
+            display: inline-block;
+            margin-top: 1rem;
+            font-family: 'DM Mono', monospace;
+            font-size: 9px;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: var(--gallery-muted);
+            border-bottom: 0.5px solid var(--gallery-border);
+            padding-bottom: 1px;
+        }
+
+        /* ──────────────────────────────────
+           GALLERY LAYOUT
+           Featured (large) piece + two side pieces
+        ────────────────────────────────── */
+
+        /* Row 1: full-width featured piece */
+        .row-featured {
+            margin-bottom: 6rem;
+        }
+
+        .row-featured .artwork-frame-inner {
+            padding-top: 60%;
+        }
+
+        /* Row 2: two equal pieces side by side */
+        .row-pair {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            margin-bottom: 6rem;
+        }
+
+        .row-pair .artwork-frame-inner {
+            padding-top: 60%;
+        }
+
+        /* ── Divider ── */
+        .gallery-divider {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            margin-bottom: 6rem;
+            opacity: 0;
+            animation: fadeUp 0.8s ease 0.5s forwards;
+        }
+
+        .gallery-divider::before,
+        .gallery-divider::after {
+            content: '';
+            flex: 1;
+            height: 0.5px;
+            background: var(--gallery-border);
+        }
+
+        .divider-ornament {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 13px;
+            color: var(--gallery-dim);
+            letter-spacing: 0.3em;
+            white-space: nowrap;
+        }
+
+        /* ── Footer ── */
+        .gallery-footer {
+            border-top: 0.5px solid var(--gallery-border);
+            padding-top: 2.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .gallery-footer p {
+            font-family: 'DM Mono', monospace;
+            font-size: 9px;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--gallery-muted);
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 760px) {
+            .gallery-nav { padding: 1rem 1.5rem; }
+            .gallery-body { padding: 7rem 1.5rem 5rem; }
+            .nav-links { display: none; }
+            .row-pair { grid-template-columns: 1fr; gap: 5rem; }
+            .row-featured .artwork-frame-inner { padding-top: 60%; }
+            .exhibition-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+        }
+    </style>
+</head>
+
+<script>
+    window.onscroll = () => {
+        const scrolled = (document.documentElement.scrollTop /
+            (document.documentElement.scrollHeight - document.documentElement.clientHeight)) * 100;
+        document.getElementById("progressFill").style.width = scrolled + "%";
+    };
+</script>
+
+<script type="module">
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(e => {
+            if (e.isIntersecting) e.target.classList.add('visible');
+        });
+    }, { threshold: 0.08 });
+    document.querySelectorAll('.animate-in').forEach(el => observer.observe(el));
+</script>
+
+<div id="invertedcursor"></div>
+<script type="module">
+    document.onmousemove = function(e) {
+        document.documentElement.style.setProperty('--x', (e.clientX + window.scrollX) + 'px');
+        document.documentElement.style.setProperty('--y', (e.clientY + window.scrollY) + 'px');
+    }
+</script>
+
+<body>
+
+    <script src="js/three.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.0.0/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-vis@1.0.2/dist/tfjs-vis.umd.min.js"></script>
+    <script type="module" src="data.js"></script>
+    <script type="module" src="solar_system.js"></script>
+    <script type="module" src="main2.js"></script>
+
+    <!-- Progress rail -->
+    <div class="progress-rail">
+        <div class="progress-fill" id="progressFill"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="gallery-nav">
+        <a href="/index.html" class="nav-wordmark">Cameron Ryan</a>
+        <ul class="nav-links">
+            <li><a href="/index.html">Home</a></li>
+            <li><a href="portfolio.html">Portfolio</a></li>
+            <li><a href="https://github.com/cryanwashere">Github</a></li>
+            <li><a href="https://linkedin.com/in/cameron-ryan-7b043a229">LinkedIn</a></li>
+            <li><a href="resume_materials/Cameron_Ryan_Resume_Winter2026.pdf">Résumé</a></li>
+            <li><a href="https://scholar.google.com/citations?user=CGqafTAAAAAJ&hl=en">Scholar</a></li>
+            <li><a href="misc.html">Misc</a></li>
+        </ul>
+    </nav>
+
+    <main class="gallery-body">
+
+        <!-- Exhibition header -->
+        <header class="exhibition-header">
+            <div>
+                <p class="exhibition-meta">Interactive 3D Exhibition</p>
+                <h1 class="exhibition-title">
+                    Viewing Gallery in<br><strong>Three Dimensions</strong>
+                </h1>
+            </div>
+            <div class="exhibition-count">
+                <span>3 Works on Display</span><br>
+                <span>Cameron Ryan, 2026</span><br>
+                <span>WebGL · Three.js</span>
+            </div>
+        </header>
+
+        <!-- ── Work I: Featured piece ── -->
+        <section class="row-featured animate-in" style="transition-delay: 0.1s;">
+            <div class="artwork" id="bg-viewer-wrap">
+                <div class="artwork-frame">
+                    <div class="artwork-frame-inner">
+                        <canvas id="bg-shared"></canvas>
+                    </div>
+                </div>
+                <div class="placard">
+                    <p class="placard-number">Work I &nbsp;</p>
+                    <h2 class="placard-title">Solar System</h2>
+                    <p class="placard-medium">WebGL, Three.js &nbsp;—&nbsp; Interactive</p>
+                    <span class="placard-interact">↔ drag to rotate &nbsp; ⊕ scroll to zoom</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Divider -->
+        <div class="gallery-divider">
+            <span class="divider-ornament">· · ·</span>
+        </div>
+
+        <!-- ── Work II: Featured piece ── -->
+        <section class="row-featured animate-in" style="transition-delay: 0.1s;">
+            <div class="artwork" id="viewer-1">
+                <div class="artwork-frame">
+                    <div class="artwork-frame-inner">
+                        <canvas id="bg1"></canvas>
+                    </div>
+                </div>
+                <div class="placard">
+                    <p class="placard-number">Work II &nbsp;·&nbsp; Made in 2022 without AI</p>
+                    <h2 class="placard-title">Convolutional Neural Network</h2>
+                    <p class="placard-medium">WebGL, Three.js &nbsp;—&nbsp; Interactive</p>
+                    <span class="placard-interact">↔ drag to rotate &nbsp; ⊕ scroll to zoom</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- ── Work III: Featured piece ── -->
+        <section class="row-featured animate-in" style="transition-delay: 0.1s;">
+            <div class="artwork" id="viewer-3">
+                <div class="artwork-frame">
+                    <div class="artwork-frame-inner">
+                        <canvas id="bg3"></canvas>
+                    </div>
+                </div>
+                <div class="placard">
+                    <p class="placard-number">Work III &nbsp;·&nbsp; Made in 2022 without AI</p>
+                    <h2 class="placard-title">ATP Synthase structure</h2>
+                    <p class="placard-medium">WebGL, Three.js &nbsp;—&nbsp; Interactive</p>
+                    <span class="placard-interact">↔ drag to rotate &nbsp; ⊕ scroll to zoom</span>
+                </div>
+            </div>
+        </section>
+
+    
+
+        <!-- Footer -->
+        <footer class="gallery-footer">
+            <p>© Cameron Ryan &nbsp;—&nbsp; All works rendered in real time</p>
+            <p>WebGL &nbsp;·&nbsp; Three.js &nbsp;·&nbsp; TensorFlow.js</p>
+        </footer>
+
+    </main>
+
+</body>
+</html>
