@@ -46,11 +46,10 @@
 </div>
 
 <div class="page">
-    <h1>Cameron's Project Portfolio</h1>
-    <p class="subtitle">A comprehensive list of projects I'm able to share publicly.</p>
+    <h1>Cameron Ryan</h1>
 
     <div class="controls">
-        <div class="control-row" id="sort-row">
+        <div class="control-row" id="sort-row" style="display: none;">
             <span class="control-label">Sort by</span>
             <select id="sort-select">
                 <option value="effort-desc">Effort (most first)</option>
@@ -71,8 +70,8 @@
     </div>
 
     <div class="view-toggle">
-        <button class="view-pill active" id="view-projects" onclick="switchView('projects')">Projects</button>
-        <button class="view-pill" id="view-feed" onclick="switchView('feed')">Feed</button>
+        <button class="view-pill active" id="view-feed" onclick="switchView('feed')">Feed</button>
+        <button class="view-pill" id="view-projects" onclick="switchView('projects')">All Projects</button>
     </div>
 
 
@@ -89,6 +88,19 @@
 // ─────────────────────────────────────────────
 const PROJECTS = [
     {
+        id: "llnl-latent-space-alignment",
+        title: "Unsupervised Latent Space Alignment",
+        description: "Do neural network latent spaces posess intrinsic geometry which can be used to align them without the use of any anchor superivion?",
+        startDate: "2026-06-15",
+        effort: 5,
+        organization: "Lawrence Livermore National Laboratory",
+        mentor: "Shusen Liu",
+        tags: ["neural networks", "latent space"],
+        links: [
+            {label : "Arxiv preprint", href: "resume_materials/unsupervised_latent_space_alignment_with_hyperspherical_geodesic_alignmnet_preprint1.pdf"}
+        ]
+    },
+    {
         id: "math-methods-perceptron",
         title: "Perceptron Learning Capacity Experiment",
         description: "Final project for Mathematical and Computational Problem Solving Methods for Physics. Did experiments on the learning capacity of perceptrons, and compared them to known analytical results from early research in the field.",
@@ -96,7 +108,7 @@ const PROJECTS = [
         effort: 3, 
         organization: "Northeastern University",
         mentor: "Armen Stepenyants", 
-        tags: ["perceptrons", "MATLAB", "theoretical physics"],
+        tags: ["perceptrons", "theoretical physics"],
         links: [
             {label : "Project Report", href: "resume_materials/Math_Methods_Final_Project.pdf"},
             {label : "GitHub", href: "https://github.com/cryanwashere/Perceptron-Capacity-Math-Methods-Final-"}
@@ -122,9 +134,9 @@ const PROJECTS = [
         description: "Researched methods of classifying material phases from atomic coordinates using neural networks. Invented the Gaussian Kernel (GK) architecture, which achieves significant performance improvements over baseline Dynamic Graph Convolutional Neural Network (DGCNN) approaches.",
         startDate: "2025-05-01",
         effort: 5,
-        organization: "University of Rochester LLE",
+        organization: "University of Rochester Laboratory for Laser Energetics",
         mentor: "Shuai Zhang",
-        tags: ["neural networks", "theoretical physics", "python", "HPC", "model training", "intertial confinement fusion"],
+        tags: ["neural networks", "theoretical physics"],
         links: [
             { label: "IFE SURE Symposium Poster (Aug 2025)", href: "resume_materials/Cameron_Ryan_Project.pdf" },
             { label: "AI/ML Group Presentation (Feb 2026)", href: "resume_materials/AIML_presentation_feb2026.pdf" }
@@ -143,7 +155,7 @@ const PROJECTS = [
         startDate: "2024-06-01",
         effort: 5,
         organization: null,
-        tags: ["systems architecture", "neural networks", "information retrieval", "latent space", "docker", "python"],
+        tags: ["neural networks", "information retrieval", "latent space"],
         links: [
             { label: "Codebase (GitLab)", href: "https://gitlab.com/cjryanwashere/Search_Engine_Backend" }
         ]
@@ -155,7 +167,7 @@ const PROJECTS = [
         startDate: "2023-09-01",
         effort: 5,
         organization: null,
-        tags: ["neural networks", "mobile app", "computer vision", "python", "model training", "docker"],
+        tags: ["neural networks", "mobile app"],
         links: [
             { label: "iOS App", href: "https://apps.apple.com/td/app/naturify/id6447524765" },
             { label: "Web demo", href: "https://naturify.app/static/identify.html" }
@@ -172,9 +184,9 @@ const PROJECTS = [
         description: "Researched methods of managing applications using containers to support scientific computing projects and collaboration with other labs at the Laboratory for Laser Energetics.",
         startDate: "2022-05-01",
         effort: 4,
-        organization: "University of Rochester LLE",
+        organization: "University of Rochester Laboratory for Laser Energetics",
         mentor: "Richard Kidder",
-        tags: ["systems architecture", "dev ops", "docker"],
+        tags: ["systems architecture"],
         links: [
             { label: "Project report", href: "resume_materials/LLE_report_summer2022.pdf" }
         ]
@@ -186,7 +198,7 @@ const PROJECTS = [
         startDate: "2023-01-01",
         effort: 3,
         organization: null,
-        tags: ["neural networks", "python"],
+        tags: ["neural networks"],
         links: [
             { label: "GitHub", href: "https://github.com/cryanwashere/Floral" }
         ]
@@ -198,7 +210,7 @@ const PROJECTS = [
         startDate: "2023-03-01",
         effort: 2,
         organization: null,
-        tags: ["theoretical biology", "C"],
+        tags: [],
         links: [
             { label: "GitHub", href: "https://github.com/cryanwashere/dna-code" }
         ]
@@ -210,7 +222,7 @@ const PROJECTS = [
         startDate: "2022-11-01",
         effort: 1,
         organization: null,
-        tags: ["assembly", "operating systems", "C"],
+        tags: [],
         links: [
             { label: "GitHub", href: "https://github.com/cryanwashere/CameronOS" }
         ]
@@ -222,7 +234,7 @@ const PROJECTS = [
         startDate: "2025-09-01",
         effort: 3,
         organization: null,
-        tags: ["finance", "systems architecture"],
+        tags: ["finance"],
         links: [
             { label: "GitHub", href: "https://github.com/cryanwashere/apartment_currency" }
         ]
@@ -234,7 +246,7 @@ const PROJECTS = [
         startDate: "2022-09-01",
         effort: 4,
         organization: null,
-        tags: ["neural networks", "mobile app", "computer vision", "latent space", "information retrieval", "AI Integration"],
+        tags: ["neural networks", "mobile app", "latent space", "information retrieval"],
         links: [
             { label: "iOS App", href: "https://apps.apple.com/td/app/image-garden/id6446785274" }
         ]
@@ -246,7 +258,7 @@ const PROJECTS = [
         startDate: "2022-06-01",
         effort: 3,
         organization: null,
-        tags: ["neural networks", "mobile app", "audio classification", "AI Integration"],
+        tags: ["neural networks", "mobile app"],
         links: [
             { label: "iOS App", href: "https://apps.apple.com/td/app/earth-explore/id1632933059" }
         ]
@@ -258,7 +270,7 @@ const PROJECTS = [
         startDate: "2021-09-01",
         effort: 4,
         organization: null,
-        tags: ["mobile app", "AI Integration"],
+        tags: ["mobile app"],
         links: [
             { label: "iOS App", href: "https://apps.apple.com/td/app/wordlab/id1584528104" }
         ]
@@ -270,7 +282,7 @@ const PROJECTS = [
         startDate: "2024-04-01",
         effort: 3,
         organization: null,
-        tags: ["systems architecture", "rust", "information retrieval"],
+        tags: ["information retrieval"],
         links: [
             { label: "GitHub", href: "https://github.com/cryanwashere/Search_Engine_Crawler" }
         ]
@@ -282,23 +294,11 @@ const PROJECTS = [
         startDate: "2025-06-01",
         effort: 2,
         organization: null,
-        tags: ["neural networks", "finance", "python", "model training"],
+        tags: ["neural networks", "finance"],
         links: [
             { label: "GitHub", href: "https://github.com/cryanwashere/stock_prediction_neural_net" }
         ]
     },
-    {
-        id: "atomdance-paper",
-        title: "ATOMDANCE (Published in Biophysical Journal)",
-        description: "Contributed to research on kernel-based denoising and choreographic analysis for protein dynamic comparison. Published in Biophysical Journal, 2024.",
-        startDate: "2021-01-01",
-        effort: 2,
-        organization: "Rochester Institute of Technology",
-        tags: ["theoretical physics", "neural networks", "biophysics"],
-        links: [
-            { label: "DOI", href: "https://doi.org/10.1016/j.bpj.2024.03.024" }
-        ]
-    }
 ];
 
 // ─────────────────────────────────────────────
@@ -306,37 +306,39 @@ const PROJECTS = [
 // ─────────────────────────────────────────────
 const FEED = [
     {
+        date: "2026-08-28",
+        text: "Released preprint for my paper on unsupervised latent space alignment. <br><b>Acknowledgement:</b> Shusen Liu for help and guidence during my research, and to Kowshik and Vivek for their support in writing this paper.",
+        organization: "Lawrence Livermore National Laboratory",
+        tags: ["neural networks", "latent space"], 
+        pdf: "resume_materials/unsupervised_latent_space_alignment_with_hyperspherical_geodesic_alignmnet_preprint1.pdf",
+        pdfLabel: "Unsupervised Latent Space Alignment with Hyperspherical Geodesic Alignment",
+        project: "llnl-latent-space-alignment"
+    },
+    {
         date: "2026-04-20",
-        text: "Submitted my final project for Mathematical and Computational Problem Solving Methods for Physics. I did several interesting computational experiments on the learning capacities of perceptrons. I am very thankful to my professor Armen Stepenyants for helping me with this project. ",
-        tags: ["perceptrons", "MATLAB", "theoretical physics"],
+        text: "Submitted final project for Mathematical and Computational Problem Solving Methods for Physics. <br><b>Acknowledgement:</b> Professor Arment Stepenyants for help in guidence throughout this project and the semester.",
+        tags: ["perceptrons", "theoretical physics"],
         organization: "Northeastern University",
         pdf: "resume_materials/Math_Methods_Final_Project.pdf",
         pdfLabel: "Experiments in the learning capacity of perceptrons",
         project: "math-methods-perceptron"
     },
     {
-        date: "2026-03-15",
-        text: "Gave a presentation on Minecraft RL methods to the Applied Math capstone class. Covered PPO, SAC, and RLHF approaches side by side.",
-        tags: ["reinforcement learning, neural networks"],
-        organization: "Northeastern University",
-        project: "capstone-minecraft-rl"
-    },
-    {
         date: "2026-02-10",
-        text: "Presented findings from my research during summer and winter break 2025 to the AI/ML group at the Laboratory for Laser Energetics. I talked about understanding the previous research by Erhard et al., the modfied DGCNN architecture, and the Gaussian Kernel architecture. I am very thankful to Shuai Zhang, and Mark Guardelben for helping me with my slides, and inviting me to give the presentation.",
-        tags: ["neural networks", "theoretical physics", "HPC"],
+        text: "Presented project progress AI/ML group at the Laboratory for Laser Energetics.",
+        tags: ["neural networks", "theoretical physics"],
         pdf: "resume_materials/AIML_presentation_feb2026.pdf",
         pdfLabel: "Presentation delivered to the LLE AI/ML group",
-        organization: "University of Rochester LLE",
+        organization: "University of Rochester Laboratory for Laser Energetics",
         project: "ml-phase-id"
     },
     {
         date: "2025-08-05",
-        text: "I went to Washington DC to present a poster with my research progress at the IFE SURE symposiom. This poster mainly focuses on the modified DGCNN model. It was really great to be able to meet other undergraduate students from around the US doing research that relates to ICF energy!",
+        text: "Presented project poster at IFE-SURE symposium.",
         pdf: "resume_materials/Cameron_Ryan_Project.pdf",
         pdfLabel: "IFE SURE Symposium poster",
-        tags: ["neural networks", "theoretical physics", "intertial confinement fusion"],
-        organization: "University of Rochester LLE",
+        tags: ["neural networks", "theoretical physics"],
+        organization: "University of Rochester Laboratory for Laser Energetics",
         project: "ml-phase-id"
     },
 ];
@@ -356,7 +358,7 @@ function toggleContrib(id, btn) {
 let activeTags = new Set();
 let activeOrgs = new Set();
 let sortMode = "effort-desc";
-let currentView = "projects"; // "projects" | "feed"
+let currentView = "feed"; // "projects" | "feed"
 
 // Derive unique tags and orgs for each dataset
 const allProjectTags = [...new Set(PROJECTS.flatMap(p => p.tags))].sort();
