@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Neural Playground — draw data, watch it learn</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* ---- Everything scoped under .nnp so it's safe to drop into an existing site ---- */
+  .nnp {
+    --bg: #10141c;
+    --panel: #171d28;
+    --panel-2: #1e2633;
+    --line: #2b3546;
+    --line-soft: #222b3a;
+    --text: #e7ecf3;
+    --muted: #8593a6;
+    --pos: #ef8a17;   /* Class A */
+    --neg: #2196c9;   /* Class B */
+    --hi: #57e2c0;    /* probe / hover accent */
+    --radius: 12px;
+    --font-display: "Space Grotesk", system-ui, sans-serif;
+    --font-body: "Inter", system-ui, sans-serif;
+    --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    padding: 22px;
+    border-radius: var(--radius);
+    max-width: 1180px;
+    margin: 0 auto;
+    box-sizing: border-box;
+    line-height: 1.4;
+  }
+  .nnp *, .nnp *::before, .nnp *::after { box-sizing: border-box; }
+
+  .nnp .head { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; margin-bottom: 4px; }
+  .nnp h1 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(20px, 3.5vw, 30px);
+    letter-spacing: -0.02em;
+    margin: 0;
+  }
+  .nnp h1 .a { color: var(--pos); }
+  .nnp h1 .b { color: var(--neg); }
+  .nnp .sub { color: var(--muted); font-size: 13.5px; margin: 2px 0 18px; max-width: 62ch; }
+
+  /* ---- control bar ---- */
+  .nnp .bar {
+    display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: flex-end;
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: var(--radius); padding: 12px 14px; margin-bottom: 16px;
+  }
+  .nnp .bar > .field:not(:first-child) { display: none; }
+  .nnp .bar > .field:first-child > label { display: none; }
+  .nnp .bar > .field:first-child > div > button:not(#play) { display: none; }
+  .nnp .bar > .spacer { display: none; }
+  .nnp .bar > .readouts { display: none; }
+  .nnp .field { display: flex; flex-direction: column; gap: 5px; }
+  .nnp .field > label {
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--muted);
+  }
+  .nnp select, .nnp button {
+    font-family: var(--font-body); font-size: 13px; color: var(--text);
+    background: var(--panel-2); border: 1px solid var(--line);
+    border-radius: 8px; padding: 7px 10px; cursor: pointer;
+  }
+  .nnp select:hover, .nnp button:hover { border-color: #3a4759; }
+  .nnp button:focus-visible, .nnp select:focus-visible, .nnp .chip:focus-visible {
+    outline: 2px solid var(--hi); outline-offset: 1px;
+  }
+  .nnp .btn-primary { background: var(--hi); color: #04211b; border-color: var(--hi); font-weight: 600; min-width: 92px; }
+  .nnp .btn-primary:hover { filter: brightness(1.06); }
+  .nnp .spacer { flex: 1 1 auto; }
+
+  .nnp .readouts { display: flex; gap: 22px; align-items: flex-end; }
+  .nnp .stat { display: flex; flex-direction: column; }
+  .nnp .stat .k { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+  .nnp .stat .v { font-family: var(--font-mono); font-size: 20px; font-weight: 500; font-variant-numeric: tabular-nums; }
+
+  /* ---- stage ---- */
+  .nnp .stage { display: flex; flex-direction: column; gap: 0; align-items: flex-start; flex-wrap: nowrap; }
+
+  .nnp .card {
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: var(--radius); padding: 14px;
+  }
+  .nnp .card h2 {
+    font-family: var(--font-mono); font-size: 11px; font-weight: 500;
+    letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted);
+    margin: 0 0 10px;
+  }
+
+  /* data panel */
+  .nnp .data { width: 100%; max-width: 392px; flex: 0 0 auto; }
+  .nnp .data h2 { display: none; }
+  .nnp .canvas-wrap { position: relative; width: 100%; aspect-ratio: 1 / 1; }
+  .nnp #board {
+    width: 100%; height: 100%; display: block; border-radius: 8px;
+    background: #f2f5f8; cursor: crosshair; touch-action: none;
+    border: 1px solid var(--line);
+  }
+  .nnp .probe-tag {
+    position: absolute; top: 8px; left: 8px; pointer-events: none;
+    background: rgba(8,12,18,0.82); color: var(--hi);
+    font-family: var(--font-mono); font-size: 11px; padding: 4px 8px;
+    border-radius: 6px; border: 1px solid var(--hi); opacity: 0; transition: opacity .12s;
+  }
+  .nnp .probe-tag.on { opacity: 1; }
+
+  .nnp .tools { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; align-items: center; }
+  .nnp .classpick { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+  .nnp .bar .classpick { display: inline-flex; align-items: center; }
+  .nnp .chip {
+    font-family: var(--font-body); font-size: 12.5px; color: var(--muted);
+    background: transparent; border: 0; padding: 7px 12px; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .nnp .chip .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .nnp .chip.a .dot { background: var(--pos); }
+  .nnp .chip.b .dot { background: var(--neg); }
+  .nnp .chip.active { color: var(--text); background: var(--panel-2); }
+  .nnp .hint { font-size: 11.5px; color: var(--muted); margin-top: 10px; }
+  .nnp .hint code { font-family: var(--font-mono); color: #b9c4d4; }
+
+  /* network panel */
+  .nnp .net { flex: 1 1 auto; min-width: auto; width: 100%; }
+  .nnp .net h2 { display: none; }
+  .nnp .net-scroll { overflow-x: auto; padding-bottom: 4px; }
+  .nnp #net-stage { position: relative; margin: 0 auto; }
+  .nnp #net-links { position: absolute; inset: 0; overflow: visible; pointer-events: none; }
+
+  .nnp .col-label {
+    position: absolute; font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted);
+    text-align: center; transform: translateX(-50%);
+    display: none;
+  }
+  .nnp .layer-ctl {
+    position: absolute; display: flex; gap: 6px; transform: translateX(-50%);
+  }
+  .nnp .layer-ctl button {
+    width: 26px; height: 26px; padding: 0; font-size: 15px; line-height: 1;
+    display: grid; place-items: center; border-radius: 6px;
+  }
+
+  .nnp .node {
+    position: absolute; width: 46px; height: 46px; border-radius: 50%;
+    border: 1.5px solid var(--line); overflow: hidden; cursor: pointer;
+    background: #f2f5f8; transition: border-color .12s, transform .12s, box-shadow .12s;
+  }
+  .nnp .node canvas { width: 100%; height: 100%; display: block; }
+  .nnp .node.input { cursor: help; }
+  .nnp .node:hover, .nnp .node.probing {
+    border-color: var(--hi); box-shadow: 0 0 0 2px rgba(87,226,192,0.25);
+    transform: scale(1.06); z-index: 3;
+  }
+  .nnp .node .tip {
+    position: absolute; bottom: -1px; left: 0; right: 0;
+    font-family: var(--font-mono); font-size: 8px; text-align: center;
+    color: #45526a; background: rgba(255,255,255,0.72); line-height: 1.3;
+    pointer-events: none;
+  }
+
+  .nnp .legend { display: flex; gap: 16px; align-items: center; margin-top: 12px; flex-wrap: wrap; }
+  .nnp .legend .item { display: flex; align-items: center; gap: 7px; font-size: 11.5px; color: var(--muted); }
+  .nnp .swatch { width: 34px; height: 12px; border-radius: 3px;
+    background: linear-gradient(90deg, var(--neg), #f2f5f8, var(--pos)); border: 1px solid var(--line); }
+  .nnp .wsample { width: 22px; height: 0; border-top-width: 3px; border-top-style: solid; }
+
+  @media (max-width: 720px) {
+    .nnp .data { width: 100%; }
+    .nnp { padding: 16px; }
+  }
+</style>
+</head>
+<body>
+<div class="nnp" id="nnp">
+
+  <!-- Controls -->
+  <div class="bar">
+    <div class="field">
+      <label>Training</label>
+      <div style="display:flex; gap:8px;">
+        <button id="play" class="btn-primary">Play</button>
+      </div>
+    </div>
+    <div class="classpick" role="group" aria-label="Class to place">
+      <button class="chip a active" id="pick-a"><span class="dot"></span>Class A</button>
+      <button class="chip b" id="pick-b"><span class="dot"></span>Class B</button>
+    </div>
+    <select id="sample" title="Load a sample dataset">
+      <option value="">Load sample…</option>
+      <option value="circle">Circle</option>
+      <option value="xor">XOR</option>
+      <option value="gauss">Two blobs</option>
+      <option value="spiral">Spiral</option>
+    </select>
+    <button id="clear">Clear</button>
+    <div class="field">
+      <label>Learning rate</label>
+      <select id="lr">
+        <option value="0.003">0.003</option>
+        <option value="0.01">0.01</option>
+        <option value="0.03" selected>0.03</option>
+        <option value="0.1">0.1</option>
+        <option value="0.3">0.3</option>
+        <option value="1">1.0</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Activation</label>
+      <select id="act">
+        <option value="tanh" selected>Tanh</option>
+        <option value="relu">ReLU</option>
+        <option value="sigmoid">Sigmoid</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Regularization (L2)</label>
+      <select id="reg">
+        <option value="0" selected>none</option>
+        <option value="0.001">0.001</option>
+        <option value="0.003">0.003</option>
+        <option value="0.01">0.01</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Batch size</label>
+      <select id="batch">
+        <option value="1">1</option>
+        <option value="5">5</option>
+        <option value="10" selected>10</option>
+        <option value="30">30</option>
+      </select>
+    </div>
+    <div class="spacer"></div>
+    <div class="readouts">
+      <div class="stat"><span class="k">Epoch</span><span class="v" id="r-epoch">0</span></div>
+      <div class="stat"><span class="k">Loss</span><span class="v" id="r-loss">—</span></div>
+      <div class="stat"><span class="k">Points</span><span class="v" id="r-pts">0</span></div>
+    </div>
+  </div>
+
+  <!-- Stage -->
+  <div class="stage">
+    <!-- Data -->
+    <section class="data">
+      <h2>Data screen</h2>
+      <div class="canvas-wrap">
+        <canvas id="board" width="360" height="360"></canvas>
+        <div class="probe-tag" id="probe-tag"></div>
+      </div>
+    </section>
+
+    <!-- Network -->
+    <section class="net">
+      <h2>Network — hover a neuron to inspect it</h2>
+      <div class="net-scroll">
+        <div id="net-stage">
+          <svg id="net-links"></svg>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* =========================================================
+     1. Neural network core (forward + backprop, batch SGD)
+     Verified to learn circle/XOR before shipping.
+     ========================================================= */
+  const Activations = {
+    tanh:    { output: x => Math.tanh(x), der: x => { const y = Math.tanh(x); return 1 - y * y; } },
+    relu:    { output: x => Math.max(0, x), der: x => (x <= 0 ? 0 : 1) },
+    sigmoid: { output: x => 1 / (1 + Math.exp(-x)), der: x => { const y = 1 / (1 + Math.exp(-x)); return y * (1 - y); } },
+    linear:  { output: x => x, der: () => 1 },
+  };
+  const SquareError = { error: (o, t) => 0.5 * (o - t) * (o - t), der: (o, t) => o - t };
+
+  function Node(id, activation) {
+    this.id = id; this.inputLinks = []; this.outputs = [];
+    this.bias = 0.1; this.totalInput = 0; this.output = 0;
+    this.outputDer = 0; this.inputDer = 0; this.accInputDer = 0; this.numAccDers = 0;
+    this.activation = activation;
+  }
+  function Link(source, dest) {
+    this.source = source; this.dest = dest;
+    this.weight = Math.random() - 0.5;
+    this.errorDer = 0; this.accErrorDer = 0; this.numAccDers = 0;
+  }
+
+  function buildNetwork(shape, hiddenAct, outputAct) {
+    let id = 1; const network = [];
+    for (let layer = 0; layer < shape.length; layer++) {
+      const isOut = layer === shape.length - 1, isIn = layer === 0;
+      const cur = []; network.push(cur);
+      for (let i = 0; i < shape[layer]; i++) {
+        const act = isIn ? Activations.linear : (isOut ? outputAct : hiddenAct);
+        const node = new Node(String(id++), act);
+        cur.push(node);
+        if (layer > 0) {
+          for (const prev of network[layer - 1]) {
+            const link = new Link(prev, node);
+            prev.outputs.push(link); node.inputLinks.push(link);
+          }
+        }
+      }
+    }
+    return network;
+  }
+
+  function forwardProp(network, inputs) {
+    const inLayer = network[0];
+    for (let i = 0; i < inLayer.length; i++) inLayer[i].output = inputs[i];
+    for (let layer = 1; layer < network.length; layer++) {
+      for (const node of network[layer]) {
+        let total = node.bias;
+        for (const link of node.inputLinks) total += link.weight * link.source.output;
+        node.totalInput = total;
+        node.output = node.activation.output(total);
+      }
+    }
+    return network[network.length - 1][0].output;
+  }
+
+  function backProp(network, target, errorFn) {
+    const out = network[network.length - 1][0];
+    out.outputDer = errorFn.der(out.output, target);
+    for (let layer = network.length - 1; layer >= 1; layer--) {
+      const cur = network[layer];
+      for (const node of cur) {
+        node.inputDer = node.outputDer * node.activation.der(node.totalInput);
+        node.accInputDer += node.inputDer; node.numAccDers++;
+      }
+      for (const node of cur) {
+        for (const link of node.inputLinks) {
+          link.errorDer = node.inputDer * link.source.output;
+          link.accErrorDer += link.errorDer; link.numAccDers++;
+        }
+      }
+      if (layer === 1) continue;
+      for (const node of network[layer - 1]) {
+        node.outputDer = 0;
+        for (const link of node.outputs) node.outputDer += link.weight * link.dest.inputDer;
+      }
+    }
+  }
+
+  function updateWeights(network, lr, reg) {
+    for (let layer = 1; layer < network.length; layer++) {
+      for (const node of network[layer]) {
+        if (node.numAccDers > 0) {
+          node.bias -= (lr * node.accInputDer) / node.numAccDers;
+          node.accInputDer = 0; node.numAccDers = 0;
+        }
+        for (const link of node.inputLinks) {
+          if (link.numAccDers > 0) {
+            const regDer = reg ? reg * link.weight : 0;
+            link.weight -= (lr * link.accErrorDer) / link.numAccDers + lr * regDer;
+            link.accErrorDer = 0; link.numAccDers = 0;
+          }
+        }
+      }
+    }
+  }
+
+  /* =========================================================
+     2. State
+     ========================================================= */
+  const DOMAIN = 6;                     // input space is [-6,6] x [-6,6]
+  const MAIN_RES = 100;                 // decision-boundary heatmap resolution
+  const NODE_RES = 20;                  // shared low-res grid for neuron thumbnails
+  const HOVER_RES = 84;                 // resolution when projecting one neuron
+
+  const state = {
+    hidden: [5, 5, 5, 5],                     // hidden layer sizes
+    points: [],                         // {x, y, label}
+    network: null,
+    hiddenAct: Activations.tanh,
+    lr: 0.03, reg: 0, batch: 10,
+    epoch: 0, loss: NaN,
+    playing: false,
+    placeClass: 1,                      // 1 = A, -1 = B
+    hoverNode: null,                    // node currently being projected
+    hoveringBoard: false,               // mouse is over data canvas
+  };
+
+  // fixed 2 input features: x1, x2 (kept simple & always able to learn via hidden layers)
+  function featuresOf(x, y) { return [x, y]; }
+  function inputShape() { return 2; }
+
+  function makeNetwork() {
+    const shape = [inputShape(), ...state.hidden, 1];
+    state.network = buildNetwork(shape, state.hiddenAct, Activations.tanh);
+    state.epoch = 0; state.loss = NaN;
+  }
+
+  /* =========================================================
+     3. Color + coordinate helpers
+     ========================================================= */
+  const C_NEG = [33, 150, 201], C_MID = [242, 245, 248], C_POS = [239, 138, 23];
+  function lerp(a, b, t) { return a + (b - a) * t; }
+  function colorFor(v) { // v in [-1,1] -> [r,g,b]
+    v = Math.max(-1, Math.min(1, v));
+    if (v < 0) { const t = v + 1; return [lerp(C_NEG[0],C_MID[0],t),lerp(C_NEG[1],C_MID[1],t),lerp(C_NEG[2],C_MID[2],t)]; }
+    const t = v; return [lerp(C_MID[0],C_POS[0],t),lerp(C_MID[1],C_POS[1],t),lerp(C_MID[2],C_POS[2],t)];
+  }
+  const px2x = px => (px / 360) * (2 * DOMAIN) - DOMAIN;
+  const py2y = py => DOMAIN - (py / 360) * (2 * DOMAIN);
+  const x2px = x => ((x + DOMAIN) / (2 * DOMAIN)) * 360;
+  const y2py = y => ((DOMAIN - y) / (2 * DOMAIN)) * 360;
+
+  /* =========================================================
+     4. DOM refs
+     ========================================================= */
+  const $ = sel => document.querySelector(sel);
+  const board = $("#board"), bctx = board.getContext("2d");
+  const netStage = $("#net-stage"), svg = $("#net-links");
+  const probeTag = $("#probe-tag");
+
+  // offscreen buffers
+  const buf = document.createElement("canvas"); buf.width = buf.height = MAIN_RES;
+  const bufctx = buf.getContext("2d");
+  const hbuf = document.createElement("canvas"); hbuf.width = hbuf.height = HOVER_RES;
+  const hbufctx = hbuf.getContext("2d");
+
+  bctx.imageSmoothingEnabled = true;
+
+  /* =========================================================
+     5. Rendering — data screen
+     ========================================================= */
+  function renderBoard() {
+    // background: decision landscape, or a single neuron's landscape when hovering
+    if (state.hoverNode) {
+      renderNodeField(state.hoverNode, hbufctx, HOVER_RES, true);
+      bctx.drawImage(hbuf, 0, 0, HOVER_RES, HOVER_RES, 0, 0, 360, 360);
+    } else {
+      const img = bufctx.createImageData(MAIN_RES, MAIN_RES);
+      const d = img.data;
+      for (let j = 0; j < MAIN_RES; j++) {
+        const y = py2y((j + 0.5) / MAIN_RES * 360);
+        for (let i = 0; i < MAIN_RES; i++) {
+          const x = px2x((i + 0.5) / MAIN_RES * 360);
+          const v = forwardProp(state.network, featuresOf(x, y));
+          const c = colorFor(v);
+          const k = (j * MAIN_RES + i) * 4;
+          d[k] = c[0]; d[k+1] = c[1]; d[k+2] = c[2]; d[k+3] = 235;
+        }
+      }
+      bufctx.putImageData(img, 0, 0);
+      bctx.drawImage(buf, 0, 0, MAIN_RES, MAIN_RES, 0, 0, 360, 360);
+    }
+
+    // axes
+    bctx.strokeStyle = "rgba(30,45,65,0.28)"; bctx.lineWidth = 1;
+    bctx.beginPath();
+    bctx.moveTo(180, 0); bctx.lineTo(180, 360);
+    bctx.moveTo(0, 180); bctx.lineTo(360, 180);
+    bctx.stroke();
+
+    // points
+    for (const p of state.points) {
+      const cx = x2px(p.x), cy = y2py(p.y);
+      bctx.beginPath();
+      bctx.arc(cx, cy, 4.6, 0, Math.PI * 2);
+      bctx.fillStyle = p.label > 0 ? "#ef8a17" : "#2196c9";
+      bctx.fill();
+      bctx.lineWidth = 1.4;
+      bctx.strokeStyle = "rgba(12,18,26,0.85)";
+      bctx.stroke();
+    }
+  }
+
+  /* =========================================================
+     6. Rendering — one neuron's field
+     Computes node output across the input space, normalized
+     by its own max magnitude so structure is always visible.
+     ========================================================= */
+  function renderNodeField(node, ctx, res, forBoard) {
+    const vals = new Float32Array(res * res);
+    let maxAbs = 1e-6;
+    for (let j = 0; j < res; j++) {
+      const y = py2y((j + 0.5) / res * 360);
+      for (let i = 0; i < res; i++) {
+        const x = px2x((i + 0.5) / res * 360);
+        forwardProp(state.network, featuresOf(x, y)); // fills all node outputs
+        const v = node.output;
+        vals[j * res + i] = v;
+        const a = Math.abs(v); if (a > maxAbs) maxAbs = a;
+      }
+    }
+    const img = ctx.createImageData(res, res);
+    const d = img.data;
+    for (let k = 0; k < vals.length; k++) {
+      const c = colorFor(vals[k] / maxAbs);
+      d[k*4] = c[0]; d[k*4+1] = c[1]; d[k*4+2] = c[2]; d[k*4+3] = forBoard ? 235 : 255;
+    }
+    ctx.putImageData(img, 0, 0);
+  }
+
+  /* =========================================================
+     7. Network diagram — build DOM once per structure change
+     ========================================================= */
+  let nodeViews = [];   // {node, el, ctx, layer, idx}
+  let linkViews = [];   // {link, line}
+  const NODE = 46, GAPX = 92, GAPY = 20, PADT = 44, PADB = 18;
+
+  const inputLabels = ["X₁", "X₂"];
+
+  const FIRST_VISIBLE = 1;   // hide the input layer from the diagram (still used for the math)
+
+  function layoutPositions() {
+    const layers = state.network;
+    const heights = layers.map(l => l.length * NODE + (l.length - 1) * GAPY);
+    const visibleIdx = [];
+    for (let li = FIRST_VISIBLE; li < layers.length; li++) visibleIdx.push(li);
+    const maxH = Math.max(...visibleIdx.map(li => heights[li]));
+    const stageH = maxH + PADT + PADB;
+    const stageW = (visibleIdx.length - 1) * GAPX + NODE;
+    const pos = [];
+    for (let li = 0; li < layers.length; li++) {
+      if (li < FIRST_VISIBLE) { pos.push([]); continue; }   // no positions for hidden input layer
+      const col = li - FIRST_VISIBLE;
+      // Reverse: output layer on left, hidden layers progress rightward
+      const colX = stageW - (col * GAPX + NODE / 2);
+      const top = PADT + (maxH - heights[li]) / 2;
+      const arr = [];
+      for (let ni = 0; ni < layers[li].length; ni++) {
+        arr.push({ cx: colX, cy: top + ni * (NODE + GAPY) + NODE / 2 });
+      }
+      pos.push(arr);
+    }
+    return { pos, stageW, stageH };
+  }
+
+  function rebuildNetDOM() {
+    // clear
+    netStage.querySelectorAll(".node,.col-label,.layer-ctl").forEach(n => n.remove());
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    nodeViews = []; linkViews = [];
+
+    const { pos, stageW, stageH } = layoutPositions();
+    netStage.style.width = stageW + "px";
+    netStage.style.height = stageH + "px";
+    svg.setAttribute("width", stageW);
+    svg.setAttribute("height", stageH);
+
+    const layers = state.network;
+
+    // links removed - no weight visualization
+
+    // column labels + controls
+    const colName = (li) =>
+      li === 0 ? "Inputs" : (li === layers.length - 1 ? "Output" : "Hidden " + li);
+    for (let li = FIRST_VISIBLE; li < layers.length; li++) {
+      if (!pos[li] || !pos[li][0]) continue;  // safety check
+      const lab = document.createElement("div");
+      lab.className = "col-label";
+      lab.textContent = colName(li);
+      lab.style.left = pos[li][0].cx + "px";
+      lab.style.top = "14px";
+      netStage.appendChild(lab);
+
+
+    }
+
+
+
+    // nodes (input layer is intentionally not drawn, output layer also hidden)
+    for (let li = FIRST_VISIBLE; li < layers.length - 1; li++) {
+      if (!pos[li]) continue;
+      for (let ni = 0; ni < layers[li].length; ni++) {
+        if (!pos[li][ni]) continue;
+        const node = layers[li][ni];
+        const el = document.createElement("div");
+        const isInput = li === 0, isOutput = li === layers.length - 1;
+        el.className = "node" + (isInput ? " input" : "");
+        el.style.left = (pos[li][ni].cx - NODE/2) + "px";
+        el.style.top = (pos[li][ni].cy - NODE/2) + "px";
+
+        const cv = document.createElement("canvas");
+        cv.width = NODE_RES; cv.height = NODE_RES;
+        el.appendChild(cv);
+
+        if (isInput) {
+          const tip = document.createElement("div");
+          tip.className = "tip";
+          tip.textContent = inputLabels[ni] || ("x" + ni);
+          el.appendChild(tip);
+        }
+
+        const view = { node, el, ctx: cv.getContext("2d"), layer: li, idx: ni };
+        // hover to project this neuron onto the data screen
+        el.addEventListener("pointerenter", () => setHover(view));
+        el.addEventListener("pointerleave", () => setHover(null));
+        netStage.appendChild(el);
+        nodeViews.push(view);
+      }
+    }
+  }
+
+  function setHover(view) {
+    nodeViews.forEach(v => v.el.classList.remove("probing"));
+    if (view) {
+      view.el.classList.add("probing");
+      state.hoverNode = view.node;
+      const li = view.layer, layers = state.network;
+      let name;
+      if (li === 0) name = "Input feature " + (inputLabels[view.idx] || view.idx);
+      else if (li === layers.length - 1) name = "Output neuron";
+      else name = "Neuron " + (li) + "." + (view.idx + 1);
+      probeTag.textContent = "▶ " + name;
+      probeTag.classList.add("on");
+    } else {
+      state.hoverNode = null;
+      probeTag.classList.remove("on");
+    }
+    renderBoard();
+  }
+
+  /* =========================================================
+     8. Render neuron thumbnails (each frame)
+     One shared low-res pass fills every node's output.
+     ========================================================= */
+  function renderNet() {
+    const res = NODE_RES;
+    const nNodes = nodeViews.length;
+    // gather all node references in a flat array aligned to a per-node value buffer
+    const valBufs = nodeViews.map(() => new Float32Array(res * res));
+    const maxAbs = new Float32Array(nNodes).fill(1e-6);
+
+    for (let j = 0; j < res; j++) {
+      const y = py2y((j + 0.5) / res * 360);
+      for (let i = 0; i < res; i++) {
+        const x = px2x((i + 0.5) / res * 360);
+        forwardProp(state.network, featuresOf(x, y));
+        const idx = j * res + i;
+        for (let n = 0; n < nNodes; n++) {
+          const v = nodeViews[n].node.output;
+          valBufs[n][idx] = v;
+          const a = Math.abs(v); if (a > maxAbs[n]) maxAbs[n] = a;
+        }
+      }
+    }
+    for (let n = 0; n < nNodes; n++) {
+      const ctx = nodeViews[n].ctx;
+      const img = ctx.createImageData(res, res);
+      const d = img.data, vb = valBufs[n], m = maxAbs[n];
+      for (let k = 0; k < vb.length; k++) {
+        const c = colorFor(vb[k] / m);
+        d[k*4] = c[0]; d[k*4+1] = c[1]; d[k*4+2] = c[2]; d[k*4+3] = 255;
+      }
+      ctx.putImageData(img, 0, 0);
+    }
+  }
+
+  function renderAll() { renderBoard(); renderNet(); updateReadouts(); }
+
+  function renderNetAtPoint(x, y) {
+    // Evaluate network at this single point, filling all node outputs
+    forwardProp(state.network, featuresOf(x, y));
+    
+    // Find max activation magnitude across all visible nodes for normalization
+    let maxAbs = 1e-6;
+    for (const view of nodeViews) {
+      const a = Math.abs(view.node.output);
+      if (a > maxAbs) maxAbs = a;
+    }
+    
+    // Color each node based on its activation at this point
+    for (const view of nodeViews) {
+      const c = colorFor(view.node.output / maxAbs);
+      view.ctx.fillStyle = `rgb(${c[0]}, ${c[1]}, ${c[2]})`;
+      view.ctx.fillRect(0, 0, NODE_RES, NODE_RES);
+    }
+  }
+
+  /* =========================================================
+     9. Training
+     ========================================================= */
+  function computeLoss() {
+    if (state.points.length === 0) return NaN;
+    let s = 0;
+    for (const p of state.points) {
+      const o = forwardProp(state.network, featuresOf(p.x, p.y));
+      s += SquareError.error(o, p.label);
+    }
+    return s / state.points.length;
+  }
+
+  function trainEpoch() {
+    const pts = state.points;
+    if (pts.length === 0) return;
+    // light shuffle each epoch
+    for (let i = pts.length - 1; i > 0; i--) { const j = (Math.random() * (i + 1)) | 0; const t = pts[i]; pts[i] = pts[j]; pts[j] = t; }
+    for (let i = 0; i < pts.length; i++) {
+      const p = pts[i];
+      forwardProp(state.network, featuresOf(p.x, p.y));
+      backProp(state.network, p.label, SquareError);
+      if ((i + 1) % state.batch === 0) updateWeights(state.network, state.lr, state.reg);
+    }
+    updateWeights(state.network, state.lr, state.reg);
+    state.epoch++;
+  }
+
+  const EPOCHS_PER_FRAME = 3;
+  function loop() {
+    if (!state.playing) return;
+    for (let k = 0; k < EPOCHS_PER_FRAME; k++) trainEpoch();
+    state.loss = computeLoss();
+    renderAll();
+    requestAnimationFrame(loop);
+  }
+
+  function updateReadouts() {
+    $("#r-epoch").textContent = state.epoch;
+    $("#r-loss").textContent = isNaN(state.loss) ? "—" : state.loss.toFixed(3);
+    $("#r-pts").textContent = state.points.length;
+  }
+
+  /* =========================================================
+     10. Data screen interaction
+     ========================================================= */
+  let painting = false, lastPaint = null;
+  function boardCoords(e) {
+    const r = board.getBoundingClientRect();
+    const px = (e.clientX - r.left) / r.width * 360;
+    const py = (e.clientY - r.top) / r.height * 360;
+    return { x: px2x(px), y: py2y(py), px, py };
+  }
+  function addPoint(x, y, label) {
+    if (x < -DOMAIN || x > DOMAIN || y < -DOMAIN || y > DOMAIN) return;
+    state.points.push({ x, y, label });
+  }
+  board.addEventListener("contextmenu", e => e.preventDefault());
+  board.addEventListener("pointerenter", () => { state.hoveringBoard = true; });
+  board.addEventListener("pointerleave", () => { state.hoveringBoard = false; renderNet(); });
+  board.addEventListener("pointerdown", e => {
+    e.preventDefault();
+    const c = boardCoords(e);
+    const label = (e.button === 2) ? -state.placeClass : state.placeClass;
+    addPoint(c.x, c.y, label);
+    painting = true; lastPaint = c; board.setPointerCapture(e.pointerId);
+    if (isNaN(state.loss)) state.loss = computeLoss();
+    renderAll();
+  });
+  board.addEventListener("pointermove", e => {
+    if (painting) {
+      const c = boardCoords(e);
+      const d = Math.hypot(c.px - lastPaint.px, c.py - lastPaint.py);
+      if (d < 16) return;                       // space out painted points
+      lastPaint = c;
+      addPoint(c.x, c.y, state.placeClass);
+      renderAll();
+    } else if (state.hoveringBoard) {
+      const c = boardCoords(e);
+      renderNetAtPoint(c.x, c.y);
+    }
+  });
+  const endPaint = () => { painting = false; };
+  board.addEventListener("pointerup", endPaint);
+  board.addEventListener("pointercancel", endPaint);
+
+  /* =========================================================
+     11. Sample datasets
+     ========================================================= */
+  function loadSample(kind) {
+    state.points = [];
+    const N = 90, R = 5;
+    const rnd = (a, b) => a + Math.random() * (b - a);
+    if (kind === "circle") {
+      for (let i = 0; i < N; i++) {
+        let a = rnd(0, 2*Math.PI), r = rnd(0, R*0.45);
+        addPoint(r*Math.cos(a), r*Math.sin(a), 1);
+        a = rnd(0, 2*Math.PI); r = rnd(R*0.7, R);
+        addPoint(r*Math.cos(a), r*Math.sin(a), -1);
+      }
+    } else if (kind === "xor") {
+      for (let i = 0; i < N; i++) {
+        const x = rnd(-R, R), y = rnd(-R, R);
+        addPoint(x, y, (x*y >= 0) ? 1 : -1);
+      }
+    } else if (kind === "gauss") {
+      const g = (mx, my, lbl) => { for (let i = 0; i < N; i++) addPoint(mx + rnd(-1.4,1.4)+rnd(-0.6,0.6), my + rnd(-1.4,1.4)+rnd(-0.6,0.6), lbl); };
+      g(2.6, 2.6, 1); g(-2.6, -2.6, -1);
+    } else if (kind === "spiral") {
+      const arm = (deltaT, lbl) => {
+        for (let i = 0; i < N; i++) {
+          const r = i / N * R;
+          const t = 1.75 * i / N * 2 * Math.PI + deltaT;
+          addPoint(r*Math.sin(t) + rnd(-0.25,0.25), r*Math.cos(t) + rnd(-0.25,0.25), lbl);
+        }
+      };
+      arm(0, 1); arm(Math.PI, -1);
+    }
+    makeNetwork();
+    rebuildNetDOM();
+    state.loss = computeLoss();
+    renderAll();
+  }
+
+  /* =========================================================
+     12. Controls wiring
+     ========================================================= */
+  const playBtn = $("#play");
+  function setPlaying(on) {
+    state.playing = on;
+    playBtn.textContent = on ? "Pause" : "Play";
+    if (on) requestAnimationFrame(loop);
+  }
+  playBtn.onclick = () => setPlaying(!state.playing);
+
+  $("#lr").onchange = e => state.lr = parseFloat(e.target.value);
+  $("#reg").onchange = e => state.reg = parseFloat(e.target.value);
+  $("#batch").onchange = e => state.batch = parseInt(e.target.value, 10);
+  $("#act").onchange = e => {
+    state.hiddenAct = Activations[e.target.value];
+    makeNetwork(); rebuildNetDOM(); state.loss = computeLoss(); renderAll();
+  };
+
+  $("#pick-a").onclick = () => { state.placeClass = 1; $("#pick-a").classList.add("active"); $("#pick-b").classList.remove("active"); };
+  $("#pick-b").onclick = () => { state.placeClass = -1; $("#pick-b").classList.add("active"); $("#pick-a").classList.remove("active"); };
+
+  $("#clear").onclick = () => { state.points = []; state.loss = NaN; renderAll(); };
+  $("#sample").onchange = e => { if (e.target.value) { loadSample(e.target.value); e.target.value = ""; } };
+
+  window.addEventListener("resize", () => { /* net layout is fixed-px + scrollable; nothing needed */ });
+
+  /* =========================================================
+     13. Boot
+     ========================================================= */
+  makeNetwork();
+  rebuildNetDOM();
+  loadSample("circle");   // start with something to look at
+})();
+</script>
+</body>
+</html>
