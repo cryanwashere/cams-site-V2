@@ -84,7 +84,7 @@
   .nnp .stat .v { font-family: var(--font-mono); font-size: 20px; font-weight: 500; font-variant-numeric: tabular-nums; }
 
   /* ---- stage ---- */
-  .nnp .stage { display: flex; flex-direction: column; gap: 0; align-items: flex-start; flex-wrap: nowrap; }
+  .nnp .stage { display: flex; flex-direction: column; gap: 0; align-items: center; flex-wrap: nowrap; }
 
   .nnp .card {
     background: var(--panel); border: 1px solid var(--line);
@@ -97,7 +97,7 @@
   }
 
   /* data panel */
-  .nnp .data { width: 100%; max-width: 392px; flex: 0 0 auto; }
+  .nnp .data { width: 100%; max-width: 300px; flex: 0 0 auto; }
   .nnp .data h2 { display: none; }
   .nnp .canvas-wrap { position: relative; width: 100%; aspect-ratio: 1 / 1; }
   .nnp #board {
@@ -386,7 +386,7 @@
     points: [],                         // {x, y, label}
     network: null,
     hiddenAct: Activations.tanh,
-    lr: 0.03, reg: 0, batch: 10,
+    lr: 0.001, reg: 0, batch: 10,
     epoch: 0, loss: NaN,
     playing: false,
     placeClass: 1,                      // 1 = A, -1 = B
