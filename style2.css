@@ -361,7 +361,7 @@ select:hover ~ #invertedcursor,
 }
 
 ::selection {
-  color: #000000;
+  color: #ffffff;
   background-color: var(--color-accent);
 }
 

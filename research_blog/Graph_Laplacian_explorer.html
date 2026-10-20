@@ -1,0 +1,583 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Graph Laplacian explorer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Newsreader:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    color-scheme: light;
+    --bg: #E8ECEF;
+    --panel: #F5F7F8;
+    --canvas: #FBFCFD;
+    --ink: #18222E;
+    --muted: #556270;
+    --line: #C9D1D8;
+    --accent: #1F5FBF;
+    --accent-ink: #FFFFFF;
+    --edge: #8A97A4;
+    --pt: #B7C1CB;
+    --focus: #1F5FBF;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --bg: #0F1419;
+      --panel: #1A2129;
+      --canvas: #141A20;
+      --ink: #E6EBF0;
+      --muted: #9AA7B4;
+      --line: #2C3641;
+      --accent: #6EA8FF;
+      --accent-ink: #0B1220;
+      --edge: #5A6672;
+      --pt: #56626E;
+      --focus: #8DBBFF;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #0F1419;
+    --panel: #1A2129;
+    --canvas: #141A20;
+    --ink: #E6EBF0;
+    --muted: #9AA7B4;
+    --line: #2C3641;
+    --accent: #6EA8FF;
+    --accent-ink: #0B1220;
+    --edge: #5A6672;
+    --pt: #56626E;
+    --focus: #8DBBFF;
+  }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+  *, *::before, *::after { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Instrument Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+  .page { max-width: 1240px; margin: 0 auto; padding: 28px 20px 40px; }
+  header { margin-bottom: 20px; max-width: 62ch; }
+  h1 {
+    font-family: "Newsreader", Georgia, "Times New Roman", serif;
+    font-weight: 500;
+    font-size: clamp(28px, 4vw, 40px);
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    margin: 0 0 8px;
+  }
+  header p { margin: 0; color: var(--muted); }
+  .layout { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 20px; align-items: start; }
+  @media (max-width: 900px) { .layout { grid-template-columns: minmax(0, 1fr); } }
+
+  .stage {
+    background: var(--canvas);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  canvas { display: block; width: 100%; aspect-ratio: 4 / 3; cursor: crosshair; touch-action: manipulation; }
+  .stage-foot {
+    display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+    padding: 10px 14px; border-top: 1px solid var(--line);
+    color: var(--muted); font-size: 13px; min-height: 42px;
+  }
+  .stage-foot .hint-hover { color: var(--ink); }
+
+  aside { display: flex; flex-direction: column; gap: 22px; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 18px; }
+  h2 { font-size: 15px; font-weight: 600; margin: 0 0 10px; }
+  .group + .group { padding-top: 20px; border-top: 1px solid var(--line); }
+
+  .seg { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .seg input { position: absolute; opacity: 0; pointer-events: none; }
+  .seg label {
+    display: flex; align-items: center; gap: 8px; justify-content: center;
+    padding: 9px 10px; border: 1px solid var(--line); border-radius: 5px;
+    cursor: pointer; background: var(--canvas); font-weight: 500;
+  }
+  .seg input:checked + label { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+  .seg input:focus-visible + label { outline: 2px solid var(--focus); outline-offset: 2px; }
+  .seg svg { width: 16px; height: 16px; flex: none; }
+  .seg svg * { fill: var(--pt); stroke: var(--ink); stroke-width: 1.6; }
+
+  .row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+  button, input[type="number"] { font: inherit; color: inherit; }
+  button {
+    padding: 8px 12px; border-radius: 5px; border: 1px solid var(--line);
+    background: var(--canvas); cursor: pointer; font-weight: 500;
+  }
+  button:hover { border-color: var(--muted); }
+  button:focus-visible, input:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); width: 100%; padding: 10px 12px; }
+  button.primary:hover { filter: brightness(1.08); }
+  .small { font-size: 13px; color: var(--muted); margin: 10px 0 0; }
+
+  .field { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+  .field input[type="number"] {
+    width: 84px; padding: 7px 9px; border: 1px solid var(--line); border-radius: 5px; background: var(--canvas);
+  }
+  .check { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; cursor: pointer; }
+  .check input { width: 16px; height: 16px; accent-color: var(--accent); }
+
+  .bar { height: 12px; border-radius: 3px; border: 1px solid var(--line); }
+  .bar-labels { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); margin-top: 4px; }
+  dl { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; margin: 16px 0 0; font-size: 14px; }
+  dt { color: var(--muted); }
+  dd { margin: 0; font-variant-numeric: tabular-nums; text-align: right; }
+  #status { margin: 14px 0 0; font-size: 13px; color: var(--muted); min-height: 2.8em; }
+  .math { font-size: 13px; color: var(--muted); }
+  .math p { margin: 0 0 8px; }
+  .math i { font-family: "Newsreader", Georgia, serif; font-size: 1.08em; }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <h1>Graph Laplacian explorer</h1>
+    <p>Click the canvas to place points from two categories, build a k-nearest-neighbor graph, and see where the Laplacian of the category indicator is nonzero.</p>
+  </header>
+
+  <div class="layout">
+    <section class="stage" aria-label="Point canvas">
+      <canvas id="cv" role="img" aria-label="Canvas for placing points. Click to add a point of the selected category."></canvas>
+      <div class="stage-foot">
+        <span id="hover" class="hint-hover">Hover a point to read its value.</span>
+        <span>Keys 1 and 2 switch category.</span>
+      </div>
+    </section>
+
+    <aside>
+      <div class="group">
+        <h2>Place points</h2>
+        <div class="seg" role="radiogroup" aria-label="Category to place">
+          <input type="radio" name="cat" id="catA" value="0" checked>
+          <label for="catA"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="5.5"/></svg>Category A</label>
+          <input type="radio" name="cat" id="catB" value="1">
+          <label for="catB"><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="2.5" y="2.5" width="11" height="11"/></svg>Category B</label>
+        </div>
+        <div class="row">
+          <button id="undo" type="button">Undo last</button>
+          <button id="clear" type="button">Clear all</button>
+        </div>
+        <div class="row">
+          <button id="moons" type="button">Two moons</button>
+          <button id="blobs" type="button">Overlapping blobs</button>
+        </div>
+      </div>
+
+      <div class="group">
+        <h2>Neighbor graph</h2>
+        <div class="field">
+          <label for="k">Neighbors (k)</label>
+          <input id="k" type="number" min="1" max="50" step="1" value="5" inputmode="numeric">
+        </div>
+        <label class="check"><input id="showEdges" type="checkbox" checked>Show edges</label>
+        <button id="gen" class="primary" type="button">Generate graph</button>
+        <p id="status" role="status" aria-live="polite">Place at least two points, then generate the graph.</p>
+      </div>
+
+      <div class="group">
+        <h2>Color shows |Lf|</h2>
+        <div id="bar" class="bar" aria-hidden="true"></div>
+        <div class="bar-labels"><span id="barMin">0</span><span id="barMax">1</span></div>
+        <dl>
+          <dt>Points</dt><dd id="sN">0</dd>
+          <dt>Edges</dt><dd id="sE">–</dd>
+          <dt>Largest |Lf|</dt><dd id="sMax">–</dd>
+          <dt>Points with Lf ≠ 0</dt><dd id="sNZ">–</dd>
+        </dl>
+      </div>
+
+      <div class="group math">
+        <p>The Laplacian is <i>L</i> = <i>D</i> − <i>W</i>. <i>W</i> marks the neighbor edges, and a pair is connected if either point lists the other among its k nearest. <i>D</i> holds each point’s degree.</p>
+        <p>The function <i>f</i> is 1 on category A and 0 on category B. Entry <i>i</i> of <i>Lf</i> is the sum over neighbors <i>j</i> of <i>f</i><sub>i</sub> − <i>f</i><sub>j</sub>, so |<i>Lf</i>|<sub>i</sub> counts the neighbors of point <i>i</i> in the other category. Swapping A and B gives the same colors.</p>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<script>
+(() => {
+  const W = 800, H = 600;      // logical canvas units
+  const R = 7;                  // point radius in logical units
+  const cv = document.getElementById('cv');
+  const ctx = cv.getContext('2d');
+
+  const els = {
+    k: document.getElementById('k'),
+    gen: document.getElementById('gen'),
+    undo: document.getElementById('undo'),
+    clear: document.getElementById('clear'),
+    moons: document.getElementById('moons'),
+    blobs: document.getElementById('blobs'),
+    showEdges: document.getElementById('showEdges'),
+    status: document.getElementById('status'),
+    hover: document.getElementById('hover'),
+    bar: document.getElementById('bar'),
+    barMax: document.getElementById('barMax'),
+    sN: document.getElementById('sN'),
+    sE: document.getElementById('sE'),
+    sMax: document.getElementById('sMax'),
+    sNZ: document.getElementById('sNZ'),
+    catA: document.getElementById('catA'),
+    catB: document.getElementById('catB')
+  };
+
+  const HOVER_DEFAULT = 'Hover a point to read its value.';
+  const state = { points: [], cat: 0, graph: null, hover: -1 };
+
+  /* ---------- colormap ---------- */
+  const STOPS = [
+    [0.00, [246, 232, 166]],
+    [0.33, [242, 166, 90]],
+    [0.66, [209, 73, 91]],
+    [1.00, [75, 29, 92]]
+  ];
+  function colormap(t) {
+    t = Math.max(0, Math.min(1, t));
+    for (let i = 1; i < STOPS.length; i++) {
+      if (t <= STOPS[i][0]) {
+        const [t0, c0] = STOPS[i - 1], [t1, c1] = STOPS[i];
+        const u = (t - t0) / (t1 - t0);
+        const c = c0.map((v, j) => Math.round(v + (c1[j] - v) * u));
+        return `rgb(${c[0]}, ${c[1]}, ${c[2]})`;
+      }
+    }
+    return `rgb(${STOPS[STOPS.length - 1][1].join(', ')})`;
+  }
+  els.bar.style.background = 'linear-gradient(to right, ' +
+    STOPS.map(([t, c]) => `rgb(${c.join(', ')}) ${t * 100}%`).join(', ') + ')';
+
+  /* ---------- graph math ---------- */
+  function buildGraph(k) {
+    const pts = state.points, n = pts.length;
+    const kk = Math.min(k, n - 1);
+
+    // Symmetric adjacency W from k nearest neighbors (edge if either lists the other).
+    const Wm = Array.from({ length: n }, () => new Float64Array(n));
+    for (let i = 0; i < n; i++) {
+      const d = [];
+      for (let j = 0; j < n; j++) {
+        if (j === i) continue;
+        const dx = pts[i].x - pts[j].x, dy = pts[i].y - pts[j].y;
+        d.push([dx * dx + dy * dy, j]);
+      }
+      d.sort((a, b) => a[0] - b[0]);
+      for (let t = 0; t < kk; t++) {
+        const j = d[t][1];
+        Wm[i][j] = 1;
+        Wm[j][i] = 1;
+      }
+    }
+
+    // Laplacian L = D - W.
+    const L = Array.from({ length: n }, () => new Float64Array(n));
+    const deg = new Float64Array(n);
+    const edges = [];
+    for (let i = 0; i < n; i++) {
+      let s = 0;
+      for (let j = 0; j < n; j++) {
+        s += Wm[i][j];
+        L[i][j] = -Wm[i][j];
+        if (j > i && Wm[i][j] > 0) edges.push([i, j]);
+      }
+      deg[i] = s;
+      L[i][i] = s;
+    }
+
+    // Indicator f: 1 on category A, 0 on category B. Then Lf and |Lf|.
+    const f = new Float64Array(n);
+    for (let i = 0; i < n; i++) f[i] = pts[i].c === 0 ? 1 : 0;
+    const Lf = new Float64Array(n), absLf = new Float64Array(n);
+    let maxAbs = 0, nz = 0;
+    for (let i = 0; i < n; i++) {
+      let s = 0;
+      for (let j = 0; j < n; j++) s += L[i][j] * f[j];
+      Lf[i] = s;
+      absLf[i] = Math.abs(s);
+      if (absLf[i] > maxAbs) maxAbs = absLf[i];
+      if (absLf[i] > 1e-9) nz++;
+    }
+    return { k, kk, n, edges, deg, Lf, absLf, maxAbs, nz };
+  }
+
+  /* ---------- drawing ---------- */
+  function css(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+
+  function sizeCanvas() {
+    const dpr = window.devicePixelRatio || 1;
+    const w = cv.clientWidth, h = cv.clientHeight;
+    cv.width = Math.round(w * dpr);
+    cv.height = Math.round(h * dpr);
+    draw();
+  }
+
+  function shape(p, r) {
+    ctx.beginPath();
+    if (p.c === 0) {
+      ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
+    } else {
+      const s = r * 0.9;
+      ctx.rect(p.x - s, p.y - s, s * 2, s * 2);
+    }
+  }
+
+  function draw() {
+    const sx = cv.width / W, sy = cv.height / H;
+    ctx.setTransform(sx, 0, 0, sy, 0, 0);
+    ctx.clearRect(0, 0, W, H);
+    const ink = css('--ink'), edgeC = css('--edge'), accent = css('--accent'), ptC = css('--pt');
+    const g = state.graph, pts = state.points;
+
+    if (g && els.showEdges.checked) {
+      // Edges within a category are faint; edges across categories carry all of Lf.
+      ctx.lineCap = 'round';
+      ctx.globalAlpha = 0.45;
+      ctx.strokeStyle = edgeC;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      for (const [i, j] of g.edges) {
+        if (pts[i].c === pts[j].c) { ctx.moveTo(pts[i].x, pts[i].y); ctx.lineTo(pts[j].x, pts[j].y); }
+      }
+      ctx.stroke();
+      ctx.globalAlpha = 0.85;
+      ctx.strokeStyle = accent;
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      for (const [i, j] of g.edges) {
+        if (pts[i].c !== pts[j].c) { ctx.moveTo(pts[i].x, pts[i].y); ctx.lineTo(pts[j].x, pts[j].y); }
+      }
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+
+      if (state.hover >= 0) {
+        ctx.strokeStyle = ink;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        for (const [i, j] of g.edges) {
+          if (i === state.hover || j === state.hover) { ctx.moveTo(pts[i].x, pts[i].y); ctx.lineTo(pts[j].x, pts[j].y); }
+        }
+        ctx.stroke();
+      }
+    }
+
+    const scale = g ? Math.max(g.maxAbs, 1) : 1;
+    for (let i = 0; i < pts.length; i++) {
+      const p = pts[i];
+      shape(p, R);
+      ctx.fillStyle = g ? colormap(g.absLf[i] / scale) : ptC;
+      ctx.fill();
+      ctx.lineWidth = 1.6;
+      ctx.strokeStyle = ink;
+      ctx.stroke();
+    }
+
+    if (state.hover >= 0 && pts[state.hover]) {
+      const p = pts[state.hover];
+      shape(p, R + 4);
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = ink;
+      ctx.stroke();
+    }
+  }
+
+  /* ---------- UI state ---------- */
+  const fmt = v => (v < 0 ? '\u2212' : '') + Math.abs(Math.round(v * 1000) / 1000);
+  const catName = c => (c === 0 ? 'A' : 'B');
+
+  function readK() {
+    let k = parseInt(els.k.value, 10);
+    if (!Number.isFinite(k) || k < 1) k = 1;
+    if (k > 50) k = 50;
+    return k;
+  }
+
+  function updateStats() {
+    els.sN.textContent = state.points.length;
+    const g = state.graph;
+    if (!g) {
+      els.sE.textContent = '–';
+      els.sMax.textContent = '–';
+      els.sNZ.textContent = '–';
+      els.barMax.textContent = '1';
+      return;
+    }
+    els.sE.textContent = g.edges.length;
+    els.sMax.textContent = fmt(g.maxAbs);
+    els.sNZ.textContent = g.nz;
+    els.barMax.textContent = fmt(Math.max(g.maxAbs, 1));
+  }
+
+  function setStatus(msg) { els.status.textContent = msg; }
+
+  function invalidate(msg) {
+    state.graph = null;
+    state.hover = -1;
+    els.hover.textContent = HOVER_DEFAULT;
+    updateStats();
+    setStatus(msg || 'The points changed. Generate the graph again to update the colors.');
+    draw();
+  }
+
+  function pointsChanged() {
+    const n = state.points.length;
+    if (state.graph) {
+      invalidate();
+    } else {
+      updateStats();
+      draw();
+      setStatus(n < 2 ? 'Place at least two points, then generate the graph.' : 'Ready. Choose k and generate the graph.');
+    }
+  }
+
+  function generate() {
+    const n = state.points.length;
+    if (n < 2) { setStatus('Place at least two points first.'); return; }
+    const k = readK();
+    els.k.value = k;
+    state.graph = buildGraph(k);
+    const g = state.graph;
+    updateStats();
+    draw();
+    const cats = new Set(state.points.map(p => p.c));
+    let msg = `Built a graph with ${g.edges.length} edges from k = ${g.kk}.`;
+    if (g.kk < k) msg = `Only ${n} points, so k was reduced to ${g.kk}. ` + msg;
+    if (cats.size < 2) msg += ' All points share one category, so Lf is zero everywhere.';
+    else if (g.maxAbs === 0) msg += ' No edge connects the two categories, so Lf is zero everywhere.';
+    setStatus(msg);
+  }
+
+  /* ---------- input ---------- */
+  function toLogical(ev) {
+    const r = cv.getBoundingClientRect();
+    return { x: (ev.clientX - r.left) / r.width * W, y: (ev.clientY - r.top) / r.height * H };
+  }
+
+  function nearest(pos, maxDist) {
+    let best = -1, bd = maxDist * maxDist;
+    for (let i = 0; i < state.points.length; i++) {
+      const dx = state.points[i].x - pos.x, dy = state.points[i].y - pos.y;
+      const d = dx * dx + dy * dy;
+      if (d <= bd) { bd = d; best = i; }
+    }
+    return best;
+  }
+
+  cv.addEventListener('click', ev => {
+    const pos = toLogical(ev);
+    state.points.push({ x: pos.x, y: pos.y, c: state.cat });
+    pointsChanged();
+  });
+
+  function describe(i) {
+    const p = state.points[i], g = state.graph;
+    if (!g) return `Point ${i + 1}, category ${catName(p.c)}.`;
+    return `Point ${i + 1}, category ${catName(p.c)}: (Lf) = ${fmt(g.Lf[i])}, |Lf| = ${fmt(g.absLf[i])}, ${g.deg[i]} neighbors.`;
+  }
+
+  cv.addEventListener('pointermove', ev => {
+    if (ev.pointerType === 'touch') return;
+    const i = nearest(toLogical(ev), R + 8);
+    if (i !== state.hover) {
+      state.hover = i;
+      els.hover.textContent = i >= 0 ? describe(i) : HOVER_DEFAULT;
+      draw();
+    }
+  });
+  cv.addEventListener('pointerleave', () => {
+    if (state.hover !== -1) { state.hover = -1; els.hover.textContent = HOVER_DEFAULT; draw(); }
+  });
+
+  function setCat(c) {
+    state.cat = c;
+    (c === 0 ? els.catA : els.catB).checked = true;
+  }
+  els.catA.addEventListener('change', () => { if (els.catA.checked) state.cat = 0; });
+  els.catB.addEventListener('change', () => { if (els.catB.checked) state.cat = 1; });
+  window.addEventListener('keydown', ev => {
+    if (ev.target && /^(INPUT|TEXTAREA|SELECT)$/.test(ev.target.tagName) && ev.target.type !== 'radio') return;
+    if (ev.key === '1') setCat(0);
+    if (ev.key === '2') setCat(1);
+  });
+
+  els.gen.addEventListener('click', generate);
+  els.undo.addEventListener('click', () => { if (state.points.length) { state.points.pop(); pointsChanged(); } });
+  els.clear.addEventListener('click', () => {
+    state.points = [];
+    state.graph = null;
+    state.hover = -1;
+    els.hover.textContent = HOVER_DEFAULT;
+    updateStats();
+    draw();
+    setStatus('Place at least two points, then generate the graph.');
+  });
+  els.showEdges.addEventListener('change', draw);
+  els.k.addEventListener('input', () => {
+    const g = state.graph;
+    if (g && readK() !== g.k) setStatus(`The graph on screen uses k = ${g.k}. Generate again to use k = ${readK()}.`);
+  });
+  els.k.addEventListener('keydown', ev => { if (ev.key === 'Enter') generate(); });
+
+  /* ---------- examples ---------- */
+  function gauss() {
+    let u = 0, v = 0;
+    while (u === 0) u = Math.random();
+    while (v === 0) v = Math.random();
+    return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+  }
+  const clampPt = (x, y, c) => ({ x: Math.max(12, Math.min(W - 12, x)), y: Math.max(12, Math.min(H - 12, y)), c });
+
+  function loadExample(kind) {
+    const pts = [];
+    if (kind === 'moons') {
+      const N = 55, s = 230, sigma = 0.09;
+      for (let i = 0; i < N; i++) {
+        const th = Math.PI * Math.random();
+        const ax = Math.cos(th) + sigma * gauss(), ay = Math.sin(th) + sigma * gauss();
+        pts.push(clampPt(W / 2 + (ax - 0.5) * s, H / 2 - (ay - 0.25) * s, 0));
+        const th2 = Math.PI * Math.random();
+        const bx = 1 - Math.cos(th2) + sigma * gauss(), by = 0.5 - Math.sin(th2) + sigma * gauss();
+        pts.push(clampPt(W / 2 + (bx - 0.5) * s, H / 2 - (by - 0.25) * s, 1));
+      }
+    } else {
+      const N = 50, sigma = 70;
+      for (let i = 0; i < N; i++) {
+        pts.push(clampPt(330 + sigma * gauss(), 300 + sigma * gauss(), 0));
+        pts.push(clampPt(470 + sigma * gauss(), 300 + sigma * gauss(), 1));
+      }
+    }
+    state.points = pts;
+    state.graph = null;
+    state.hover = -1;
+    els.hover.textContent = HOVER_DEFAULT;
+    updateStats();
+    draw();
+    setStatus(`Loaded ${pts.length} points. Generate the graph to see |Lf|.`);
+  }
+  els.moons.addEventListener('click', () => loadExample('moons'));
+  els.blobs.addEventListener('click', () => loadExample('blobs'));
+
+  /* ---------- lifecycle ---------- */
+  if (window.ResizeObserver) new ResizeObserver(sizeCanvas).observe(cv);
+  else window.addEventListener('resize', sizeCanvas);
+  if (window.matchMedia) {
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    (mq.addEventListener ? mq.addEventListener.bind(mq, 'change') : mq.addListener.bind(mq))(draw);
+  }
+  new MutationObserver(draw).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+  updateStats();
+  sizeCanvas();
+})();
+</script>
+</body>
+</html>
