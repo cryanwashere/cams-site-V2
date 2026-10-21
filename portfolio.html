@@ -11,15 +11,6 @@
 
 <div id="invertedcursor"></div>
 
-<div id="lightbox">
-    <img id="lightbox-img" src="" alt="">
-</div>
-
-<div id="html-lightbox">
-    <div class="html-lightbox-inner">
-        <iframe id="html-lightbox-iframe" src="" sandbox="allow-scripts allow-same-origin"></iframe>
-    </div>
-</div>
 <script type="module">
     document.onmousemove = function(e) {
         document.documentElement.style.setProperty('--x', (e.clientX + window.scrollX) + 'px');
@@ -35,10 +26,10 @@
     <nav>
         <ul>
             <li><a href="/index.html">Home</a></li>
-            <li><a href="portfolio.html">Project Portfolio</a></li>
+            <li><a href="portfolio.html">Portfolio</a></li>
             <li><a href="https://github.com/cryanwashere">Github</a></li>
             <li><a href="https://linkedin.com/in/cameron-ryan-7b043a229">LinkedIn</a></li>
-            <li><a href="resume_materials/Cameron_Ryan_fall2026_2.pdf">Resume</a></li>
+            <li><a href="resume_materials/Cameron_Ryan_fall2026_2.pdf">CV</a></li>
             <li><a href="https://scholar.google.com/citations?user=CGqafTAAAAAJ&hl=en">Google Scholar</a></li>
             <li><a href="misc.html">Misc</a></li>
         </ul>
@@ -48,613 +39,201 @@
 <div class="page">
     <h1>Cameron Ryan</h1>
 
-    <div class="controls">
-        <div class="control-row" id="sort-row" style="display: none;">
-            <span class="control-label">Sort by</span>
-            <select id="sort-select">
-                <option value="effort-desc">Effort (most first)</option>
-                <option value="effort-asc">Effort (least first)</option>
-                <option value="date-desc">Date Started (newest first)</option>
-                <option value="date-asc">Date Started (oldest first)</option>
-                <option value="title-asc">Title (A–Z)</option>
-            </select>
-        </div>
-        <div class="control-row">
-            <span class="control-label">Tags</span>
-            <div class="pill-group" id="tag-filters"></div>
-        </div>
-        <div class="control-row">
-            <span class="control-label">Organization</span>
-            <div class="pill-group" id="org-filters"></div>
-        </div>
-    </div>
+    <section class="portfolio-section">
+        <h2 class="section-title">Papers</h2>
+        <ol class="biblio-list">
+            <li class="biblio-entry">
+                <div class="biblio-main">
+                    <span class="biblio-authors"><strong>Ryan, C.</strong>, Narayanaswamy, V. S., Thopalli, K., &amp; Liu, S.</span>
+                    <span class="biblio-title">&ldquo;Unsupervised Latent Space Alignment with Hyperspherical Geodesic Matching.&rdquo;</span>
+                    <span class="biblio-venue">arXiv preprint, 2026. Accepted (extended abstract) to the NeurReps Workshop, NeurIPS 2026.</span>
+                </div>
+                <div class="biblio-links">
+                    <a href="resume_materials/unsupervised_latent_space_alignment_with_hyperspherical_geodesic_alignmnet_preprint1.pdf" target="_blank">PDF</a>
+                    <a href="https://arxiv.org/abs/2608.28840" target="_blank">arXiv</a>
+                </div>
+            </li>
+            <li class="biblio-entry">
+                <div class="biblio-main">
+                    <span class="biblio-authors">Babbitt, G. A., Rajendran, M., Lynch, M. L., Asare-Bediako, R., Mouli, L. T., <strong>Ryan, C. J.</strong>, Srivastava, H., Rynkiewicz, P., Phadke, K., Reed, M. L., et al.</span>
+                    <span class="biblio-title">&ldquo;ATOMDANCE: Kernel-based Denoising and Choreographic Analysis for Protein Dynamic Comparison.&rdquo;</span>
+                    <span class="biblio-venue">Biophysical Journal, 123(17), 2705&ndash;2715, 2024.</span>
+                </div>
+                <div class="biblio-links">
+                    <a href="https://doi.org/10.1016/j.bpj.2024.03.024" target="_blank">DOI</a>
+                </div>
+            </li>
+            <li class="biblio-entry">
+                <div class="biblio-main">
+                    <span class="biblio-authors">Babbitt, G. A., Rajendran, M., Lynch, M. L., Asare-Bediako, R., Mouli, L. T., <strong>Ryan, C. J.</strong>, Srivastava, H., Rynkiewicz, P., Phadke, K., Reed, M. L., et al.</span>
+                    <span class="biblio-title">&ldquo;ATOMDANCE: Kernel-based Denoising and Allosteric Resonance Analysis for Functional and Evolutionary Comparisons of Protein Dynamics.&rdquo;</span>
+                    <span class="biblio-venue">bioRxiv preprint, 2023.</span>
+                </div>
+                <div class="biblio-links">
+                    <a href="https://doi.org/10.1101/2023.04.20.537698" target="_blank">DOI</a>
+                </div>
+            </li>
+        </ol>
+    </section>
 
-    <div class="view-toggle">
-        <button class="view-pill active" id="view-feed" onclick="switchView('feed')">Feed</button>
-        <button class="view-pill" id="view-projects" onclick="switchView('projects')">All Projects</button>
-    </div>
+    <section class="portfolio-section">
+        <h2 class="section-title">Academic Projects</h2>
+        <ol class="biblio-list">
+            <li class="biblio-entry">
+                <div class="biblio-main">
+                    <span class="biblio-authors">Ryan, C., Descoteaux, A., Liu, S., Ryan, A., &amp; Kroon, L.</span>
+                    <span class="biblio-title">&ldquo;Applied Math Capstone: Minecraft Reinforcement Learning Methods.&rdquo;</span>
+                    <span class="biblio-venue">Applied Math Capstone, Northeastern University, 2026.</span>
+                </div>
+                <div class="biblio-links">
+                    <a href="resume_materials/MATH4025_Final_Paper.pdf" target="_blank">PDF</a>
+                </div>
+            </li>
+            <li class="biblio-entry">
+                <div class="biblio-main">
+                    <span class="biblio-authors">Ryan, C.</span>
+                    <span class="biblio-title">&ldquo;Experiments in the Learning Capacity of Perceptrons.&rdquo;</span>
+                    <span class="biblio-venue">Final project, Mathematical and Computational Problem Solving Methods for Physics, Northeastern University, 2026.</span>
+                </div>
+                <div class="biblio-links">
+                    <a href="resume_materials/Math_Methods_Final_Project.pdf" target="_blank">PDF</a>
+                    <a href="https://github.com/cryanwashere/Perceptron-Capacity-Math-Methods-Final-" target="_blank">GitHub</a>
+                </div>
+            </li>
+            <li class="biblio-entry">
+                <div class="biblio-main">
+                    <span class="biblio-authors">Ryan, C.</span>
+                    <span class="biblio-title">&ldquo;Containerized Application Management for Scientific Computing Collaboration.&rdquo;</span>
+                    <span class="biblio-venue">University of Rochester Laboratory for Laser Energetics, 2022.</span>
+                </div>
+                <div class="biblio-links">
+                    <a href="resume_materials/LLE_report_summer2022.pdf" target="_blank">PDF</a>
+                </div>
+            </li>
+        </ol>
+    </section>
 
+    <section class="portfolio-section">
+        <h2 class="section-title">Posters &amp; Presentations</h2>
+        <ul class="poster-list">
+            <li class="poster-entry">
+                <div class="poster-main">
+                    <span class="poster-title">&ldquo;High Pressure Material Phase Identification with Gaussian Kernel Neural Networks.&rdquo;</span>
+                    <span class="poster-venue">Poster, IFE-SURE Symposium, University of Rochester Laboratory for Laser Energetics — August 2026.</span>
+                </div>
+                <div class="poster-links">
+                    <a href="resume_materials/GK_IFE_2026_poster_V3.pdf" target="_blank">PDF</a>
+                </div>
+            </li>
+            <li class="poster-entry">
+                <div class="poster-main">
+                    <span class="poster-title">&ldquo;High Pressure Material Phase Classification Using Machine Learning.&rdquo;</span>
+                    <span class="poster-venue">Presentation, AI/ML Group, University of Rochester Laboratory for Laser Energetics — February 2026.</span>
+                </div>
+                <div class="poster-links">
+                    <a href="resume_materials/AIML_presentation_feb2026.pdf" target="_blank">PDF</a>
+                </div>
+            </li>
+            <li class="poster-entry">
+                <div class="poster-main">
+                    <span class="poster-title">&ldquo;High Pressure Material Phase Classification with Spatially Weighted Dynamic Graph Convolutional Neural Networks.&rdquo;</span>
+                    <span class="poster-venue">Poster, IFE-SURE Symposium, University of Rochester Laboratory for Laser Energetics — August 2025.</span>
+                </div>
+                <div class="poster-links">
+                    <a href="resume_materials/Cameron_Ryan_Project.pdf" target="_blank">PDF</a>
+                </div>
+            </li>
+        </ul>
+    </section>
 
-    <div class="results-meta" id="results-meta"></div>
-    <div class="project-list" id="project-list"></div>
+    <section class="portfolio-section">
+        <h2 class="section-title">Other Software Projects</h2>
+        <div class="software-list">
+            <div class="software-card">
+                <div class="software-title">Wikipedia Search Engine</div>
+                <p class="software-desc">A search engine focused on Wikipedia pages. Creates embeddings for text and images using open source CLIP models, stored and queried via a vector database. All components are containerized with Docker for modular management.</p>
+                <div class="project-links">
+                    <a href="https://gitlab.com/cjryanwashere/Search_Engine_Backend" target="_blank">Codebase (GitLab)</a>
+                </div>
+            </div>
+            <div class="software-card">
+                <div class="software-title">Naturify</div>
+                <p class="software-desc">An iOS app for identifying plants, animals, and fungi from photos. Trained a visual transformer on 10,000 species using PyTorch on an Nvidia A100 GPU. Also includes a geolocation model that predicts nearby species from lat/lng coordinates.</p>
+                <div class="project-links">
+                    <a href="https://apps.apple.com/td/app/naturify/id6447524765" target="_blank">iOS App</a>
+                    <a href="https://naturify.app/static/identify.html" target="_blank">Web demo</a>
+                </div>
+            </div>
+            <div class="software-card">
+                <div class="software-title">Image Garden</div>
+                <p class="software-desc">An iOS app that performs semantic searches on photos in your photo library using a CLIP neural network.</p>
+                <div class="project-links">
+                    <a href="https://apps.apple.com/td/app/image-garden/id6446785274" target="_blank">iOS App</a>
+                </div>
+            </div>
+            <div class="software-card">
+                <div class="software-title">wordLab</div>
+                <p class="software-desc">An iOS app for taking notes and querying them with AI.</p>
+                <div class="project-links">
+                    <a href="https://apps.apple.com/td/app/wordlab/id1584528104" target="_blank">iOS App</a>
+                </div>
+            </div>
+            <div class="software-card">
+                <div class="software-title">Earth Explore</div>
+                <p class="software-desc">An iOS app that classifies birds from their calls using a neural network.</p>
+                <div class="project-links">
+                    <a href="https://apps.apple.com/td/app/earth-explore/id1632933059" target="_blank">iOS App</a>
+                </div>
+            </div>
+            <div class="software-card">
+                <div class="software-title">Floral — JAX Neural Network Library</div>
+                <p class="software-desc">A JAX-based Python neural network library. Allows creating, training, and saving neural networks with a clean API. Available on PyPI.</p>
+                <div class="project-links">
+                    <a href="https://github.com/cryanwashere/Floral" target="_blank">GitHub</a>
+                </div>
+            </div>
+            <div class="software-card">
+                <div class="software-title">Stock Prediction Neural Network</div>
+                <p class="software-desc">Predicts future stock returns from historical returns by outputting a normal distribution over expected future performance.</p>
+                <div class="project-links">
+                    <a href="https://github.com/cryanwashere/stock_prediction_neural_net" target="_blank">GitHub</a>
+                </div>
+            </div>
+            <div class="software-card">
+                <div class="software-title">Apartment Stock Exchange</div>
+                <p class="software-desc">A working currency and security exchange for items in my apartment. Implements a full order book for buying and selling securities with the custom currency.</p>
+                <div class="project-links">
+                    <a href="https://github.com/cryanwashere/apartment_currency" target="_blank">GitHub</a>
+                </div>
+            </div>
+            <div class="software-card">
+                <div class="software-title">Search Engine Crawler</div>
+                <p class="software-desc">A basic web crawler written in Rust, built as a prerequisite to the Wikipedia search engine project.</p>
+                <div class="project-links">
+                    <a href="https://github.com/cryanwashere/Search_Engine_Crawler" target="_blank">GitHub</a>
+                </div>
+            </div>
+            <div class="software-card">
+                <div class="software-title">DNA File Encoder</div>
+                <p class="software-desc">A C program that encodes any file into a DNA sequence. Motivated by future applications in biological data storage — when DNA writing matures, this could store arbitrary files inside living organisms.</p>
+                <div class="project-links">
+                    <a href="https://github.com/cryanwashere/dna-code" target="_blank">GitHub</a>
+                </div>
+            </div>
+            <div class="software-card">
+                <div class="software-title">CameronOS</div>
+                <p class="software-desc">An attempt at writing an operating system from scratch in C and assembly. Implements a basic bootloader and screen driver.</p>
+                <div class="project-links">
+                    <a href="https://github.com/cryanwashere/CameronOS" target="_blank">GitHub</a>
+                </div>
+            </div>
+        </div>
+    </section>
 
     <hr class="divider">
-    <p class="footer">Projects marked with effort dots (●) represent relative time investment, 1–5 scale.</p>
 </div>
 
 <script>
-// ─────────────────────────────────────────────
-//  PROJECT DATA — edit this to add new projects
-// ─────────────────────────────────────────────
-const PROJECTS = [
-    {
-        id: "llnl-latent-space-alignment",
-        title: "Unsupervised Latent Space Alignment",
-        description: "Do neural network latent spaces posess intrinsic geometry which can be used to align them without the use of any anchor supervision?",
-        startDate: "2026-06-15",
-        effort: 5,
-        organization: "Lawrence Livermore National Laboratory",
-        mentor: "Shusen Liu",
-        tags: ["neural networks", "latent space"],
-        links: [
-            {label : "Arxiv preprint", href: "resume_materials/unsupervised_latent_space_alignment_with_hyperspherical_geodesic_alignmnet_preprint1.pdf"}
-        ]
-    },
-    {
-        id: "math-methods-perceptron",
-        title: "Perceptron Learning Capacity Experiment",
-        description: "Final project for Mathematical and Computational Problem Solving Methods for Physics. Did experiments on the learning capacity of perceptrons, and compared them to known analytical results from early research in the field.",
-        startDate: "2026-04-15",
-        effort: 3, 
-        organization: "Northeastern University",
-        mentor: "Armen Stepanyants", 
-        tags: ["perceptrons", "theoretical physics"],
-        links: [
-            {label : "Project Report", href: "resume_materials/Math_Methods_Final_Project.pdf"},
-            {label : "GitHub", href: "https://github.com/cryanwashere/Perceptron-Capacity-Math-Methods-Final-"}
-        ]
-    },
-    {
-        id: "capstone-minecraft-rl",
-        title: "Applied Math Capstone: Minecraft Reinforcement Learning Methods", 
-        description: "Applied Math Capstone. Did research on the efficacy of different reinforcement learning methods for Minecraft. Focus included Reinforcement Learning from Human Feedback, Proximal Policy Optimization, and Soft Actor Critic.",
-        startDate: "2026-01-20",
-        effort: 3, 
-        organization: "Northeastern University",
-        mentor: "Lee Peng Lee", 
-        collaborators: ["Ally Descoteaux","Stone Liu", "Alison Ryan", "Lucas Kroon"],
-        tags: ["reinforcement learning", "neural networks"],
-        links: [
-            {label : "Final Report", href: "resume_materials/MATH4025_Final_Paper.pdf"}
-        ]
-    },
-    {
-        id: "ml-phase-id",
-        title: "Machine Learning Material Phase Identification",
-        description: "Researched methods of classifying material phases from atomic coordinates using neural networks. Invented the Gaussian Kernel (GK) architecture, which achieves significant performance improvements over baseline Dynamic Graph Convolutional Neural Network (DGCNN) approaches.",
-        startDate: "2025-05-01",
-        effort: 5,
-        organization: "University of Rochester Laboratory for Laser Energetics",
-        mentor: "Shuai Zhang",
-        tags: ["neural networks", "theoretical physics"],
-        links: [
-            { label: "IFE SURE Symposium Poster (Aug 2025)", href: "resume_materials/Cameron_Ryan_Project.pdf" },
-            { label: "AI/ML Group Presentation (Feb 2026)", href: "resume_materials/AIML_presentation_feb2026.pdf" }
-        ],
-        contributions: [
-            "Replicated results from prior work on DGCNNs for material phase classification.",
-            "Developed a modified DGCNN with better test accuracy.",
-            "Invented Gaussian Kernel (GK) architecture with significant performance gains.",
-            "Researched hyperparameter scaling of GK models."
-        ]
-    },
-    {
-        id: "search-engine",
-        title: "Wikipedia Search Engine",
-        description: "A search engine focused on Wikipedia pages. Creates embeddings for text and images using open source CLIP models, stored and queried via a vector database. All components are containerized with Docker for modular management.",
-        startDate: "2024-06-01",
-        effort: 5,
-        organization: null,
-        tags: ["neural networks", "information retrieval", "latent space"],
-        links: [
-            { label: "Codebase (GitLab)", href: "https://gitlab.com/cjryanwashere/Search_Engine_Backend" }
-        ]
-    },
-    {
-        id: "naturify",
-        title: "Naturify",
-        description: "An iOS app for identifying plants, animals, and fungi from photos. Trained a visual transformer on 10,000 species using PyTorch on an Nvidia A100 GPU. Also includes a geolocation model that predicts nearby species from lat/lng coordinates.",
-        startDate: "2023-09-01",
-        effort: 5,
-        organization: null,
-        tags: ["neural networks", "mobile app"],
-        links: [
-            { label: "iOS App", href: "https://apps.apple.com/td/app/naturify/id6447524765" },
-            { label: "Web demo", href: "https://naturify.app/static/identify.html" }
-        ],
-        contributions: [
-            "Trained neural network to perform image classification on a dataset of 10000 different species (plants, animals, fungi etc.) for my app Naturify. I used a visual transformer architecture, and trained the model with Pytorch on an Nvidia A100 GPU for several days.",
-            "Trained neural network to predict nearby species given latitude and longitude coordinates.",
-            "Created backend server for Naturify. This functions as an inference server for the iOS app, and hosts the app's website."
-        ]
-    },
-    {
-        id: "container-mgmt",
-        title: "Containerized Application Management",
-        description: "Researched methods of managing applications using containers to support scientific computing projects and collaboration with other labs at the Laboratory for Laser Energetics.",
-        startDate: "2022-05-01",
-        effort: 4,
-        organization: "University of Rochester Laboratory for Laser Energetics",
-        mentor: "Richard Kidder",
-        tags: ["systems architecture"],
-        links: [
-            { label: "Project report", href: "resume_materials/LLE_report_summer2022.pdf" }
-        ]
-    },
-    {
-        id: "floral",
-        title: "Floral — JAX Neural Network Library",
-        description: "A JAX-based Python neural network library. Allows creating, training, and saving neural networks with a clean API. Available on PyPI.",
-        startDate: "2023-01-01",
-        effort: 3,
-        organization: null,
-        tags: ["neural networks"],
-        links: [
-            { label: "GitHub", href: "https://github.com/cryanwashere/Floral" }
-        ]
-    },
-    {
-        id: "dna-code",
-        title: "DNA File Encoder",
-        description: "A C program that encodes any file into a DNA sequence. Motivated by future applications in biological data storage — when DNA writing matures, this could store arbitrary files inside living organisms.",
-        startDate: "2023-03-01",
-        effort: 2,
-        organization: null,
-        tags: [],
-        links: [
-            { label: "GitHub", href: "https://github.com/cryanwashere/dna-code" }
-        ]
-    },
-    {
-        id: "cameronos",
-        title: "CameronOS",
-        description: "An attempt at writing an operating system from scratch in C and assembly. Implements a basic bootloader and screen driver.",
-        startDate: "2022-11-01",
-        effort: 1,
-        organization: null,
-        tags: [],
-        links: [
-            { label: "GitHub", href: "https://github.com/cryanwashere/CameronOS" }
-        ]
-    },
-    {
-        id: "apartment-exchange",
-        title: "Apartment Stock Exchange",
-        description: "A working currency and security exchange for items in my apartment. Implements a full order book for buying and selling securities with the custom currency.",
-        startDate: "2025-09-01",
-        effort: 3,
-        organization: null,
-        tags: ["finance"],
-        links: [
-            { label: "GitHub", href: "https://github.com/cryanwashere/apartment_currency" }
-        ]
-    },
-    {
-        id: "image-garden",
-        title: "Image Garden",
-        description: "An iOS app that performs semantic searches on photos in your photo library using a CLIP neural network.",
-        startDate: "2022-09-01",
-        effort: 4,
-        organization: null,
-        tags: ["neural networks", "mobile app", "latent space", "information retrieval"],
-        links: [
-            { label: "iOS App", href: "https://apps.apple.com/td/app/image-garden/id6446785274" }
-        ]
-    },
-    {
-        id: "earth-explore",
-        title: "Earth Explore",
-        description: "An iOS app that classifies birds from their calls using a neural network.",
-        startDate: "2022-06-01",
-        effort: 3,
-        organization: null,
-        tags: ["neural networks", "mobile app"],
-        links: [
-            { label: "iOS App", href: "https://apps.apple.com/td/app/earth-explore/id1632933059" }
-        ]
-    },
-    {
-        id: "wordlab",
-        title: "wordLab",
-        description: "An iOS app for taking notes and querying them with AI.",
-        startDate: "2021-09-01",
-        effort: 4,
-        organization: null,
-        tags: ["mobile app"],
-        links: [
-            { label: "iOS App", href: "https://apps.apple.com/td/app/wordlab/id1584528104" }
-        ]
-    },
-    {
-        id: "search-crawler",
-        title: "Search Engine Crawler",
-        description: "A basic web crawler written in Rust, built as a prerequisite to the Wikipedia search engine project.",
-        startDate: "2024-04-01",
-        effort: 3,
-        organization: null,
-        tags: ["information retrieval"],
-        links: [
-            { label: "GitHub", href: "https://github.com/cryanwashere/Search_Engine_Crawler" }
-        ]
-    },
-    {
-        id: "stock-prediction",
-        title: "Stock Prediction Neural Network",
-        description: "Predicts future stock returns from historical returns by outputting a normal distribution over expected future performance.",
-        startDate: "2025-06-01",
-        effort: 2,
-        organization: null,
-        tags: ["neural networks", "finance"],
-        links: [
-            { label: "GitHub", href: "https://github.com/cryanwashere/stock_prediction_neural_net" }
-        ]
-    },
-];
-
-// ─────────────────────────────────────────────
-//  FEED DATA — edit this to add new feed items
-// ─────────────────────────────────────────────
-const FEED = [
-    {
-        date: "2026-08-28",
-        text: "<em>Unsupervised Latent Space Alignment with Hyperspherical Geodesic Matching</em> accepted into NeurReps workshop at NeurIPS in extended abstract track.",
-        organization: "Lawrence Livermore National Laboratory",
-        project: "llnl-latent-space-alignment"
-    },
-    {
-        date: "2026-08-28",
-        text: "<em>Unsupervised Latent Space Alignment with Hyperspherical Geodesic Matching</em> preprint available on Arxiv.",
-        organization: "Lawrence Livermore National Laboratory",
-        tags: ["neural networks", "latent space"], 
-        pdf: "resume_materials/unsupervised_latent_space_alignment_with_hyperspherical_geodesic_alignmnet_preprint1.pdf",
-        pdfLabel: "Unsupervised Latent Space Alignment with Hyperspherical Geodesic Alignment",
-        project: "llnl-latent-space-alignment"
-    },
-    {
-        date: "2026-08-03",
-        text: "<em>High Pressure Material Phase Identification With Gaussian Kernel Neural Networks</em> presented at IFE-SURE 2026.",
-        organization: "University of Rochester Laboratory for Laser Energetics",
-        pdf: "resume_materials/GK_IFE_2026_poster_V3.pdf",
-        project: "ml-phase-id"
-    },
-    {
-        date: "2026-04-20",
-        text: "<em>Learning Capacity of a Perceptron</em> final project for Mathematical and Computational Problem Solving Methods for Physics.",
-        tags: ["perceptrons", "theoretical physics"],
-        organization: "Northeastern University",
-        pdf: "resume_materials/Math_Methods_Final_Project.pdf",
-        pdfLabel: "Experiments in the learning capacity of perceptrons",
-        project: "math-methods-perceptron"
-    },
-    {
-        date: "2026-02-10",
-        text: "<em>High Pressure Material Phase Classification Using Machine Learning</em> Presented to AI/ML group at the Laboratory for Laser Energetics.",
-        tags: ["neural networks", "theoretical physics"],
-        pdf: "resume_materials/AIML_presentation_feb2026.pdf",
-        pdfLabel: "Presentation delivered to the LLE AI/ML group",
-        organization: "University of Rochester Laboratory for Laser Energetics",
-        project: "ml-phase-id"
-    },
-    {
-        date: "2025-08-05",
-        text: "<em>High Pressure Material Phase Classification with Spatially Weighted Dynamic Graph Convolutional Neural Networks</em> presented at IFE-SURE 2026.",
-        pdf: "resume_materials/Cameron_Ryan_Project.pdf",
-        pdfLabel: "IFE SURE Symposium poster",
-        tags: ["neural networks", "theoretical physics"],
-        organization: "University of Rochester Laboratory for Laser Energetics",
-        project: "ml-phase-id"
-    },
-];
-
-// ─────────────────────────────────────────────
-//  Toggle contributions
-// ─────────────────────────────────────────────
-function toggleContrib(id, btn) {
-    const el = document.getElementById("contrib-" + id);
-    const open = el.classList.toggle("open");
-    btn.textContent = open ? "– contributions" : "+ contributions";
-}
-
-// ─────────────────────────────────────────────
-//  App state
-// ─────────────────────────────────────────────
-let activeTags = new Set();
-let activeOrgs = new Set();
-let sortMode = "effort-desc";
-let currentView = "feed"; // "projects" | "feed"
-
-// Derive unique tags and orgs for each dataset
-const allProjectTags = [...new Set(PROJECTS.flatMap(p => p.tags))].sort();
-const allProjectOrgs = [...new Set(PROJECTS.map(p => p.organization).filter(Boolean))].sort();
-const allFeedTags    = [...new Set(FEED.flatMap(f => f.tags || []))].sort();
-const allFeedOrgs    = [...new Set(FEED.map(f => f.organization).filter(Boolean))].sort();
-
-function currentTags() { return currentView === "projects" ? allProjectTags : allFeedTags; }
-function currentOrgs() { return currentView === "projects" ? allProjectOrgs : allFeedOrgs; }
-
-// ─────────────────────────────────────────────
-//  View switcher
-// ─────────────────────────────────────────────
-function switchView(view) {
-    currentView = view;
-    activeTags.clear();
-    activeOrgs.clear();
-    document.getElementById("view-projects").classList.toggle("active", view === "projects");
-    document.getElementById("view-feed").classList.toggle("active", view === "feed");
-
-    // Show/hide sort control — not applicable to feed (always date-desc)
-    document.getElementById("sort-row").style.display = view === "projects" ? "" : "none";
-
-    rebuildPills();
-    render();
-}
-
-// ─────────────────────────────────────────────
-//  Render controls
-// ─────────────────────────────────────────────
-function buildPills(containerId, items, activeSet, onToggle) {
-    const container = document.getElementById(containerId);
-    container.innerHTML = "";
-    items.forEach(item => {
-        const pill = document.createElement("button");
-        pill.className = "pill" + (activeSet.has(item) ? " active" : "");
-        pill.textContent = item;
-        pill.addEventListener("click", () => onToggle(item));
-        container.appendChild(pill);
-    });
-}
-
-function rebuildPills() {
-    buildPills("tag-filters", currentTags(), activeTags, tag => {
-        activeTags.has(tag) ? activeTags.delete(tag) : activeTags.add(tag);
-        rebuildPills();
-        render();
-    });
-    buildPills("org-filters", currentOrgs(), activeOrgs, org => {
-        activeOrgs.has(org) ? activeOrgs.delete(org) : activeOrgs.add(org);
-        rebuildPills();
-        render();
-    });
-}
-
-function initControls() {
-    rebuildPills();
-    document.getElementById("sort-select").addEventListener("change", e => {
-        sortMode = e.target.value;
-        render();
-    });
-}
-
-// ─────────────────────────────────────────────
-//  Filter + sort (projects)
-// ─────────────────────────────────────────────
-function getFilteredProjects() {
-    return PROJECTS.filter(p => {
-        if (activeTags.size > 0 && ![...activeTags].every(t => p.tags.includes(t))) return false;
-        if (activeOrgs.size > 0 && !activeOrgs.has(p.organization)) return false;
-        return true;
-    });
-}
-
-function getSorted(projects) {
-    return [...projects].sort((a, b) => {
-        if (sortMode === "effort-desc") return b.effort - a.effort;
-        if (sortMode === "effort-asc") return a.effort - b.effort;
-        if (sortMode === "date-desc") return new Date(b.startDate) - new Date(a.startDate);
-        if (sortMode === "date-asc") return new Date(a.startDate) - new Date(b.startDate);
-        if (sortMode === "title-asc") return a.title.localeCompare(b.title);
-        return 0;
-    });
-}
-
-// ─────────────────────────────────────────────
-//  Filter (feed)
-// ─────────────────────────────────────────────
-function getFilteredFeed() {
-    return FEED.filter(f => {
-        const tags = f.tags || [];
-        if (activeTags.size > 0 && ![...activeTags].every(t => tags.includes(t))) return false;
-        if (activeOrgs.size > 0 && !activeOrgs.has(f.organization)) return false;
-        return true;
-    }).sort((a, b) => new Date(b.date) - new Date(a.date));
-}
-
-// ─────────────────────────────────────────────
-//  Master render dispatcher
-// ─────────────────────────────────────────────
-function render() {
-    if (currentView === "projects") renderProjects();
-    else renderFeed();
-}
-
-// ─────────────────────────────────────────────
-//  Render projects
-// ─────────────────────────────────────────────
-function effortDots(n) {
-    let html = '<div class="effort-dots" title="Effort: ' + n + '/5">';
-    for (let i = 1; i <= 5; i++) {
-        html += '<div class="dot' + (i <= n ? " filled" : "") + '"></div>';
-    }
-    html += "</div>";
-    return html;
-}
-
-function formatDate(dateStr) {
-    const d = new Date(dateStr + "T00:00:00");
-    return d.toLocaleDateString("en-US", { month: "short", year: "numeric" });
-}
-
-function renderProjects() {
-    const filtered = getFilteredProjects();
-    const sorted = getSorted(filtered);
-
-    const meta = document.getElementById("results-meta");
-    meta.textContent = sorted.length + " of " + PROJECTS.length + " projects";
-
-    const list = document.getElementById("project-list");
-    if (sorted.length === 0) {
-        list.innerHTML = '<div class="no-results">No projects match the selected filters.</div>';
-        return;
-    }
-
-    list.innerHTML = sorted.map(p => {
-        const metaBadges = [
-            '<span class="meta-badge">' + formatDate(p.startDate) + "</span>",
-            p.organization ? '<span class="meta-badge org">' + p.organization + "</span>" : "",
-            p.mentor ? '<span class="meta-badge mentor">Mentor: ' + p.mentor + "</span>" : ""
-        ].filter(Boolean).join("");
-
-        const tags = p.tags.map(t =>
-            '<span class="tag">' + t + "</span>"
-        ).join("");
-
-        const links = p.links.length > 0
-            ? '<div class="project-links">' + p.links.map(l =>
-                '<a href="' + l.href + '" target="_blank">' + l.label + "</a>"
-              ).join("") + "</div>"
-            : "";
-
-        const contributionsHtml = p.contributions && p.contributions.length > 0
-            ? `<div class="contributions" id="contrib-${p.id}">
-                <ul>${p.contributions.map(c => '<li>' + c + '</li>').join("")}</ul>
-               </div>
-               <button class="read-more-btn" onclick="toggleContrib('${p.id}', this)">+ contributions</button>`
-            : "";
-
-        return `
-        <div class="project-card">
-            <div class="project-header">
-                <div class="project-title">${p.title}</div>
-                ${effortDots(p.effort)}
-            </div>
-            <div class="project-meta">${metaBadges}</div>
-            <p class="project-desc">${p.description}</p>
-            <div class="project-tags">${tags}</div>
-            ${links}
-            ${contributionsHtml}
-        </div>`;
-    }).join("");
-}
-
-// ─────────────────────────────────────────────
-//  Render feed
-// ─────────────────────────────────────────────
-function renderFeed() {
-    const filtered = getFilteredFeed();
-    const meta = document.getElementById("results-meta");
-    meta.textContent = filtered.length + " of " + FEED.length + " feed items";
-
-    const list = document.getElementById("project-list");
-    if (filtered.length === 0) {
-        list.innerHTML = '<div class="no-results">No feed items match the selected filters.</div>';
-        return;
-    }
-
-    list.innerHTML = filtered.map(f => {
-        const projectObj = f.project ? PROJECTS.find(p => p.id === f.project) : null;
-        const projectBadge = projectObj
-            ? `<a class="feed-project-link" href="#${projectObj.id}" onclick="switchView('projects')">${projectObj.title}</a>`
-            : "";
-        const orgBadge = f.organization
-            ? `<span class="meta-badge org">${f.organization}</span>`
-            : "";
-        const tags = (f.tags || []).map(t => `<span class="tag">${t}</span>`).join("");
-
-        // images: accept a single path string or an array of paths
-        const imgs = f.images
-            ? (Array.isArray(f.images) ? f.images : [f.images])
-            : [];
-        const imagesHtml = imgs.length > 0
-            ? `<div class="feed-images feed-images-${Math.min(imgs.length, 3)}">
-                ${imgs.map(src => `<img src="${src}" alt="" loading="lazy" onclick="openLightbox('${src}')">`).join("")}
-               </div>`
-            : "";
-
-        // pdf: inline scrollable iframe viewer
-        const pdfHtml = f.pdf
-            ? `<div class="feed-pdf">
-                <div class="feed-pdf-bar">
-                    <span class="feed-pdf-label">📄 ${f.pdfLabel || f.pdf.split('/').pop()}</span>
-                    <a class="feed-pdf-open" href="${f.pdf}" target="_blank">open ↗</a>
-                </div>
-                <iframe class="feed-pdf-iframe" src="${f.pdf}" loading="lazy"></iframe>
-               </div>`
-            : "";
-
-        // html preview: inline iframe with expand button
-        const htmlPreviewHtml = f.htmlPreview
-            ? `<div class="feed-html-preview">
-                <div class="feed-html-bar">
-                    <span class="feed-html-label">Live preview</span>
-                    <a class="feed-html-open" href="${f.htmlPreview}" target="_blank">open ↗</a>
-                </div>
-                <div class="feed-iframe-wrap">
-                    <iframe src="${f.htmlPreview}" loading="lazy" sandbox="allow-scripts allow-same-origin" scrolling="no"></iframe>
-                    <div class="feed-iframe-expand" onclick="openHtmlLightbox('${f.htmlPreview}')" title="Expand"></div>
-                </div>
-               </div>`
-            : "";
-
-        return `
-        <div class="feed-item">
-            <div class="feed-date">${formatDate(f.date)}</div>
-            <p class="feed-text">${f.text}</p>
-            ${imagesHtml}
-            ${pdfHtml}
-            ${htmlPreviewHtml}
-            <div class="feed-footer">
-                <div class="project-tags">${tags}</div>
-                <div class="feed-meta">
-                    ${orgBadge}
-                    ${projectBadge}
-                </div>
-            </div>
-        </div>`;
-    }).join("");
-}
-
-// ─────────────────────────────────────────────
-//  Lightbox
-// ─────────────────────────────────────────────
-function openLightbox(src) {
-    const lb = document.getElementById("lightbox");
-    document.getElementById("lightbox-img").src = src;
-    lb.classList.add("open");
-}
-
-function openHtmlLightbox(src) {
-    const lb = document.getElementById("html-lightbox");
-    document.getElementById("html-lightbox-iframe").src = src;
-    lb.classList.add("open");
-}
-
-document.addEventListener("click", e => {
-    if (e.target.id === "lightbox") document.getElementById("lightbox").classList.remove("open");
-    if (e.target.id === "html-lightbox") {
-        const lb = document.getElementById("html-lightbox");
-        lb.classList.remove("open");
-        document.getElementById("html-lightbox-iframe").src = "";
-    }
-});
-document.addEventListener("keydown", e => {
-    if (e.key === "Escape") {
-        document.getElementById("lightbox").classList.remove("open");
-        const lb = document.getElementById("html-lightbox");
-        lb.classList.remove("open");
-        document.getElementById("html-lightbox-iframe").src = "";
-    }
-});
-
 // ─────────────────────────────────────────────
 //  Scroll progress
 // ─────────────────────────────────────────────
@@ -663,12 +242,6 @@ window.onscroll = () => {
     const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
     document.getElementById("myBar").style.width = (winScroll / height * 100) + "%";
 };
-
-// ─────────────────────────────────────────────
-//  Init
-// ─────────────────────────────────────────────
-initControls();
-render();
 </script>
 
 </body>

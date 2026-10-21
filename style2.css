@@ -268,6 +268,136 @@ hr.divider {
     margin: 2rem 0 0;
 }
 
+/* ── Portfolio sections (papers / posters / software) ── */
+.portfolio-section {
+    margin-bottom: 2.75rem;
+}
+
+.section-title {
+    font-size: 19px;
+    font-weight: 600;
+    margin-bottom: 1.1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 0.5px solid var(--color-border);
+}
+
+.biblio-list {
+    list-style: none;
+    padding-left: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+}
+
+.biblio-entry {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+}
+
+.biblio-main {
+    flex: 1 1 420px;
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+.biblio-authors {
+    color: var(--color-text);
+    font-weight: 500;
+}
+
+.biblio-title {
+    color: var(--color-text);
+}
+.biblio-authors + .biblio-title { margin-left: 0.35em; }
+
+.biblio-venue {
+    display: block;
+    color: var(--color-text-secondary);
+    font-size: 13.5px;
+    margin-top: 0.15rem;
+}
+
+.biblio-links, .poster-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    flex-shrink: 0;
+}
+.biblio-links a, .poster-links a {
+    font-size: 13px;
+    color: var(--color-accent-text);
+    text-decoration: none;
+    padding: 3px 10px;
+    border: 0.5px solid var(--color-accent);
+    border-radius: var(--radius-md);
+    background: var(--color-accent-bg);
+    white-space: nowrap;
+}
+.biblio-links a:hover, .poster-links a:hover { opacity: 0.8; }
+
+.poster-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+}
+
+.poster-entry {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+}
+
+.poster-main {
+    flex: 1 1 420px;
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+.poster-title {
+    display: block;
+    color: var(--color-text);
+}
+
+.poster-venue {
+    display: block;
+    color: var(--color-text-secondary);
+    font-size: 13.5px;
+    margin-top: 0.15rem;
+}
+
+.software-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.software-card {
+    background: var(--color-bg);
+    border: 0.5px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: 1.1rem 1.4rem;
+    transition: border-color 0.15s;
+}
+.software-card:hover { border-color: var(--color-border-strong); }
+
+.software-title {
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 0.4rem;
+}
+
+.software-desc {
+    font-size: 14.5px;
+    color: var(--color-text-secondary);
+    margin-bottom: 0.65rem;
+}
+
 .footer {
     margin-top: 3rem;
     font-size: 13px;
