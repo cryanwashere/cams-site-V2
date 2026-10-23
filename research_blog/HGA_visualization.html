@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Hyperspherical Geodesic Alignment</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&display=swap">
+<style>
+:root {
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  --bg: #e9edf3;
+  --surface: #ffffff;
+  --ink: #12203a;
+  --muted: #56627a;
+  --line: #cfd6e2;
+  --track: #d8deea;
+  --accent: #1f3a6b;
+  --accent-ink: #ffffff;
+  --overlay: rgba(255, 255, 255, 0.82);
+  --serif: "Newsreader", Georgia, "Times New Roman", serif;
+  --sans: "Instrument Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0c111d;
+    --surface: #151c2c;
+    --ink: #e8ecf5;
+    --muted: #9aa6bf;
+    --line: #28324a;
+    --track: #2a344c;
+    --accent: #8fb0ee;
+    --accent-ink: #0c111d;
+    --overlay: rgba(21, 28, 44, 0.84);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0c111d;
+  --surface: #151c2c;
+  --ink: #e8ecf5;
+  --muted: #9aa6bf;
+  --line: #28324a;
+  --track: #2a344c;
+  --accent: #8fb0ee;
+  --accent-ink: #0c111d;
+  --overlay: rgba(21, 28, 44, 0.84);
+  color-scheme: dark;
+}
+html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+.wrap { max-width: 1280px; margin: 0 auto; padding: 24px 20px 40px; }
+header { margin-bottom: 18px; max-width: 70ch; }
+h1 {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: clamp(28px, 4vw, 42px);
+  line-height: 1.08;
+  letter-spacing: -0.015em;
+  margin: 0 0 8px;
+}
+.sub { margin: 0; color: var(--muted); font-size: 15.5px; }
+.sub em { font-family: var(--serif); font-size: 1.08em; color: var(--ink); }
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(300px, 0.85fr);
+  gap: 20px;
+  align-items: start;
+}
+body.clean .layout { grid-template-columns: minmax(0, 1fr); }
+body.clean .panel { display: none; }
+body.clean header { display: none; }
+body.clean .stage { max-width: 760px; margin: 0 auto; width: 100%; }
+body.clean .restore { display: inline-flex; }
+@media (max-width: 900px) {
+  .layout { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* Stage */
+.stage {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  max-height: 88vh;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  overflow: hidden;
+}
+#gl { position: absolute; inset: 0; cursor: grab; touch-action: none; }
+#gl:active { cursor: grabbing; }
+#gl canvas { display: block; }
+.overlay { position: absolute; pointer-events: none; }
+.legend {
+  top: 12px; left: 12px;
+  background: var(--overlay);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 13px;
+  display: grid; gap: 5px;
+}
+.legend div { display: flex; align-items: center; gap: 8px; }
+.legend i { width: 13px; height: 13px; border-radius: 50%; display: inline-block; border: 2.5px solid; }
+.legend .n i { background: #111; border-color: #fff; box-shadow: 0 0 0 1px rgba(0,0,0,0.35); }
+.legend .m i { background: #ffc21a; border-color: #111; }
+.legend .sym { font-family: var(--serif); font-size: 15px; }
+
+.readout {
+  top: 12px; right: 12px;
+  background: var(--overlay);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border-radius: 10px;
+  padding: 8px 14px 9px;
+  text-align: right;
+}
+.readout .name { font-family: var(--serif); font-size: 15px; color: var(--muted); }
+.readout .val {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: clamp(28px, 4.4vw, 44px);
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+}
+.readout .meta { font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+.cbar {
+  left: 50%; bottom: 12px; transform: translateX(-50%);
+  width: min(78%, 460px);
+  display: flex; align-items: center; gap: 8px;
+  background: var(--overlay);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.cbar .grad {
+  flex: 1; height: 10px; border-radius: 5px;
+  background: linear-gradient(90deg, #3b4cc0, #8db0fe, #dddddd, #f49a7b, #b40426);
+}
+.cbar span { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.cbar b { font-weight: 600; color: var(--ink); }
+
+/* Panel */
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 18px 18px 20px;
+  display: grid;
+  gap: 18px;
+}
+.panel h2 {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: 19px;
+  margin: 0 0 8px;
+  letter-spacing: -0.005em;
+}
+.ctrl {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  gap: 2px 10px;
+  margin-bottom: 10px;
+}
+.ctrl label { font-size: 14px; }
+.ctrl output { font-size: 13.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.ctrl input[type=range] { grid-column: 1 / -1; width: 100%; margin: 2px 0 0; accent-color: var(--accent); }
+.check { display: flex; gap: 8px; align-items: center; font-size: 14px; margin-top: 4px; }
+.check input { accent-color: var(--accent); width: 16px; height: 16px; }
+.btns { display: flex; flex-wrap: wrap; gap: 8px; }
+.btn {
+  font: inherit; font-size: 14px; font-weight: 500;
+  border: 1px solid var(--line);
+  background: transparent; color: var(--ink);
+  border-radius: 8px; padding: 7px 12px; cursor: pointer;
+}
+.btn:hover { border-color: var(--accent); }
+.btn:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.status { margin: 8px 0 0; font-size: 13px; color: var(--muted); min-height: 2.6em; }
+.restore {
+  display: none; position: fixed; right: 14px; bottom: calc(14px + env(safe-area-inset-bottom, 0px)); z-index: 5;
+  background: var(--surface);
+}
+
+.matrix {
+  font-family: var(--serif);
+  font-size: 16px;
+  font-variant-numeric: tabular-nums;
+  display: grid;
+  grid-template-columns: repeat(3, auto);
+  gap: 3px 16px;
+  justify-content: start;
+  padding: 8px 14px;
+  border-left: 2px solid var(--ink);
+  border-right: 2px solid var(--ink);
+  border-radius: 6px;
+  width: fit-content;
+}
+.det { font-size: 13px; color: var(--muted); margin-top: 6px; }
+.math {
+  font-family: var(--serif);
+  font-size: 16.5px;
+  line-height: 1.7;
+  display: grid;
+  gap: 8px;
+}
+.math p { margin: 0; }
+.note { font-size: 13px; color: var(--muted); margin: 0; }
+sub, sup { line-height: 0; }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header>
+    <h1>Hyperspherical Geodesic Alignment</h1>
+    <p class="sub">Rotate the gold points <em>R Ŝ</em><sub>M</sub> until they land where the black points <em>Ŝ</em><sub>N</sub> are dense. The sphere is colored by the Gaussian kernel density of <em>Ŝ</em><sub>N</sub>, measured in geodesic distance.</p>
+  </header>
+
+  <div class="layout">
+    <section class="stage" aria-label="Unit sphere with two point sets and kernel density coloring">
+      <div id="gl"></div>
+      <div class="overlay legend">
+        <div class="n"><i></i><span><span class="sym">Ŝ<sub>N</sub></span> fixed</span></div>
+        <div class="m"><i></i><span><span class="sym">R Ŝ<sub>M</sub></span> rotating</span></div>
+      </div>
+      <div class="overlay readout" aria-live="polite">
+        <div class="name">J<sub>σ</sub>(R)</div>
+        <div class="val" id="jval">0.0000</div>
+        <div class="meta">σ = <span id="sigmeta">0.40 rad</span></div>
+      </div>
+      <div class="overlay cbar">
+        <span>low <b id="cmin">0.00</b></span>
+        <div class="grad"></div>
+        <span><b id="cmax">0.00</b> high</span>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <div>
+        <h2>Rotate Ŝ<sub>M</sub></h2>
+        <div class="ctrl">
+          <label for="rx">About the x-axis</label><output id="rxo" for="rx">0.0°</output>
+          <input type="range" id="rx" min="-180" max="180" step="0.1" value="0">
+        </div>
+        <div class="ctrl">
+          <label for="ry">About the y-axis</label><output id="ryo" for="ry">0.0°</output>
+          <input type="range" id="ry" min="-90" max="90" step="0.1" value="0">
+        </div>
+        <div class="ctrl">
+          <label for="rz">About the z-axis</label><output id="rzo" for="rz">0.0°</output>
+          <input type="range" id="rz" min="-180" max="180" step="0.1" value="0">
+        </div>
+        <label class="check"><input type="checkbox" id="refl"> Include a reflection (det R = −1)</label>
+      </div>
+
+      <div>
+        <h2>Kernel width</h2>
+        <div class="ctrl">
+          <label for="sig">σ</label><output id="sigo" for="sig">0.40 rad</output>
+          <input type="range" id="sig" min="0.05" max="1.5" step="0.01" value="0.4">
+        </div>
+      </div>
+
+      <div>
+        <div class="btns">
+          <button class="btn primary" id="ascend" type="button">Run gradient ascent</button>
+          <button class="btn" id="rand" type="button">Random R</button>
+          <button class="btn" id="reset" type="button">Reset R</button>
+          <button class="btn" id="resample" type="button">New sample</button>
+          <button class="btn" id="clean" type="button">Hide panel</button>
+        </div>
+        <p class="status" id="status">Drag the sphere to change your viewing angle. This does not change R.</p>
+      </div>
+
+      <div>
+        <h2>Current R</h2>
+        <div class="matrix" id="matrix" aria-label="Current rotation matrix"></div>
+        <div class="det" id="det"></div>
+      </div>
+
+      <div>
+        <h2>Objective</h2>
+        <div class="math">
+          <p>J<sub>σ</sub>(R) = <span style="font-size:1.15em">(1/<i>mn</i>)</span> Σ<sub><i>i,j</i></sub> exp( −arccos²⟨R <i>p̂<sub>i</sub></i>, <i>q̂<sub>j</sub></i>⟩ / 2σ² )</p>
+          <p>The sphere shows <i>f</i>(<i>x</i>) = (1/<i>n</i>) Σ<sub><i>j</i></sub> exp( −<i>d</i>(<i>x</i>, <i>q̂<sub>j</sub></i>)² / 2σ² ), so J<sub>σ</sub>(R) is the average of <i>f</i> over the gold points.</p>
+        </div>
+        <p class="note" style="margin-top:10px">Demo data: <i>n</i> = 36 and <i>m</i> = 28 points drawn from the same four clusters, with the second sample rotated by a hidden rotation. The color scale runs from the smallest to the largest value of <i>f</i> on the sphere.</p>
+      </div>
+    </aside>
+  </div>
+</main>
+<button class="btn restore" id="restore" type="button">Show panel</button>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function () {
+  'use strict';
+  var PI = Math.PI, MAXN = 64, N_COUNT = 36, M_COUNT = 28;
+
+  /* ---------- small math helpers ---------- */
+  function clamp(x, a, b) { return Math.min(b, Math.max(a, x)); }
+  function mulberry(seed) {
+    var a = seed >>> 0;
+    return function () {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      var t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function gauss(r) { var u = 1 - r(), v = r(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * PI * v); }
+  function unit(v) { var l = Math.hypot(v[0], v[1], v[2]); return [v[0] / l, v[1] / l, v[2] / l]; }
+  function dot(a, b) { return a[0] * b[0] + a[1] * b[1] + a[2] * b[2]; }
+  function cross(a, b) { return [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]]; }
+  function I3() { return [[1, 0, 0], [0, 1, 0], [0, 0, 1]]; }
+  function mv(A, v) {
+    return [A[0][0] * v[0] + A[0][1] * v[1] + A[0][2] * v[2],
+            A[1][0] * v[0] + A[1][1] * v[1] + A[1][2] * v[2],
+            A[2][0] * v[0] + A[2][1] * v[1] + A[2][2] * v[2]];
+  }
+  function mm(A, B) {
+    var C = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
+    for (var i = 0; i < 3; i++) for (var j = 0; j < 3; j++)
+      C[i][j] = A[i][0] * B[0][j] + A[i][1] * B[1][j] + A[i][2] * B[2][j];
+    return C;
+  }
+  function tr(A) { return [[A[0][0], A[1][0], A[2][0]], [A[0][1], A[1][1], A[2][1]], [A[0][2], A[1][2], A[2][2]]]; }
+  function det3(A) {
+    return A[0][0] * (A[1][1] * A[2][2] - A[1][2] * A[2][1])
+         - A[0][1] * (A[1][0] * A[2][2] - A[1][2] * A[2][0])
+         + A[0][2] * (A[1][0] * A[2][1] - A[1][1] * A[2][0]);
+  }
+  function rotX(a) { var c = Math.cos(a), s = Math.sin(a); return [[1, 0, 0], [0, c, -s], [0, s, c]]; }
+  function rotY(a) { var c = Math.cos(a), s = Math.sin(a); return [[c, 0, s], [0, 1, 0], [-s, 0, c]]; }
+  function rotZ(a) { var c = Math.cos(a), s = Math.sin(a); return [[c, -s, 0], [s, c, 0], [0, 0, 1]]; }
+  function expSO3(w) {
+    var th = Math.hypot(w[0], w[1], w[2]);
+    if (th < 1e-12) return I3();
+    var k = [w[0] / th, w[1] / th, w[2] / th], c = Math.cos(th), s = Math.sin(th), v = 1 - c;
+    return [[c + k[0] * k[0] * v, k[0] * k[1] * v - k[2] * s, k[0] * k[2] * v + k[1] * s],
+            [k[1] * k[0] * v + k[2] * s, c + k[1] * k[1] * v, k[1] * k[2] * v - k[0] * s],
+            [k[2] * k[0] * v - k[1] * s, k[2] * k[1] * v + k[0] * s, c + k[2] * k[2] * v]];
+  }
+  function randomRotation(r) {
+    var q = unit4([gauss(r), gauss(r), gauss(r), gauss(r)]), w = q[0], x = q[1], y = q[2], z = q[3];
+    return [[1 - 2 * (y * y + z * z), 2 * (x * y - z * w), 2 * (x * z + y * w)],
+            [2 * (x * y + z * w), 1 - 2 * (x * x + z * z), 2 * (y * z - x * w)],
+            [2 * (x * z - y * w), 2 * (y * z + x * w), 1 - 2 * (x * x + y * y)]];
+  }
+  function unit4(q) { var l = Math.hypot(q[0], q[1], q[2], q[3]); return [q[0] / l, q[1] / l, q[2] / l, q[3] / l]; }
+
+  /* ---------- demo data ---------- */
+  function makeData(seed) {
+    var r = mulberry(seed), centers = [], K = 4;
+    while (centers.length < K) {
+      var c = unit([gauss(r), gauss(r), gauss(r)]);
+      if (centers.every(function (o) { return dot(o, c) < 0.35; })) centers.push(c);
+    }
+    function sample(count) {
+      var pts = [];
+      for (var i = 0; i < count; i++) {
+        var c = centers[i % K];
+        pts.push(unit([c[0] + 0.25 * gauss(r), c[1] + 0.25 * gauss(r), c[2] + 0.25 * gauss(r)]));
+      }
+      return pts;
+    }
+    var N = sample(N_COUNT), Mraw = sample(M_COUNT), Q, ang;
+    do {
+      Q = randomRotation(r);
+      ang = Math.acos(clamp((Q[0][0] + Q[1][1] + Q[2][2] - 1) / 2, -1, 1));
+    } while (ang < 1.3);
+    var Qt = tr(Q);
+    return { N: N, M: Mraw.map(function (p) { return mv(Qt, p); }) };
+  }
+
+  /* ---------- state ---------- */
+  var seed = 7, data = makeData(seed), Rot = I3(), reflect = false, sigma = 0.4;
+  var ascending = false, iters = 0, dirty = true;
+
+  function Reff() { return reflect ? mm(Rot, [[-1, 0, 0], [0, 1, 0], [0, 0, 1]]) : Rot; }
+  function rotated() { var R = Reff(); return data.M.map(function (p) { return mv(R, p); }); }
+  function objective(A) {
+    var s = 0, inv = 1 / (2 * sigma * sigma), Nn = data.N;
+    for (var i = 0; i < A.length; i++) for (var j = 0; j < Nn.length; j++) {
+      var th = Math.acos(clamp(dot(A[i], Nn[j]), -1, 1));
+      s += Math.exp(-th * th * inv);
+    }
+    return s / (A.length * Nn.length);
+  }
+  function field(p) {
+    var s = 0, inv = 1 / (2 * sigma * sigma), Nn = data.N;
+    for (var j = 0; j < Nn.length; j++) {
+      var th = Math.acos(clamp(dot(p, Nn[j]), -1, 1));
+      s += Math.exp(-th * th * inv);
+    }
+    return s / Nn.length;
+  }
+  var GRID = (function () {
+    var out = [], n = 2400, ga = PI * (3 - Math.sqrt(5));
+    for (var k = 0; k < n; k++) {
+      var z = 1 - 2 * (k + 0.5) / n, r = Math.sqrt(1 - z * z), ph = k * ga;
+      out.push([r * Math.cos(ph), r * Math.sin(ph), z]);
+    }
+    return out;
+  })();
+
+  /* Riemannian gradient of J on SO(3), as an infinitesimal rotation vector */
+  function gradient(A) {
+    var g = [0, 0, 0], s2 = sigma * sigma, Nn = data.N;
+    for (var i = 0; i < A.length; i++) for (var j = 0; j < Nn.length; j++) {
+      var c = clamp(dot(A[i], Nn[j]), -1, 1), sn = Math.sqrt(1 - c * c);
+      if (sn < 1e-9) continue;
+      var th = Math.acos(c), coef = Math.exp(-th * th / (2 * s2)) * (th / sn) / s2, cr = cross(A[i], Nn[j]);
+      g[0] += coef * cr[0]; g[1] += coef * cr[1]; g[2] += coef * cr[2];
+    }
+    var mn = A.length * Nn.length;
+    return [g[0] / mn, g[1] / mn, g[2] / mn];
+  }
+
+  /* ---------- three.js scene ---------- */
+  var host = document.getElementById('gl');
+  var renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.setClearColor(0x000000, 0);
+  host.appendChild(renderer.domElement);
+  var scene = new THREE.Scene();
+  var camera = new THREE.PerspectiveCamera(28, 1, 0.1, 50);
+  var world = new THREE.Group();
+  world.rotation.set(0.45, -0.7, 0);
+  scene.add(world);
+
+  var uniforms = {
+    uPts: { value: Array.from({ length: MAXN }, function () { return new THREE.Vector3(); }) },
+    uN: { value: 0 }, uSigma: { value: sigma }, uMin: { value: 0 }, uMax: { value: 1 }
+  };
+  var sphere = new THREE.Mesh(
+    new THREE.SphereGeometry(1, 96, 64),
+    new THREE.ShaderMaterial({
+      uniforms: uniforms,
+      vertexShader: [
+        'varying vec3 vPos; varying vec3 vNrm;',
+        'void main(){ vPos = position; vNrm = normalize(normalMatrix * normal);',
+        '  gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }'
+      ].join('\n'),
+      fragmentShader: [
+        'precision highp float;',
+        'varying vec3 vPos; varying vec3 vNrm;',
+        'uniform vec3 uPts[' + MAXN + ']; uniform int uN; uniform float uSigma, uMin, uMax;',
+        'vec3 cw(float t){',
+        '  vec3 c0 = vec3(0.230,0.299,0.754), c1 = vec3(0.553,0.690,0.996), c2 = vec3(0.867,0.867,0.867),',
+        '       c3 = vec3(0.957,0.604,0.482), c4 = vec3(0.706,0.016,0.150);',
+        '  if (t < 0.25) return mix(c0, c1, t / 0.25);',
+        '  if (t < 0.5)  return mix(c1, c2, (t - 0.25) / 0.25);',
+        '  if (t < 0.75) return mix(c2, c3, (t - 0.5) / 0.25);',
+        '  return mix(c3, c4, (t - 0.75) / 0.25);',
+        '}',
+        'void main(){',
+        '  vec3 p = normalize(vPos);',
+        '  float s = 0.0;',
+        '  for (int i = 0; i < ' + MAXN + '; i++) {',
+        '    if (i >= uN) break;',
+        '    float th = acos(clamp(dot(p, uPts[i]), -1.0, 1.0));',
+        '    s += exp(-th * th / (2.0 * uSigma * uSigma));',
+        '  }',
+        '  s /= float(uN);',
+        '  float t = clamp((s - uMin) / (uMax - uMin + 1e-6), 0.0, 1.0);',
+        '  float nz = normalize(vNrm).z;',
+        '  float shade = 0.82 + 0.18 * smoothstep(0.0, 0.65, nz);',
+        '  gl_FragColor = vec4(cw(t) * shade, 1.0);',
+        '}'
+      ].join('\n')
+    })
+  );
+  world.add(sphere);
+
+  /* graticule */
+  var gratMat = new THREE.LineBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.16 });
+  (function () {
+    var seg = 128, R = 1.003, d;
+    for (d = -60; d <= 60; d += 30) {
+      var pts = [], lat = d * PI / 180;
+      for (var i = 0; i <= seg; i++) { var l = 2 * PI * i / seg; pts.push(new THREE.Vector3(R * Math.cos(lat) * Math.cos(l), R * Math.sin(lat), R * Math.cos(lat) * Math.sin(l))); }
+      world.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), gratMat));
+    }
+    for (d = 0; d < 180; d += 30) {
+      var pts2 = [], lon = d * PI / 180;
+      for (var k = 0; k <= seg; k++) { var a = 2 * PI * k / seg; pts2.push(new THREE.Vector3(R * Math.cos(a) * Math.cos(lon), R * Math.sin(a), R * Math.cos(a) * Math.sin(lon))); }
+      world.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts2), gratMat));
+    }
+  })();
+  function applyTheme() {
+    var m = getComputedStyle(document.body).backgroundColor.match(/[\d.]+/g) || [255, 255, 255];
+    var lum = 0.299 * m[0] + 0.587 * m[1] + 0.114 * m[2];
+    gratMat.color.set(lum < 128 ? 0xffffff : 0x000000);
+    gratMat.opacity = lum < 128 ? 0.14 : 0.16;
+    dirty = true;
+  }
+  applyTheme();
+  if (window.matchMedia) {
+    var mq = window.matchMedia('(prefers-color-scheme: dark)');
+    if (mq.addEventListener) mq.addEventListener('change', applyTheme);
+  }
+  new MutationObserver(applyTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'class', 'style'] });
+
+  /* point sprites */
+  function dotTexture(fill, stroke) {
+    var c = document.createElement('canvas'); c.width = c.height = 128;
+    var g = c.getContext('2d');
+    g.beginPath(); g.arc(64, 64, 52, 0, 2 * PI);
+    g.fillStyle = fill; g.fill();
+    g.lineWidth = 11; g.strokeStyle = stroke; g.stroke();
+    return new THREE.CanvasTexture(c);
+  }
+  function makeSprites(tex, count, order) {
+    var arr = [];
+    for (var i = 0; i < count; i++) {
+      var s = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: true, depthWrite: false }));
+      s.scale.set(0.085, 0.085, 1);
+      s.renderOrder = order;
+      world.add(s); arr.push(s);
+    }
+    return arr;
+  }
+  var nSprites = makeSprites(dotTexture('#111111', '#ffffff'), N_COUNT, 2);
+  var mSprites = makeSprites(dotTexture('#ffc21a', '#111111'), M_COUNT, 3);
+
+  function loadTargets() {
+    for (var j = 0; j < data.N.length; j++) {
+      var p = data.N[j];
+      nSprites[j].position.set(p[0] * 1.025, p[1] * 1.025, p[2] * 1.025);
+      uniforms.uPts.value[j].set(p[0], p[1], p[2]);
+    }
+    uniforms.uN.value = data.N.length;
+  }
+
+  /* ---------- UI ---------- */
+  var $ = function (id) { return document.getElementById(id); };
+  var el = { rx: $('rx'), ry: $('ry'), rz: $('rz'), rxo: $('rxo'), ryo: $('ryo'), rzo: $('rzo'),
+             sig: $('sig'), sigo: $('sigo'), sigmeta: $('sigmeta'), jval: $('jval'),
+             cmin: $('cmin'), cmax: $('cmax'), matrix: $('matrix'), det: $('det'), status: $('status'),
+             refl: $('refl'), ascend: $('ascend') };
+  var MINUS = '\u2212';
+  function fmt(x) { return (x < -0.0005 ? MINUS : '\u2007') + Math.abs(x).toFixed(3); }
+  function deg(x) { return (x < 0 ? MINUS : '') + Math.abs(x).toFixed(1) + '\u00b0'; }
+
+  function slidersToRot() {
+    Rot = mm(rotZ(parseFloat(el.rz.value) * PI / 180),
+         mm(rotY(parseFloat(el.ry.value) * PI / 180), rotX(parseFloat(el.rx.value) * PI / 180)));
+  }
+  function rotToSliders() {
+    var b = -Math.asin(clamp(Rot[2][0], -1, 1)), a = Math.atan2(Rot[2][1], Rot[2][2]), g = Math.atan2(Rot[1][0], Rot[0][0]);
+    el.rx.value = (a * 180 / PI).toFixed(1);
+    el.ry.value = (b * 180 / PI).toFixed(1);
+    el.rz.value = (g * 180 / PI).toFixed(1);
+    el.rxo.textContent = deg(a * 180 / PI);
+    el.ryo.textContent = deg(b * 180 / PI);
+    el.rzo.textContent = deg(g * 180 / PI);
+  }
+  function sigmaText() { return sigma.toFixed(2) + ' rad (' + (sigma * 180 / PI).toFixed(1) + '\u00b0)'; }
+
+  function updateField() {
+    uniforms.uSigma.value = sigma;
+    var lo = Infinity, hi = -Infinity;
+    function test(p) { var f = field(p); if (f < lo) lo = f; if (f > hi) hi = f; }
+    GRID.forEach(test); data.N.forEach(test);
+    uniforms.uMin.value = lo; uniforms.uMax.value = hi;
+    el.cmin.textContent = lo.toFixed(2); el.cmax.textContent = hi.toFixed(2);
+    el.sigo.textContent = sigmaText();
+    el.sigmeta.textContent = sigma.toFixed(2) + ' rad';
+  }
+  function update() {
+    var A = rotated(), J = objective(A);
+    for (var i = 0; i < A.length; i++) mSprites[i].position.set(A[i][0] * 1.025, A[i][1] * 1.025, A[i][2] * 1.025);
+    el.jval.textContent = J.toFixed(4);
+    var R = Reff(), html = '';
+    for (var r = 0; r < 3; r++) for (var c = 0; c < 3; c++) html += '<span>' + fmt(R[r][c]) + '</span>';
+    el.matrix.innerHTML = html;
+    var d = det3(R);
+    el.det.textContent = 'det R = ' + (d < 0 ? MINUS : '+') + '1' + (d < 0 ? ' (reflection)' : ' (rotation)');
+    dirty = true;
+    return J;
+  }
+
+  /* gradient ascent on SO(3) */
+  function setAscending(on, msg) {
+    ascending = on;
+    el.ascend.textContent = on ? 'Stop' : 'Run gradient ascent';
+    if (on) { iters = 0; el.status.textContent = 'Ascending J from the current R. Small σ gives a bumpy landscape; larger σ is smoother.'; }
+    else if (msg) el.status.textContent = msg;
+  }
+  function stepAscent() {
+    for (var k = 0; k < 3; k++) {
+      var g = gradient(rotated()), eta = 1.5 * sigma * sigma;
+      var w = [g[0] * eta, g[1] * eta, g[2] * eta], mag = Math.hypot(w[0], w[1], w[2]);
+      if (mag < 1e-5) { rotToSliders(); setAscending(false, 'Converged to a local maximum, J = ' + update().toFixed(4) + '. Try Random R to look for a better one.'); return; }
+      if (mag > 0.04) { w = [w[0] * 0.04 / mag, w[1] * 0.04 / mag, w[2] * 0.04 / mag]; }
+      Rot = mm(expSO3(w), Rot);
+      if (++iters > 6000) { rotToSliders(); setAscending(false, 'Stopped after 6000 steps, J = ' + update().toFixed(4) + '.'); return; }
+    }
+    rotToSliders(); update();
+  }
+
+  /* controls */
+  ['rx', 'ry', 'rz'].forEach(function (id) {
+    el[id].addEventListener('input', function () {
+      if (ascending) setAscending(false);
+      el.rxo.textContent = deg(parseFloat(el.rx.value));
+      el.ryo.textContent = deg(parseFloat(el.ry.value));
+      el.rzo.textContent = deg(parseFloat(el.rz.value));
+      slidersToRot(); update();
+    });
+  });
+  el.sig.addEventListener('input', function () { sigma = parseFloat(el.sig.value); updateField(); update(); });
+  el.refl.addEventListener('change', function () { reflect = el.refl.checked; update(); });
+  el.ascend.addEventListener('click', function () { setAscending(!ascending, 'Stopped.'); });
+  $('rand').addEventListener('click', function () {
+    setAscending(false); Rot = randomRotation(mulberry((Date.now() ^ (Math.random() * 1e9)) >>> 0));
+    rotToSliders(); update(); el.status.textContent = 'Random R. Run gradient ascent to see where it settles.';
+  });
+  $('reset').addEventListener('click', function () {
+    setAscending(false); Rot = I3(); rotToSliders(); update(); el.status.textContent = 'R reset to the identity.';
+  });
+  $('resample').addEventListener('click', function () {
+    setAscending(false); seed++; data = makeData(seed); Rot = I3();
+    loadTargets(); updateField(); rotToSliders(); update(); el.status.textContent = 'New synthetic sample drawn.';
+  });
+  function toggleClean() {
+    var on = document.body.classList.toggle('clean');
+    $('clean').textContent = on ? 'Show panel' : 'Hide panel';
+    window.scrollTo(0, 0);
+  }
+  $('clean').addEventListener('click', toggleClean);
+  $('restore').addEventListener('click', toggleClean);
+
+  /* drag to orbit the view */
+  var dragging = false, lx = 0, ly = 0;
+  host.addEventListener('pointerdown', function (e) { dragging = true; lx = e.clientX; ly = e.clientY; host.setPointerCapture(e.pointerId); });
+  host.addEventListener('pointermove', function (e) {
+    if (!dragging) return;
+    var dx = e.clientX - lx, dy = e.clientY - ly; lx = e.clientX; ly = e.clientY;
+    var q = new THREE.Quaternion().setFromEuler(new THREE.Euler(dy * 0.006, dx * 0.006, 0, 'XYZ'));
+    world.quaternion.premultiply(q); dirty = true;
+  });
+  function endDrag() { dragging = false; }
+  host.addEventListener('pointerup', endDrag);
+  host.addEventListener('pointercancel', endDrag);
+
+  /* sizing + loop */
+  function resize() {
+    var w = host.clientWidth, h = host.clientHeight;
+    if (!w || !h) return;
+    renderer.setSize(w, h);
+    camera.aspect = w / h;
+    camera.position.set(0, 0, 1.32 / (Math.tan(14 * PI / 180) * Math.min(1, camera.aspect)));
+    camera.updateProjectionMatrix();
+    dirty = true;
+  }
+  if (window.ResizeObserver) new ResizeObserver(resize).observe(host);
+  window.addEventListener('resize', resize);
+
+  function frame() {
+    if (ascending) stepAscent();
+    if (dirty) { renderer.render(scene, camera); dirty = false; }
+    requestAnimationFrame(frame);
+  }
+
+  loadTargets(); updateField(); rotToSliders(); update(); resize();
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
