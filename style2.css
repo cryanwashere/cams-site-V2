@@ -309,9 +309,14 @@ hr.divider {
 }
 
 .biblio-title {
-    color: var(--color-text);
+    color: var(--color-accent-text);
 }
-.biblio-authors + .biblio-title { margin-left: 0.35em; }
+.biblio-title a {
+    color: inherit;
+    text-decoration: none;
+}
+.biblio-title a:hover { text-decoration: underline; }
+.biblio-title + .biblio-authors { margin-left: 0.35em; }
 
 .biblio-venue {
     display: block;
@@ -361,8 +366,13 @@ hr.divider {
 
 .poster-title {
     display: block;
-    color: var(--color-text);
+    color: var(--color-accent-text);
 }
+.poster-title a {
+    color: inherit;
+    text-decoration: none;
+}
+.poster-title a:hover { text-decoration: underline; }
 
 .poster-venue {
     display: block;
