@@ -215,6 +215,12 @@
   ],
   "feed": [
     {
+      "date": "2026-11-10",
+      "text": "<em>High Pressure Material Phase Identification with Gaussian Kernel Neural Networks</em> preprint available on arXiv.",
+      "organization": "University of Rochester Laboratory for Laser Energetics",
+      "project": "ml-phase-id"
+    },
+    {
       "date": "2026-08-28",
       "text": "<em>Unsupervised Latent Space Alignment with Hyperspherical Geodesic Matching</em> accepted into NeurReps workshop at NeurIPS in extended abstract track.",
       "organization": "Lawrence Livermore National Laboratory",
