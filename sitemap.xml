@@ -9,4 +9,28 @@
   <url>
     <loc>https://perceptrons.org/misc.html</loc>
   </url>
+  <url>
+    <loc>https://perceptrons.org/visualizations/index.html</loc>
+  </url>
+  <url>
+    <loc>https://perceptrons.org/visualizations/Graph_Laplacian_Eigenvectors.html</loc>
+  </url>
+  <url>
+    <loc>https://perceptrons.org/visualizations/Graph_Laplacian_explorer.html</loc>
+  </url>
+  <url>
+    <loc>https://perceptrons.org/visualizations/HGA_visualization.html</loc>
+  </url>
+  <url>
+    <loc>https://perceptrons.org/visualizations/diffusion.html</loc>
+  </url>
+  <url>
+    <loc>https://perceptrons.org/visualizations/gradient_visualization.html</loc>
+  </url>
+  <url>
+    <loc>https://perceptrons.org/visualizations/neural-playground.html</loc>
+  </url>
+  <url>
+    <loc>https://perceptrons.org/visualizations/weight_decomposition.html</loc>
+  </url>
 </urlset>
